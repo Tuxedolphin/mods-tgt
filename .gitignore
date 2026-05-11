@@ -1,0 +1,53 @@
+# =========================
+# Operating System & Editor
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Neovim / Vim
+*.swp
+*.*~
+*.swo
+Session.vim
+
+# Collaborator IDEs (Rider / Visual Studio / VS Code)
+.idea/
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.user
+*.suo
+
+# =========================
+# Backend (.NET 8 C#)
+# =========================
+backend/bin/
+backend/obj/
+backend/TestResults/
+backend/logs/
+
+# Local Environment Configuration
+backend/appsettings.Development.json
+backend/appsettings.Local.json
+
+# =========================
+# Frontend (SvelteKit / Node)
+# =========================
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/build/
+frontend/dist/
+
+# Logs and Caches
+frontend/npm-debug.log*
+frontend/.npm/
+frontend/.eslintcache
+frontend/vite.config.js.timestamp-*
+
+# Environment Variables
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
