@@ -1,0 +1,10 @@
+opencollection: 1.0.0
+
+info:
+  name: NUSMods API
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

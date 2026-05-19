@@ -1,0 +1,4 @@
+name: Environment 2
+variables:
+  - name: baseUrl
+    value: http://api.nusmods.com/v2

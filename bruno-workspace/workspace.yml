@@ -1,0 +1,12 @@
+opencollection: 1.0.0
+info:
+  name: "mod-together"
+  type: workspace
+
+collections:
+  - name: "NUSMods API"
+    path: "collections/NUSMods API"
+
+specs:
+
+docs: ''

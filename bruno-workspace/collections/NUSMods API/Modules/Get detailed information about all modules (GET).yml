@@ -1,0 +1,85 @@
+info:
+  name: Get detailed information about all modules (GET)
+  type: http
+  seq: 2
+  tags:
+    - Modules
+
+http:
+  method: GET
+  url: "{{baseUrl}}/:acadYear/moduleInfo.json"
+  params:
+    - name: acadYear
+      value: 2018-2019
+      type: path
+      description: academic year, with the slash (/) replaced by a dash
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Response
+    description: Success
+    request:
+      url: "{{baseUrl}}/:acadYear/moduleInfo.json"
+      method: GET
+      params:
+        - name: acadYear
+          value: 2018-2019
+          type: path
+          description: academic year, with the slash (/) replaced by a dash
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          [
+            {
+              "moduleCode": "CS2100",
+              "title": "Computer Organisation",
+              "description": "The objective of this module is to familiarise students with the fundamentals of computing devices. Through this module students will understand the basics of data representation, and how the various parts of a computer work, separately and with each other. This allows students to understand the issues in computing devices, and how these issues affect the implementation of solutions. Topics covered include data representation systems, combinational and sequential circuit design techniques, assembly language, processor execution cycles, pipelining, memory hierarchy and input/output systems.",
+              "moduleCredit": "4",
+              "department": "Computer Science",
+              "faculty": "Computing",
+              "workload": "",
+              "prerequisite": "CS1010 or its equivalent",
+              "preclusion": "CS1104 or Students from department of ECE",
+              "corequisite": "Students must take CS2101 in the same semester as this module",
+              "semesterData": [
+                {
+                  "semester": 1,
+                  "examDate": "2018-11-27T09:00:00.000Z",
+                  "examDuration": 120
+                }
+              ]
+            }
+          ]
+  - name: 404 Response
+    description: Not found
+    request:
+      url: "{{baseUrl}}/:acadYear/moduleInfo.json"
+      method: GET
+      params:
+        - name: acadYear
+          value: 2018-2019
+          type: path
+          description: academic year, with the slash (/) replaced by a dash
+    response:
+      status: 404
+      statusText: Not Found
+      body:
+        type: text
+        data: ""
+
+docs: |
+  Get all information about modules except for timetable and prereq tree in a year. This is compact enough to be loaded and filtered in browsers without lag and is useful for faceted search and detailed module listing.
+
+  NUSMods feeds this information into an Elasticsearch search server for the detailed module search page.
