@@ -1,4 +1,6 @@
 <script lang="ts">
+  import TimetableComponent from '../components/TimetableComponent.svelte';
+
 	import DaysOfWeekHeader from './DaysOfWeekHeader.svelte';
 
 	import Timeline from '../components/Timeline.svelte';
@@ -11,7 +13,8 @@
 <SearchBar summaries={data.data}></SearchBar>
 <div class="flex">
 	<Timeline></Timeline>
-	<div class="flex-1 gap-0">
+	<div class="flex-1 flex-col">
 		<DaysOfWeekHeader></DaysOfWeekHeader>
+		<TimetableComponent></TimetableComponent>
 	</div>
 </div>
