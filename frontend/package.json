@@ -48,6 +48,7 @@
 		"vitest-browser-svelte": "^2.1.0"
 	},
 	"dependencies": {
-		"js-search": "^2.0.1"
+		"js-search": "^2.0.1",
+		"svelte-persisted-store": "^0.12.0"
 	}
 }

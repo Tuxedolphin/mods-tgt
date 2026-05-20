@@ -11,6 +11,9 @@ importers:
       js-search:
         specifier: ^2.0.1
         version: 2.0.1
+      svelte-persisted-store:
+        specifier: ^0.12.0
+        version: 0.12.0(svelte@5.55.7(@typescript-eslint/types@8.59.3))
     devDependencies:
       '@eslint/compat':
         specifier: ^2.0.4
@@ -1223,6 +1226,12 @@ packages:
       svelte:
         optional: true
 
+  svelte-persisted-store@0.12.0:
+    resolution: {integrity: sha512-BdBQr2SGSJ+rDWH8/aEV5GthBJDapVP0GP3fuUCA7TjYG5ctcB+O9Mj9ZC0+Jo1oJMfZUd1y9H68NFRR5MyIJA==}
+    engines: {node: '>=0.14'}
+    peerDependencies:
+      svelte: ^3.48.0 || ^4 || ^5
+
   svelte@5.55.7:
     resolution: {integrity: sha512-ymI5ykLPwIHW839E053FQbI1G+jnRFJEw3Kv5Y4njixVWywQBx+NUFpkkKyk5LIb36Fg9DVXSYpqiGekLD0hyw==}
     engines: {node: '>=18'}
@@ -2397,6 +2406,10 @@ snapshots:
       postcss-selector-parser: 7.1.1
       semver: 7.8.0
     optionalDependencies:
+      svelte: 5.55.7(@typescript-eslint/types@8.59.3)
+
+  svelte-persisted-store@0.12.0(svelte@5.55.7(@typescript-eslint/types@8.59.3)):
+    dependencies:
       svelte: 5.55.7(@typescript-eslint/types@8.59.3)
 
   svelte@5.55.7(@typescript-eslint/types@8.59.3):

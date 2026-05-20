@@ -6,11 +6,13 @@
 	import Timeline from '../components/Timeline.svelte';
 	import SearchBar from '../components/SearchBar.svelte';
 	import type { PageProps } from './$types';
+	import { currentlySelectedMods } from '../shared/shared.svelte';
 
 	let { data }: PageProps = $props();
 </script>
 
 <SearchBar summaries={data.data}></SearchBar>
+{$currentlySelectedMods.selectedMods}
 <div class="flex">
 	<Timeline></Timeline>
 	<div class="flex-1 flex-col">
