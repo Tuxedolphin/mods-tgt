@@ -37,7 +37,6 @@
     }
 
 </script>
-
 <SearchBar summaries={data.data}></SearchBar>
 <div class="flex">
 	<div class="row-auto w-12 flex-initial">
@@ -54,9 +53,9 @@
 				<div class="h-16 border-2">{formatShortDate(daysOfWeek[i + 1])}</div>
 				{#each { length: 12 }, i}
                     {#if i % 2 == 0}
-					    <div class="h-16 text-center bg-blue-300">{i}</div>
+					    <div class="h-16 text-center bg-base-200">{i}</div>
                     {:else}
-					    <div class="h-16 text-center bg-blue-400">{i}</div>
+					    <div class="h-16 text-center bg-base-300">{i}</div>
                     {/if}
                     
 				{/each}
