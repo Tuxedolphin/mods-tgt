@@ -7,12 +7,16 @@
 	import SearchBar from '../components/SearchBar.svelte';
 	import type { PageProps } from './$types';
 	import { currentlySelectedMods } from '../shared/shared.svelte';
+	import { onMount } from 'svelte';
 
 	let { data }: PageProps = $props();
+
+	onMount(() => {
+		console.log($currentlySelectedMods.selectedMods);
+	});
 </script>
 
 <SearchBar summaries={data.data}></SearchBar>
-{$currentlySelectedMods.selectedMods}
 <div class="flex">
 	<Timeline></Timeline>
 	<div class="flex-1 flex-col">

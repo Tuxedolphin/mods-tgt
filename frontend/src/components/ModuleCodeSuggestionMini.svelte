@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { currentlySelectedMods } from '../shared/shared.svelte';
 	import type { ModSummary } from '../types/mod_summaries';
-	import { get } from 'svelte/store';
 
 	interface Mod {
 		mod: ModSummary;
@@ -9,9 +8,10 @@
 
 	let { mod }: Mod = $props();
 
-	function addMod() {
+	async function addMod() {
+		fetch('https://api.nusmods.com/v2/2025-2026/modules/{}')
 		currentlySelectedMods.set({
-			selectedMods: mod.moduleCode
+			selectedMods: {}
 		});
 	}
 </script>
