@@ -1,5 +1,4 @@
 import { persisted } from 'svelte-persisted-store'
-import type { ModSummary } from '../types/mod_summaries';
 
 type LessonInfo = {
   classNo: string,

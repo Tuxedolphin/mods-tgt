@@ -1,5 +1,23 @@
 <script lang="ts">
+	import TimetableDayComponent from './TimetableDayComponent.svelte';
+
+	import { onMount } from 'svelte';
+	import { currentlySelectedMods } from '../shared/shared.svelte';
+	import { getFullModInfo } from '../utils/fetchFromCache';
+
+	import type { Module } from '../types/modules';
+
 	const heightOfOneHourLessonPx = 16;
+	let fullModInfo: { [moduleCode: string]: Module } = $state({});
+	onMount(() => {
+		currentlySelectedMods.subscribe(async (mods) => {
+			for (const mod in mods.selectedMods) {
+				if (mod in fullModInfo) continue;
+				const info = await getFullModInfo(mod);
+				fullModInfo[mod] = info;
+			}
+		});
+	});
 </script>
 
 <div class="grid grid-cols-5 grid-rows-12">
@@ -12,8 +30,7 @@
 			></div>
 		{/each}
 	{/each}
-
 	{#each { length: 5 }, day}
-		<div class="relative col-start-{day} row-start-1"></div>
+		<TimetableDayComponent {day} modInfo={fullModInfo}></TimetableDayComponent>
 	{/each}
 </div>

@@ -32,7 +32,6 @@
 			pairings[key] = firstLesson;
 		}
 		$currentlySelectedMods.selectedMods[mod.moduleCode] = pairings;
-		currentlySelectedMods.set($currentlySelectedMods);
 	}
 </script>
 
