@@ -1,3 +1,5 @@
+import type { Module } from '../types/modules';
+
 export function parse24HourTimeToMin(time24Hour: string): number {
 	const startHour = Number.parseInt(time24Hour.substring(0, 2));
 	const startMin = Number.parseInt(time24Hour.substring(2, 4));

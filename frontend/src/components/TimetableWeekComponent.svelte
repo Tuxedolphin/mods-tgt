@@ -17,17 +17,19 @@
 		calculateOverlappingTimes(filterByDay(modInfo))
 	);
 
+	const filteredInfoForSelection: TimeTableDayInfo[] = $derived({});
+
 	function findOverlappingTimeInfo(itemToCompare: TimeTableDayInfo, allTimes: TimeTableDayInfo[]) {
 		for (let i = 0; i < allTimes.length; i++) {
 			const element = allTimes[i];
-			if (itemToCompare.moduleCode == element.moduleCode) continue;
+			if (itemToCompare.uniqueIdentifer == element.uniqueIdentifer) continue;
 
 			if (
 				element.normalisedStartDuration >= itemToCompare.normalisedStartDuration &&
 				element.normalisedStartDuration < itemToCompare.normalisedEndDuration
 			) {
 				// means time has been found in between:
-				itemToCompare.searchedModuleCodes.add(element.moduleCode);
+				itemToCompare.searchedModuleCodes.add(element.uniqueIdentifer);
 				// modify other one as well:
 				element.searchedModuleCodes = element.searchedModuleCodes.union(
 					itemToCompare.searchedModuleCodes
@@ -47,6 +49,7 @@
 
 	function filterByDay(modInfo: { [moduleCode: string]: Module }): TimeTableDayInfo[] {
 		let totalInfo: TimeTableDayInfo[] = [];
+		// For Displaying the Timetable:
 		for (const mod in modInfo) {
 			const info = modInfo[mod];
 
@@ -55,8 +58,7 @@
 
 			const selectedMod = $currentlySelectedMods.selectedMods[mod];
 
-			for (const scheduleInfo in selectedMod) {
-				const lessonType = scheduleInfo;
+			for (const lessonType in selectedMod) {
 				const classNo = selectedMod[lessonType];
 				const lessonForDay = ttData?.filter(
 					(x) => x.lessonType == lessonType && x.classNo == classNo
@@ -64,15 +66,39 @@
 
 				if (lessonForDay?.length != 0) {
 					const lesson = lessonForDay![0] as RawLesson;
+					const identifer = `${lesson.classNo}-${info.moduleCode}`;
 					totalInfo.push({
 						lessonSchedule: lesson,
 						moduleCode: info.moduleCode,
 						moduleName: info.title,
 						normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
 						normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
-						searchedModuleCodes: new Set<string>([info.moduleCode])
+						searchedModuleCodes: new Set<string>([identifer]),
+						isAChoiceSelection: false,
+						uniqueIdentifer: identifer
 					});
 				}
+			}
+		}
+
+		const lessonQuery = modInfo['CS2030S'];
+
+		const weekData = lessonQuery?.semesterData.find((semNo) => semNo.semester == 2);
+		const ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
+		const lessonTypeToMatch = ttData?.filter((x) => x.lessonType == 'Recitation');
+		if (lessonTypeToMatch) {
+			for (const lesson of lessonTypeToMatch!) {
+				const identifer = `${lesson.classNo}-${lessonQuery.moduleCode}`;
+				totalInfo.push({
+					lessonSchedule: lesson,
+					moduleCode: lessonQuery.moduleCode,
+					moduleName: lessonQuery.title,
+					normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
+					normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
+					searchedModuleCodes: new Set<string>([`${lessonQuery.moduleCode}-${lesson.classNo}`]),
+					isAChoiceSelection: true,
+					uniqueIdentifer: identifer
+				});
 			}
 		}
 
@@ -89,6 +115,8 @@
 			normalisedStartDuration={mod.normalisedStartDuration}
 			normalisedEndDuration={mod.normalisedEndDuration}
 			searchedModuleCodes={mod.searchedModuleCodes}
+			isAChoiceSelection={mod.isAChoiceSelection}
+			uniqueIdentifer={mod.uniqueIdentifer}
 		></TimetableDayComponent>
 	{/each}
 </div>
