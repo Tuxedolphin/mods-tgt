@@ -16,7 +16,32 @@
 		calculateOverlappingTimes(filterByDay(modInfo))
 	);
 
+	function findOverlappingTimeInfo(itemToCompare: TimeTableDayInfo, allTimes: TimeTableDayInfo[]) {
+		for (let i = 0; i < allTimes.length; i++) {
+			const element = allTimes[i];
+			if (itemToCompare.moduleCode == element.moduleCode) continue;
+
+			if (
+				element.normalisedStartDuration >= itemToCompare.normalisedStartDuration &&
+				element.normalisedStartDuration < itemToCompare.normalisedEndDuration
+			) {
+				// means time has been found in between:
+				itemToCompare.searchedModuleCodes.add(element.moduleCode);
+				// modify other one as well:
+				element.searchedModuleCodes = element.searchedModuleCodes.union(
+					itemToCompare.searchedModuleCodes
+				);
+			}
+		}
+	}
+
 	function calculateOverlappingTimes(timeTableInfo: TimeTableDayInfo[]): TimeTableDayInfo[] {
+		for (let i = 0; i < timeTableInfo.length; i++) {
+			const element = timeTableInfo[i];
+			findOverlappingTimeInfo(element, timeTableInfo);
+		}
+
+		console.log(timeTableInfo);
 		return timeTableInfo;
 	}
 
@@ -44,7 +69,10 @@
 						moduleCode: info.moduleCode,
 						moduleName: info.title,
 						normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
-						normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime)
+						normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
+						indexInRow: 0,
+						maxNumGroup: 1,
+						searchedModuleCodes: new Set<string>([info.moduleCode])
 					});
 				}
 			}
@@ -62,6 +90,9 @@
 			moduleName={mod.moduleName}
 			normalisedStartDuration={mod.normalisedStartDuration}
 			normalisedEndDuration={mod.normalisedEndDuration}
+			indexInRow={mod.indexInRow}
+			searchedModuleCodes={mod.searchedModuleCodes}
+			maxNumGroup={mod.maxNumGroup}
 		></TimetableDayComponent>
 	{/each}
 </div>

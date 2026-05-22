@@ -6,4 +6,7 @@ export interface TimeTableDayInfo {
 	moduleName: string;
 	normalisedStartDuration: number;
 	normalisedEndDuration: number;
+	indexInRow: number;
+	maxNumGroup: number;
+	searchedModuleCodes: Set<string>;
 }

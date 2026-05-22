@@ -8,4 +8,6 @@
 
 @source inline('h-{8..384..4}');
 @source inline('mt-{8..384..4}');
-@source inline('w-1/{1..24}')
+@source inline('w-1/{1..24}');
+
+@source inline('ml-\[{0..100}\%\]');
