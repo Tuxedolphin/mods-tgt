@@ -24,7 +24,7 @@
 		normalisedStartDuration * 192} border bg-amber-100 text-xs wrap-break-word"
 	onclick={() => console.log('Hello')}
 >
-	{lessonSchedule.day}
-	{lessonSchedule.startTime}-{lessonSchedule.endTime}
-	{moduleCode} - {lessonSchedule.lessonType} - {lessonSchedule.classNo} - {moduleName}
+	{moduleCode}
+	{lessonSchedule.classNo}
+	{JSON.stringify([...searchedModuleCodes])}
 </button>

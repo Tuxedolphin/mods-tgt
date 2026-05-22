@@ -17,8 +17,6 @@
 		calculateOverlappingTimes(filterByDay(modInfo))
 	);
 
-	const filteredInfoForSelection: TimeTableDayInfo[] = $derived({});
-
 	function findOverlappingTimeInfo(itemToCompare: TimeTableDayInfo, allTimes: TimeTableDayInfo[]) {
 		for (let i = 0; i < allTimes.length; i++) {
 			const element = allTimes[i];
@@ -30,10 +28,10 @@
 			) {
 				// means time has been found in between:
 				itemToCompare.searchedModuleCodes.add(element.uniqueIdentifer);
-				// modify other one as well:
-				element.searchedModuleCodes = element.searchedModuleCodes.union(
-					itemToCompare.searchedModuleCodes
-				);
+				// // modify other one as well:
+				// element.searchedModuleCodes = element.searchedModuleCodes.union(
+				// 	itemToCompare.searchedModuleCodes
+				// );
 			}
 		}
 	}
@@ -95,7 +93,7 @@
 					moduleName: lessonQuery.title,
 					normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
 					normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
-					searchedModuleCodes: new Set<string>([`${lessonQuery.moduleCode}-${lesson.classNo}`]),
+					searchedModuleCodes: new Set<string>([identifer]),
 					isAChoiceSelection: true,
 					uniqueIdentifer: identifer
 				});
