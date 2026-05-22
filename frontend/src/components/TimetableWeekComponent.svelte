@@ -12,6 +12,7 @@
 	}
 	const { day, modInfo }: WeekTimeTabledComponent = $props();
 	const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
 	const filteredInformation: TimeTableDayInfo[] = $derived(
 		calculateOverlappingTimes(filterByDay(modInfo))
 	);
@@ -41,7 +42,6 @@
 			findOverlappingTimeInfo(element, timeTableInfo);
 		}
 
-		console.log(timeTableInfo);
 		return timeTableInfo;
 	}
 
@@ -51,7 +51,7 @@
 			const info = modInfo[mod];
 
 			const weekData = info.semesterData.find((semNo) => semNo.semester == 2);
-			let ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
+			const ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
 
 			const selectedMod = $currentlySelectedMods.selectedMods[mod];
 
@@ -70,8 +70,6 @@
 						moduleName: info.title,
 						normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
 						normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
-						indexInRow: 0,
-						maxNumGroup: 1,
 						searchedModuleCodes: new Set<string>([info.moduleCode])
 					});
 				}
@@ -90,9 +88,7 @@
 			moduleName={mod.moduleName}
 			normalisedStartDuration={mod.normalisedStartDuration}
 			normalisedEndDuration={mod.normalisedEndDuration}
-			indexInRow={mod.indexInRow}
 			searchedModuleCodes={mod.searchedModuleCodes}
-			maxNumGroup={mod.maxNumGroup}
 		></TimetableDayComponent>
 	{/each}
 </div>
