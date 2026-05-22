@@ -1,49 +1,39 @@
 <script lang="ts">
-	import type { Module, RawLesson } from '../types/modules';
-	import { currentlySelectedMods } from '../shared/shared.svelte';
-	interface WeekTimeTabledComponent {
-		day: number;
-		modInfo: { [moduleCode: string]: Module };
+	import type { TimeTableDayInfo } from '../types/internal';
+
+	const { lessonSchedule, moduleName, moduleCode }: TimeTableDayInfo = $props();
+	const startTime = () => lessonSchedule.startTime;
+	const endTime = () => lessonSchedule.endTime;
+
+	function parse24HourTimeToMin(time24Hour: string): number {
+		const startHour = Number.parseInt(time24Hour.substring(0, 2));
+		const startMin = Number.parseInt(time24Hour.substring(2, 4));
+
+		return startHour * 60 + startMin;
 	}
-	const { day, modInfo }: WeekTimeTabledComponent = $props();
-	const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-	const filteredInformation = $derived(filterByDay(modInfo));
 
-	interface TimeTableDayComponent {
-		lessonSchedule: RawLesson;
-		moduleCode: string;
-		moduleName: string;
+	function parseDiffDuration(startTime24Hour: string, endTime24Hour: string): number {
+		const startMins = parse24HourTimeToMin(startTime24Hour);
+		const endMins = parse24HourTimeToMin(endTime24Hour);
+		return endMins - startMins;
 	}
-	function filterByDay(modInfo: { [moduleCode: string]: Module }): any[] {
-		let totalInfo: TimeTableDayComponent[] = [];
-		for (const mod in modInfo) {
-			const info = modInfo[mod];
 
-			const weekData = info.semesterData.find((semNo) => semNo.semester == 2);
-			let ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
-
-			const selectedMod = $currentlySelectedMods.selectedMods[mod];
-
-			for (const scheduleInfo in selectedMod) {
-				const lessonType = scheduleInfo;
-				const classNo = selectedMod[lessonType];
-				const lessonForDay = ttData?.filter(
-					(x) => x.lessonType == lessonType && x.classNo == classNo
-				);
-
-				if (lessonForDay?.length != 0) {
-					const lesson = lessonForDay![0] as RawLesson;
-					totalInfo.push({
-						lessonSchedule: lesson,
-						moduleCode: info.moduleCode,
-						moduleName: info.title
-					});
-				}
-			}
-		}
-
-		return totalInfo;
+	function calculateHeightOfClass(
+		startTime24Hour: string,
+		endTime24Hour: string,
+		fullHourUnitsInPx: number
+	): number {
+		const diff = parseDiffDuration(startTime24Hour, endTime24Hour);
+		return (diff / 60.0) * fullHourUnitsInPx;
 	}
 </script>
 
-<div class="relative col-start-{day + 1} row-start-1"></div>
+<div
+	class="absolute mt-{calculateHeightOfClass(
+		'0800',
+		startTime(),
+		16
+	)} w-full h-{calculateHeightOfClass(startTime(), endTime(), 16)} bg-amber-100"
+>
+	{moduleCode}
+</div>

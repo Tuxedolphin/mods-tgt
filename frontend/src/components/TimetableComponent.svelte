@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TimetableDayComponent from './TimetableDayComponent.svelte';
+	import TimetableDayComponent from './TimetableWeekComponent.svelte';
 
 	import { onMount } from 'svelte';
 	import { currentlySelectedMods } from '../shared/shared.svelte';
