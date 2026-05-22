@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { chooseModState } from '../shared/shared.svelte';
+	import { chooseModState, currentlySelectedMods } from '../shared/shared.svelte';
 	import type { TimeTableDayInfo } from '../types/internal';
 
 	const {
@@ -21,9 +21,18 @@
 	mt-{normalisedStartDuration * 192} w-1/{groupLength} h-{normalisedEndDuration * 192 -
 		normalisedStartDuration * 192} border bg-amber-100 text-xs wrap-break-word"
 	onclick={() => {
-		chooseModState.lessonType = lessonSchedule.lessonType;
-		chooseModState.moduleCode = moduleCode;
+		if (chooseModState.lessonType === '') {
+			chooseModState.lessonType = lessonSchedule.lessonType;
+			chooseModState.moduleCode = moduleCode;
+			chooseModState.classNo = lessonSchedule.classNo;
+		} else {
+			$currentlySelectedMods.selectedMods[moduleCode][lessonSchedule.lessonType] =
+				lessonSchedule.classNo;
+			chooseModState.lessonType = '';
+			chooseModState.moduleCode = '';
+			chooseModState.classNo = '';
+		}
 	}}
 >
-	{moduleCode} - {moduleName} - {lessonSchedule.lessonType}
+	{moduleCode} - {moduleName} - {lessonSchedule.lessonType} [{lessonSchedule.classNo}]
 </button>

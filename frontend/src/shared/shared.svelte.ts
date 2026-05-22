@@ -9,10 +9,12 @@ export const currentlySelectedMods = persisted('selectedMods', {
 
 export const chooseModState = $state({
 	moduleCode: '',
-	lessonType: ''
+	lessonType: '',
+	classNo: ''
 }) as LessonInfo;
 
 export interface LessonInfo {
 	moduleCode: string;
 	lessonType: string;
+	classNo: string;
 }

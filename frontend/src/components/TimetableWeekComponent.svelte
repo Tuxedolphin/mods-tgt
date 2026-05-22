@@ -22,7 +22,7 @@
 		let timeOut = 0;
 		let timeOutLimit = 10_000;
 		let groupTimes = [];
-		console.log(allTimes.length);
+
 		while (groupsFound != allTimes.length && timeOut != timeOutLimit) {
 			for (const item of allTimes) {
 				if (item.hasFoundAGroup) continue;
@@ -131,6 +131,7 @@
 		const lessonTypeToMatch = ttData?.filter((x) => x.lessonType == userState.lessonType);
 		if (lessonTypeToMatch) {
 			for (const lesson of lessonTypeToMatch!) {
+				if (lesson.classNo == userState.classNo) continue;
 				const identifer = `${lesson.classNo}-${lesson.lessonType}-${lessonQuery.moduleCode}`;
 				totalInfo.push({
 					lessonSchedule: lesson,
@@ -153,7 +154,7 @@
 				b.normalisedStartDuration -
 				(a.normalisedEndDuration - a.normalisedStartDuration)
 		);
-		
+
 		return totalInfo;
 	}
 </script>
