@@ -2,7 +2,7 @@
 	import TimetableDayComponent from './TimetableDayComponent.svelte';
 
 	import type { Module, RawLesson } from '../types/modules';
-	import { currentlySelectedMods } from '../shared/shared.svelte';
+	import { currentlySelectedMods, chooseModState, type LessonInfo } from '../shared/shared.svelte';
 	import type { TimeTableDayInfo } from '../types/internal';
 	import { normaliseDuration } from '../utils/calculations_for_ui';
 
@@ -14,39 +14,83 @@
 	const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 	const filteredInformation: TimeTableDayInfo[] = $derived(
-		calculateOverlappingTimes(filterByDay(modInfo))
+		calculateOverlappingTimes(filterByDay(modInfo, chooseModState))
 	);
 
-	function findOverlappingTimeInfo(itemToCompare: TimeTableDayInfo, allTimes: TimeTableDayInfo[]) {
-		for (let i = 0; i < allTimes.length; i++) {
-			const element = allTimes[i];
-			if (itemToCompare.uniqueIdentifer == element.uniqueIdentifer) continue;
+	function findOverlappingTimeInfo(allTimes: TimeTableDayInfo[]) {
+		let groupsFound = 0;
+		let timeOut = 0;
+		let timeOutLimit = 10_000;
+		let groupTimes = [];
+		console.log(allTimes.length);
+		while (groupsFound != allTimes.length && timeOut != timeOutLimit) {
+			for (const item of allTimes) {
+				if (item.hasFoundAGroup) continue;
+				if (!item.hasFoundAGroup) {
+					// try to match a group:
+					for (const times of groupTimes) {
+						const groupStartTime = times['startTime'];
+						const groupEndTime = times['endTime'];
+						const groupMembers = times['members'];
 
-			if (
-				element.normalisedStartDuration >= itemToCompare.normalisedStartDuration &&
-				element.normalisedStartDuration < itemToCompare.normalisedEndDuration
-			) {
-				// means time has been found in between:
-				itemToCompare.searchedModuleCodes.add(element.uniqueIdentifer);
-				// // modify other one as well:
-				// element.searchedModuleCodes = element.searchedModuleCodes.union(
-				// 	itemToCompare.searchedModuleCodes
-				// );
+						// match group: add member:
+						if (
+							item.normalisedStartDuration >= groupStartTime &&
+							item.normalisedEndDuration <= groupEndTime
+						) {
+							groupMembers.push(item.uniqueIdentifer);
+
+							if (item.normalisedEndDuration >= groupEndTime) {
+								times['endTime'] = item.normalisedEndDuration;
+							}
+							item.hasFoundAGroup = true;
+							groupsFound++;
+							break;
+						}
+					}
+				}
+
+				// unable to establish membership:
+				if (!item.hasFoundAGroup) {
+					groupTimes.push({
+						startTime: item.normalisedStartDuration,
+						endTime: item.normalisedEndDuration,
+						members: [item.uniqueIdentifer]
+					});
+					groupsFound++;
+					item.hasFoundAGroup = true;
+				}
+			}
+
+			timeOut++;
+		}
+
+		if (timeOutLimit == timeOut) {
+			console.log('Error Finding Group Pairing');
+		}
+		for (const groups of groupTimes) {
+			for (let i = 0; i < groups.members.length; i++) {
+				const element = groups.members[i];
+
+				for (const allMods of allTimes) {
+					if (allMods.uniqueIdentifer != element) continue;
+					allMods.groupIndex = i;
+					allMods.groupLength = groups.members.length;
+				}
 			}
 		}
 	}
 
 	function calculateOverlappingTimes(timeTableInfo: TimeTableDayInfo[]): TimeTableDayInfo[] {
-		for (let i = 0; i < timeTableInfo.length; i++) {
-			const element = timeTableInfo[i];
-			findOverlappingTimeInfo(element, timeTableInfo);
-		}
-
+		findOverlappingTimeInfo(timeTableInfo);
 		return timeTableInfo;
 	}
 
-	function filterByDay(modInfo: { [moduleCode: string]: Module }): TimeTableDayInfo[] {
-		let totalInfo: TimeTableDayInfo[] = [];
+	function filterByDay(
+		modInfo: { [moduleCode: string]: Module },
+		userState: LessonInfo
+	): TimeTableDayInfo[] {
+		const totalInfo: TimeTableDayInfo[] = [];
 		// For Displaying the Timetable:
 		for (const mod in modInfo) {
 			const info = modInfo[mod];
@@ -64,42 +108,52 @@
 
 				if (lessonForDay?.length != 0) {
 					const lesson = lessonForDay![0] as RawLesson;
-					const identifer = `${lesson.classNo}-${info.moduleCode}`;
+					const identifer = `${lesson.classNo}-${lesson.lessonType}-${info.moduleCode}`;
 					totalInfo.push({
 						lessonSchedule: lesson,
 						moduleCode: info.moduleCode,
 						moduleName: info.title,
 						normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
 						normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
-						searchedModuleCodes: new Set<string>([identifer]),
 						isAChoiceSelection: false,
-						uniqueIdentifer: identifer
+						uniqueIdentifer: identifer,
+						hasFoundAGroup: false,
+						groupIndex: 0,
+						groupLength: 0
 					});
 				}
 			}
 		}
-
-		const lessonQuery = modInfo['CS2030S'];
+		const lessonQuery = modInfo[userState.moduleCode];
 
 		const weekData = lessonQuery?.semesterData.find((semNo) => semNo.semester == 2);
 		const ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
-		const lessonTypeToMatch = ttData?.filter((x) => x.lessonType == 'Recitation');
+		const lessonTypeToMatch = ttData?.filter((x) => x.lessonType == userState.lessonType);
 		if (lessonTypeToMatch) {
 			for (const lesson of lessonTypeToMatch!) {
-				const identifer = `${lesson.classNo}-${lessonQuery.moduleCode}`;
+				const identifer = `${lesson.classNo}-${lesson.lessonType}-${lessonQuery.moduleCode}`;
 				totalInfo.push({
 					lessonSchedule: lesson,
 					moduleCode: lessonQuery.moduleCode,
 					moduleName: lessonQuery.title,
 					normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
 					normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
-					searchedModuleCodes: new Set<string>([identifer]),
 					isAChoiceSelection: true,
-					uniqueIdentifer: identifer
+					uniqueIdentifer: identifer,
+					hasFoundAGroup: false,
+					groupIndex: 0,
+					groupLength: 0
 				});
 			}
 		}
 
+		totalInfo.sort(
+			(a, b) =>
+				b.normalisedEndDuration -
+				b.normalisedStartDuration -
+				(a.normalisedEndDuration - a.normalisedStartDuration)
+		);
+		
 		return totalInfo;
 	}
 </script>
@@ -112,9 +166,11 @@
 			moduleName={mod.moduleName}
 			normalisedStartDuration={mod.normalisedStartDuration}
 			normalisedEndDuration={mod.normalisedEndDuration}
-			searchedModuleCodes={mod.searchedModuleCodes}
 			isAChoiceSelection={mod.isAChoiceSelection}
 			uniqueIdentifer={mod.uniqueIdentifer}
+			groupIndex={mod.groupIndex}
+			groupLength={mod.groupLength}
+			hasFoundAGroup={mod.hasFoundAGroup}
 		></TimetableDayComponent>
 	{/each}
 </div>

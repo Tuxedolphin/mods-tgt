@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { chooseModState } from '../shared/shared.svelte';
 	import type { TimeTableDayInfo } from '../types/internal';
 
 	const {
@@ -7,24 +8,22 @@
 		moduleCode,
 		normalisedStartDuration,
 		normalisedEndDuration,
-		searchedModuleCodes,
 		isAChoiceSelection,
-		uniqueIdentifer
+		groupIndex,
+		groupLength
 	}: TimeTableDayInfo = $props();
-	const currentIndex = $derived(
-		[...searchedModuleCodes].sort().indexOf(uniqueIdentifer) * (100 / searchedModuleCodes.size)
-	);
 </script>
 
 <button
-	style="margin-left: {currentIndex}%"
+	style="margin-left: {groupIndex * (100.0 / groupLength)}%;"
 	class="absolute
 	{isAChoiceSelection ? 'opacity-30' : 'opacity-100'}
-	mt-{normalisedStartDuration * 192} w-1/{searchedModuleCodes.size} h-{normalisedEndDuration * 192 -
+	mt-{normalisedStartDuration * 192} w-1/{groupLength} h-{normalisedEndDuration * 192 -
 		normalisedStartDuration * 192} border bg-amber-100 text-xs wrap-break-word"
-	onclick={() => console.log('Hello')}
+	onclick={() => {
+		chooseModState.lessonType = lessonSchedule.lessonType;
+		chooseModState.moduleCode = moduleCode;
+	}}
 >
-	{moduleCode}
-	{lessonSchedule.classNo}
-	{JSON.stringify([...searchedModuleCodes])}
+	{moduleCode} - {moduleName} - {lessonSchedule.lessonType}
 </button>

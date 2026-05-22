@@ -6,3 +6,13 @@ import type { SavedModInfo } from '../types/mod_summaries';
 export const currentlySelectedMods = persisted('selectedMods', {
 	selectedMods: {} as { [key: string]: SavedModInfo }
 });
+
+export const chooseModState = $state({
+	moduleCode: '',
+	lessonType: ''
+}) as LessonInfo;
+
+export interface LessonInfo {
+	moduleCode: string;
+	lessonType: string;
+}
