@@ -51,18 +51,21 @@
 				break;
 			}
 
+			if (!firstGroup) break;
 			let endTime = firstGroup[0].normalisedEndDuration;
 
 			// Find groups:
 			for (const i in groupTimes) {
 				if (i == firstGroupProcess) continue;
 				const group = groupTimes[i]![0];
-				if (group.normalisedStartDuration == endTime) {
+				if (group.normalisedStartDuration >= endTime) {
 					endTime = group.normalisedEndDuration;
 					processedTimings.push(i);
 					processedGroups[groupId].push(groupTimes[i]!);
 				}
 			}
+
+			// Find Groups that may not exactly match endtimes:
 
 			groupId++;
 		}
