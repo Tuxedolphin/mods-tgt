@@ -17,6 +17,59 @@
 		calculateOverlappingTimes(filterByDay(modInfo, chooseModState))
 	);
 
+	function findOverlappingTimeInfoNew(allTime: TimeTableDayInfo[]) {
+		
+		const groupTimes = Object.groupBy(allTime, (x => x.normalisedStartDuration));
+		const MAX_ITER = 1000;
+		let iterIdx = 0;		
+		const processedTimings: string[] = [];
+		const processedGroups: {
+			[key: number] : TimeTableDayInfo[][]
+		} = {}
+		let lengthOfGroups = 0;
+		for (const _ in groupTimes) lengthOfGroups++;
+		let groupId = 0;
+		while (processedTimings.length != lengthOfGroups && iterIdx != MAX_ITER) {
+			iterIdx++;
+			console.log(groupId);
+			let firstGroup: TimeTableDayInfo[] = null;
+			let firstGroupProcess: string = "";
+			for (const i in groupTimes) {
+				if (processedTimings.includes(i)) continue;
+				firstGroup = groupTimes[i]!;
+				firstGroupProcess = i;
+				firstGroup.sort((a, b) => (b.normalisedEndDuration - b.normalisedStartDuration) - (a.normalisedEndDuration - a.normalisedStartDuration)); 
+				
+				processedTimings.push(i);
+				
+				if (!processedGroups[groupId]) processedGroups[groupId] = [];
+				processedGroups[groupId].push(firstGroup)
+				break;
+			}
+
+			let endTime = firstGroup[0].normalisedEndDuration;
+
+			// Find groups: 
+			for (const i in groupTimes) {
+				if (i == firstGroupProcess) continue;
+				const group = groupTimes[i]![0];
+				if (group.normalisedStartDuration == endTime) 
+				{
+					endTime = group.normalisedEndDuration;
+					processedTimings.push(i);
+					processedGroups[groupId].push(groupTimes[i]!)
+				}				
+			}
+
+			groupId++;
+		} 
+
+		
+		if (iterIdx == MAX_ITER) {
+			console.log("Unable to find pairings");
+		}
+	}
+
 	function findOverlappingTimeInfo(allTimes: TimeTableDayInfo[]) {
 		let groupsFound = 0;
 		let timeOut = 0;
@@ -82,7 +135,7 @@
 	}
 
 	function calculateOverlappingTimes(timeTableInfo: TimeTableDayInfo[]): TimeTableDayInfo[] {
-		findOverlappingTimeInfo(timeTableInfo);
+		findOverlappingTimeInfoNew(timeTableInfo);
 		return timeTableInfo;
 	}
 
@@ -90,6 +143,7 @@
 		modInfo: { [moduleCode: string]: Module },
 		userState: LessonInfo
 	): TimeTableDayInfo[] {
+		if (day != 1) return [];
 		const totalInfo: TimeTableDayInfo[] = [];
 		// For Displaying the Timetable:
 		for (const mod in modInfo) {
@@ -150,10 +204,7 @@
 
 		totalInfo.sort(
 			(a, b) =>
-				b.normalisedEndDuration -
-				b.normalisedStartDuration -
-				(a.normalisedEndDuration - a.normalisedStartDuration)
-		);
+				a.normalisedStartDuration - b.normalisedStartDuration);
 
 		return totalInfo;
 	}

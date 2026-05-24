@@ -19,7 +19,7 @@
 	class="absolute
 	{isAChoiceSelection ? 'opacity-30' : 'opacity-100'}
 	mt-{normalisedStartDuration * 192} w-1/{groupLength} h-{normalisedEndDuration * 192 -
-		normalisedStartDuration * 192} border bg-amber-100 text-xs wrap-break-word"
+		normalisedStartDuration * 192} border bg-primary-content text-xs wrap-break-word"
 	onclick={() => {
 		if (chooseModState.lessonType === '') {
 			chooseModState.lessonType = lessonSchedule.lessonType;

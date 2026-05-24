@@ -1,7 +1,7 @@
 <script lang="ts">
 	const timeFormatter = new Intl.DateTimeFormat(undefined, {
 		hour: '2-digit',
-		minute: 'numeric'
+		minute: '2-digit'
 	});
 
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
