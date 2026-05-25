@@ -12,7 +12,7 @@
 	}
 </script>
 
-<div class="row-auto w-24 flex-initial">
+<div class="row-auto w-20 flex-initial">
 	<div class="h-16"></div>
 	{#each { length: 13 }, i}
 		<div class="h-16 text-center align-middle">
