@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { chooseModState, currentlySelectedMods } from '../shared/shared.svelte';
+	import { chooseModState, currentlySelectedMods, preferences } from '../shared/shared.svelte';
 	import type { TimeTableDayInfo } from '../types/internal';
 
 	const {
@@ -37,7 +37,8 @@
 			chooseModState.moduleCode = moduleCode;
 			chooseModState.classNo = lessonSchedule.classNo;
 		} else {
-			$currentlySelectedMods.selectedMods[moduleCode][lessonSchedule.lessonType] =
+			
+			$currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView][moduleCode][lessonSchedule.lessonType] =
 				lessonSchedule.classNo;
 			chooseModState.lessonType = '';
 			chooseModState.moduleCode = '';

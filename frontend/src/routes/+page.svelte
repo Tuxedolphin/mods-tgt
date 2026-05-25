@@ -12,7 +12,6 @@
 
 	let modData = $state([]) as ModSummary[];
 	onMount(async () => {
-		console.log($preferences);
 		modData = await getListOfModsSummary($preferences.acadYear);
 		// Setup Preferences:
 	});
@@ -22,8 +21,9 @@
 	<SearchBar summaries={modData}></SearchBar>
 
 	<div class="flex">
-		<button> Prev </button>
+		<button class="btn-primary btn" onclick={() => $preferences.currentSemView--}> Prev </button>
 		<div class="text-center">Semester {$preferences.currentSemView}</div>
+		<button class="btn-primary btn" onclick={() => $preferences.currentSemView++}> Next </button>
 	</div>
 {/if}
 

@@ -10,14 +10,26 @@
 	const heightOfOneHourLessonPx = 16;
 	let fullModInfo: { [moduleCode: string]: Module } = $state({});
 	onMount(() => {
-		currentlySelectedMods.subscribe(async (mods) => {
-			for (const mod in mods.selectedMods) {
-				if (mod in fullModInfo) continue;
-				const info = await getFullModInfo(mod, $preferences.acadYear);
-				fullModInfo[mod] = info;
-			}
+		preferences.subscribe(async () => {
+			fullModInfo = {};
+
+			// trigger UI refresh here:
+			refreshUI();
+		});
+		currentlySelectedMods.subscribe(async () => {
+			refreshUI();
 		});
 	});
+
+	async function refreshUI() {
+		if (!$currentlySelectedMods[$preferences.acadYear]) return;
+		if (!$currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView]) return; 
+		for (const mod in $currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView]) {
+			if (mod in fullModInfo) continue;
+			const info = await getFullModInfo(mod, $preferences.acadYear);
+			fullModInfo[mod] = info;
+		}
+	}
 </script>
 
 <div class="grid grid-cols-5 grid-rows-12">

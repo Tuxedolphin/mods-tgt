@@ -36,7 +36,6 @@
 		let groupId = 0;
 		while (processedTimings.length != lengthOfGroups && iterIdx != MAX_ITER) {
 			iterIdx++;
-			console.log(groupId);
 			let firstGroup: TimeTableDayInfo[] = [];
 			let firstGroupProcess: string = '';
 			for (const i in groupTimes) {
@@ -119,7 +118,6 @@
 
 			const selectedMod =
 				$currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView][info.moduleCode];
-			console.log(selectedMod);
 			for (const lessonType in selectedMod) {
 				const classNo = selectedMod[lessonType];
 				const lessonForDay = ttData?.filter(
