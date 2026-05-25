@@ -5,12 +5,20 @@
 
 	import Timeline from '../components/Timeline.svelte';
 	import SearchBar from '../components/SearchBar.svelte';
-	import type { PageProps } from './$types';
+	import { onMount } from 'svelte';
+	import type { ModSummary } from '../types/mod_summaries';
+	import { getListOfModsSummary } from '../utils/fetch_from_cache';
 
-	let { data }: PageProps = $props();
+	let modData = $state([]) as ModSummary[];
+	onMount(async () => {
+		modData = await getListOfModsSummary();
+	});
 </script>
 
-<SearchBar summaries={data.data}></SearchBar>
+{#if modData.length != 0}
+	<SearchBar summaries={modData}></SearchBar>
+{/if}
+
 <div class="flex">
 	<Timeline></Timeline>
 	<div class="flex-1 flex-col">

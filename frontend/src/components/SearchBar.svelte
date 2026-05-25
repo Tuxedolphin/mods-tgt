@@ -3,16 +3,18 @@
 
 	import { AllSubstringsIndexStrategy, Search } from 'js-search';
 	import type { ModSummary } from '../types/mod_summaries';
+	import { onMount } from 'svelte';
 
 	let searchTerm = $state('');
 	const { summaries } = $props();
-	const modSearch = new Search('moduleCode');
-	modSearch.indexStrategy = new AllSubstringsIndexStrategy();
-	modSearch.addIndex('moduleCode');
-	modSearch.addIndex('title');
 
-	// svelte-ignore state_referenced_locally
-	modSearch.addDocuments(summaries);
+	const modSearch = new Search('moduleCode');
+	onMount(() => {
+		modSearch.indexStrategy = new AllSubstringsIndexStrategy();
+		modSearch.addIndex('moduleCode');
+		modSearch.addIndex('title');
+		modSearch.addDocuments(summaries as ModSummary[]);
+	});
 
 	let results = $derived(modSearch.search(searchTerm)) as ModSummary[];
 </script>
