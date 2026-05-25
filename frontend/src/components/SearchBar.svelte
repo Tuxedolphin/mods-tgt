@@ -4,6 +4,7 @@
 	import { AllSubstringsIndexStrategy, Search } from 'js-search';
 	import type { ModSummary } from '../types/mod_summaries';
 	import { onMount } from 'svelte';
+	import { preferences } from '../shared/shared.svelte';
 
 	let searchTerm = $state('');
 	const { summaries } = $props();
@@ -17,9 +18,10 @@
 	});
 
 	let results = $derived(
+		searchTerm.length < 3 ? [] :
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		(modSearch.search(searchTerm) as ModSummary[]).sort((a, _) =>
-			a.semesters.includes(2) ? -1 : 1
+			a.semesters.includes($preferences.currentSemView) ? -1 : 1
 		)
 	);
 </script>

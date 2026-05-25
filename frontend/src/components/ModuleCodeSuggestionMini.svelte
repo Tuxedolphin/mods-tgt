@@ -10,6 +10,7 @@
 	let { mod }: Mod = $props();
 
 	async function addMod() {
+		if (!mod.semesters.includes($preferences.currentSemView)) return;
 		const modFullInfo = await getFullModInfo(mod.moduleCode, $preferences.acadYear);
 
 		const timeTable = modFullInfo.semesterData.find(
@@ -42,7 +43,15 @@
 		$currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView][
 			modFullInfo.moduleCode
 		] = pairings;
+
+		
 	}
 </script>
 
-<button class="h-12 w-full" onclick={addMod}>{mod.moduleCode} - {mod.title} {mod.semesters}</button>
+<button class="h-12 w-full" onclick={addMod}> 
+	{#if !mod.semesters.includes($preferences.currentSemView)}
+		{mod.moduleCode} - {mod.title} - Not Offered in this semester
+	{:else}
+		{mod.moduleCode} - {mod.title}
+	{/if}
+</button>
