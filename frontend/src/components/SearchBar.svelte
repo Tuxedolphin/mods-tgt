@@ -4,9 +4,8 @@
 	import { AllSubstringsIndexStrategy, Search } from 'js-search';
 	import type { ModSummary } from '../types/mod_summaries';
 	import { onMount } from 'svelte';
-	import { preferences } from '../shared/shared.svelte';
+	import { preferences, searchTerm } from '../shared/shared.svelte';
 
-	let searchTerm = $state('');
 	const { summaries } = $props();
 
 	const modSearch = new Search('moduleCode');
@@ -18,16 +17,17 @@
 	});
 
 	let results = $derived(
-		searchTerm.length < 3 ? [] :
+		$searchTerm.length < 3 ? [] :
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		(modSearch.search(searchTerm) as ModSummary[]).sort((a, _) =>
+		(modSearch.search($searchTerm) as ModSummary[]).sort((a, _) =>
 			a.semesters.includes($preferences.currentSemView) ? -1 : 1
 		)
 	);
+
 </script>
 
 <p>Search</p>
-<input type="text" placeholder="Type here" class="input w-full" bind:value={searchTerm} />
+<input type="text" placeholder="Type here" class="input w-full" bind:value={$searchTerm} />
 
 <div class="max-h-36 overflow-auto scroll-auto">
 	{#each results as res (res.moduleCode)}

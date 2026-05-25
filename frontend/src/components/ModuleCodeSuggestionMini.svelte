@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currentlySelectedMods, preferences } from '../shared/shared.svelte';
+	import { currentlySelectedMods, preferences, searchTerm } from '../shared/shared.svelte';
 	import type { ModSummary } from '../types/mod_summaries';
 	import { getFullModInfo } from '../utils/fetch_from_cache';
 
@@ -44,7 +44,7 @@
 			modFullInfo.moduleCode
 		] = pairings;
 
-		
+		searchTerm.set('')
 	}
 </script>
 
