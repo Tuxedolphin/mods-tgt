@@ -1,14 +1,17 @@
 <script lang="ts">
 	import TimetableDayComponent from './TimetableWeekComponent.svelte';
 	import type { TimeTable } from '../types/mod_summaries';
-	import { filterTimetableByDay } from '../utils/format_db_information';
+	import { filterTimetableByDay, queryAvailableLessons } from '../utils/format_db_information';
+	import { chooseModState } from '../shared/shared.svelte';
 
 	const heightOfOneHourLessonPx = 16;
 
 	interface Timetables {
 		timetables: TimeTable[];
+		acadYear: string;
+		semester: number;
 	}
-	const { timetables }: Timetables = $props();
+	const { timetables, acadYear, semester }: Timetables = $props();
 </script>
 
 <div class="grid grid-cols-5 grid-rows-12">
@@ -22,8 +25,12 @@
 		{/each}
 	{/each}
 	{#each { length: 5 }, day}
-		{#await filterTimetableByDay(day, timetables) then timetableDayInfo}
-			<TimetableDayComponent timetableDayDisplayInfo={timetableDayInfo} {day}
+		{#await Promise.all( [filterTimetableByDay(day, timetables), queryAvailableLessons(day, semester, acadYear, chooseModState)] ) then timetableDayInfo}
+			<TimetableDayComponent
+				timetableDayDisplayInfo={timetableDayInfo.flat()}
+				{day}
+				{acadYear}
+				{semester}
 			></TimetableDayComponent>
 		{/await}
 	{/each}

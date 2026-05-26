@@ -37,6 +37,6 @@
 
 <div class="max-h-36 overflow-auto scroll-auto">
 	{#each results as res (res.moduleCode)}
-		<ModuleCodeSuggestionMini mod={res}></ModuleCodeSuggestionMini>
+		<ModuleCodeSuggestionMini mod={res} {semester} {acadYear}></ModuleCodeSuggestionMini>
 	{/each}
 </div>

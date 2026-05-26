@@ -25,7 +25,11 @@
 	<Timeline></Timeline>
 	<div class="flex-1 flex-col">
 		<DaysOfWeekHeader></DaysOfWeekHeader>
-		<TimetableComponent timetables={currentTimetableDisplay}></TimetableComponent>
+		<TimetableComponent
+			timetables={currentTimetableDisplay}
+			acadYear={$preferences.acadYear}
+			semester={$preferences.currentSemView}
+		></TimetableComponent>
 	</div>
 </div>
 

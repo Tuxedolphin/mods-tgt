@@ -1,52 +1,55 @@
 <script lang="ts">
-	import { chooseModState, currentlySelectedMods, preferences } from '../shared/shared.svelte';
+	import { chooseModState, currentlySelectedMods } from '../shared/shared.svelte';
 	import type { TimeTableDayInfo } from '../types/internal';
+	import { modifyModEntry } from '../utils/format_db_information';
+	interface TimetableDayProps {
+		timeTableDayInfo: TimeTableDayInfo;
+		semester: number;
+		acadYear: string;
+	}
+	const { timeTableDayInfo, acadYear, semester }: TimetableDayProps = $props();
 
-	const {
-		lessonSchedule,
-		moduleName,
-		moduleCode,
-		normalisedStartDuration,
-		normalisedEndDuration,
-		isAChoiceSelection,
-		innerGroupIndex,
-		innerGroupLength,
-		outerGroupIndex,
-		outerGroupLength
-	}: TimeTableDayInfo = $props();
-
-	const spaceAllowedToUse = $derived(100.0 / outerGroupLength);
-	const startingOuterOffset = $derived(outerGroupIndex * spaceAllowedToUse);
+	const spaceAllowedToUse = $derived(100.0 / timeTableDayInfo.outerGroupLength);
+	const startingOuterOffset = $derived(timeTableDayInfo.outerGroupIndex * spaceAllowedToUse);
 	const leftMarginPercentage = $derived(
-		innerGroupIndex * (spaceAllowedToUse / innerGroupLength) + startingOuterOffset
+		timeTableDayInfo.innerGroupIndex * (spaceAllowedToUse / timeTableDayInfo.innerGroupLength) +
+			startingOuterOffset
 	);
-	const showModName = $state(true);
-	const width = $derived(spaceAllowedToUse / innerGroupLength);
+	const showModName = $state(false);
+	const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
 </script>
 
 <button
 	style:margin-left="{leftMarginPercentage}%"
 	style:width="{width}%;"
 	class="absolute
-	{isAChoiceSelection ? 'opacity-30' : 'opacity-100'}
-	mt-{normalisedStartDuration * 192} h-{normalisedEndDuration * 192 -
-		normalisedStartDuration * 192} border bg-accent text-xs wrap-break-word text-base-content"
-	onclick={() => {
+	{timeTableDayInfo.isAChoiceSelection ? 'opacity-30' : 'opacity-100'}
+	mt-{timeTableDayInfo.normalisedStartDuration * 192} h-{timeTableDayInfo.normalisedEndDuration *
+		192 -
+		timeTableDayInfo.normalisedStartDuration *
+			192} border bg-accent text-xs wrap-break-word text-base-content"
+	onclick={async () => {
 		if (chooseModState.lessonType === '') {
-			chooseModState.lessonType = lessonSchedule.lessonType;
-			chooseModState.moduleCode = moduleCode;
-			chooseModState.classNo = lessonSchedule.classNo;
+			chooseModState.lessonType = timeTableDayInfo.lessonSchedule.lessonType;
+			chooseModState.moduleCode = timeTableDayInfo.moduleCode;
+			chooseModState.classNo = timeTableDayInfo.lessonSchedule.classNo;
 		} else {
-			
-			$currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView][moduleCode][lessonSchedule.lessonType] =
-				lessonSchedule.classNo;
+			$currentlySelectedMods = await modifyModEntry(
+				$currentlySelectedMods,
+				acadYear,
+				semester,
+				'you',
+				'test',
+				timeTableDayInfo.lessonSchedule.classNo,
+				chooseModState
+			);
 			chooseModState.lessonType = '';
 			chooseModState.moduleCode = '';
 			chooseModState.classNo = '';
 		}
 	}}
 >
-	<div>{moduleCode} {showModName ? moduleName : ''}</div>
+	<div>{timeTableDayInfo.moduleCode} {showModName ? timeTableDayInfo.moduleName : ''}</div>
 
-	{lessonSchedule.lessonType} [{lessonSchedule.classNo}]
+	{timeTableDayInfo.lessonSchedule.lessonType} [{timeTableDayInfo.lessonSchedule.classNo}]
 </button>
