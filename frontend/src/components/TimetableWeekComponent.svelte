@@ -1,28 +1,19 @@
 <script lang="ts">
 	import TimetableDayComponent from './TimetableDayComponent.svelte';
 
-	import type { Module, RawLesson } from '../types/modules';
-	import {
-		currentlySelectedMods,
-		chooseModState,
-		type LessonInfo,
-		preferences
-	} from '../shared/shared.svelte';
 	import type { TimeTableDayInfo } from '../types/internal';
-	import { normaliseDuration } from '../utils/calculations_for_ui';
 
-	interface WeekTimeTabledComponent {
+	interface DisplayInfo {
+		timetableDayDisplayInfo: TimeTableDayInfo[];
 		day: number;
-		modInfo: { [moduleCode: string]: Module };
 	}
-	const { day, modInfo }: WeekTimeTabledComponent = $props();
-	const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+	const { timetableDayDisplayInfo, day }: DisplayInfo = $props();
 
 	const filteredInformation: TimeTableDayInfo[] = $derived(
-		calculateOverlappingTimes(filterByDay(modInfo, chooseModState))
+		findOverlappingTimeInfoNew(timetableDayDisplayInfo)
 	);
 
-	function findOverlappingTimeInfoNew(allTime: TimeTableDayInfo[]) {
+	function findOverlappingTimeInfoNew(allTime: TimeTableDayInfo[]): TimeTableDayInfo[] {
 		const groupTimes = Object.groupBy(allTime, (x) => x.normalisedStartDuration);
 		const MAX_ITER = 1000;
 		let iterIdx = 0;
@@ -95,84 +86,8 @@
 		if (iterIdx == MAX_ITER) {
 			console.log('Unable to find pairings');
 		}
-	}
 
-	function calculateOverlappingTimes(timeTableInfo: TimeTableDayInfo[]): TimeTableDayInfo[] {
-		findOverlappingTimeInfoNew(timeTableInfo);
-		return timeTableInfo;
-	}
-
-	function filterByDay(
-		modInfo: { [moduleCode: string]: Module },
-		userState: LessonInfo
-	): TimeTableDayInfo[] {
-		const totalInfo: TimeTableDayInfo[] = [];
-		// For Displaying the Timetable:
-		for (const mod in modInfo) {
-			const info = modInfo[mod];
-
-			const weekData = info.semesterData.find(
-				(semNo) => semNo.semester == $preferences.currentSemView
-			);
-			const ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
-
-			const selectedMod =
-				$currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView][info.moduleCode];
-			for (const lessonType in selectedMod) {
-				const classNo = selectedMod[lessonType];
-				const lessonForDay = ttData?.filter(
-					(x) => x.lessonType == lessonType && x.classNo == classNo
-				);
-
-				if (lessonForDay?.length != 0) {
-					const lesson = lessonForDay![0] as RawLesson;
-					const identifer = `${lesson.classNo}-${lesson.lessonType}-${info.moduleCode}`;
-					totalInfo.push({
-						lessonSchedule: lesson,
-						moduleCode: info.moduleCode,
-						moduleName: info.title,
-						normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
-						normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
-						isAChoiceSelection: false,
-						uniqueIdentifer: identifer,
-						innerGroupIndex: -1,
-						innerGroupLength: -1,
-						outerGroupIndex: -1,
-						outerGroupLength: -1
-					});
-				}
-			}
-		}
-		const lessonQuery = modInfo[userState.moduleCode];
-
-		const weekData = lessonQuery?.semesterData.find(
-			(semNo) => semNo.semester == $preferences.currentSemView
-		);
-		const ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
-		const lessonTypeToMatch = ttData?.filter((x) => x.lessonType == userState.lessonType);
-		if (lessonTypeToMatch) {
-			for (const lesson of lessonTypeToMatch!) {
-				if (lesson.classNo == userState.classNo) continue;
-				const identifer = `${lesson.classNo}-${lesson.lessonType}-${lessonQuery.moduleCode}`;
-				totalInfo.push({
-					lessonSchedule: lesson,
-					moduleCode: lessonQuery.moduleCode,
-					moduleName: lessonQuery.title,
-					normalisedStartDuration: normaliseDuration('0800', '2000', lesson.startTime),
-					normalisedEndDuration: normaliseDuration('0800', '2000', lesson.endTime),
-					isAChoiceSelection: true,
-					uniqueIdentifer: identifer,
-					innerGroupIndex: -1,
-					innerGroupLength: -1,
-					outerGroupIndex: -1,
-					outerGroupLength: -1
-				});
-			}
-		}
-
-		totalInfo.sort((a, b) => a.normalisedStartDuration - b.normalisedStartDuration);
-
-		return totalInfo;
+		return allTime;
 	}
 </script>
 
@@ -185,7 +100,6 @@
 			normalisedStartDuration={mod.normalisedStartDuration}
 			normalisedEndDuration={mod.normalisedEndDuration}
 			isAChoiceSelection={mod.isAChoiceSelection}
-			uniqueIdentifer={mod.uniqueIdentifer}
 			innerGroupLength={mod.innerGroupLength}
 			innerGroupIndex={mod.innerGroupIndex}
 			outerGroupIndex={mod.outerGroupIndex}

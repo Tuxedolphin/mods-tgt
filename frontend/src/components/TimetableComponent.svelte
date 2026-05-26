@@ -1,35 +1,14 @@
 <script lang="ts">
 	import TimetableDayComponent from './TimetableWeekComponent.svelte';
-
-	import { onMount } from 'svelte';
-	import { currentlySelectedMods, preferences } from '../shared/shared.svelte';
-	import { getFullModInfo } from '../utils/fetch_from_cache';
-
-	import type { Module } from '../types/modules';
+	import type { TimeTable } from '../types/mod_summaries';
+	import { filterTimetableByDay } from '../utils/format_db_information';
 
 	const heightOfOneHourLessonPx = 16;
-	let fullModInfo: { [moduleCode: string]: Module } = $state({});
-	onMount(() => {
-		preferences.subscribe(async () => {
-			fullModInfo = {};
 
-			// trigger UI refresh here:
-			refreshUI();
-		});
-		currentlySelectedMods.subscribe(async () => {
-			refreshUI();
-		});
-	});
-
-	async function refreshUI() {
-		if (!$currentlySelectedMods[$preferences.acadYear]) return;
-		if (!$currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView]) return; 
-		for (const mod in $currentlySelectedMods[$preferences.acadYear][$preferences.currentSemView]) {
-			if (mod in fullModInfo) continue;
-			const info = await getFullModInfo(mod, $preferences.acadYear);
-			fullModInfo[mod] = info;
-		}
+	interface Timetables {
+		timetables: TimeTable[];
 	}
+	const { timetables }: Timetables = $props();
 </script>
 
 <div class="grid grid-cols-5 grid-rows-12">
@@ -43,6 +22,9 @@
 		{/each}
 	{/each}
 	{#each { length: 5 }, day}
-		<TimetableDayComponent {day} modInfo={fullModInfo}></TimetableDayComponent>
+		{#await filterTimetableByDay(day, timetables) then timetableDayInfo}
+			<TimetableDayComponent timetableDayDisplayInfo={timetableDayInfo} {day}
+			></TimetableDayComponent>
+		{/await}
 	{/each}
 </div>

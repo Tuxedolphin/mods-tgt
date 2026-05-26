@@ -9,21 +9,27 @@
 	import type { ModSummary } from '../types/mod_summaries';
 	import { getListOfModsSummary } from '../utils/fetch_from_cache';
 	import { currentlySelectedMods, preferences } from '../shared/shared.svelte';
+	import { getTimetable } from '../utils/format_db_information';
 
 	let modData = $state([]) as ModSummary[];
 	onMount(async () => {
 		modData = await getListOfModsSummary($preferences.acadYear);
 		// Setup Preferences:
+		console.log('Startup: ' + currentTimetableDisplay);
 	});
+
+	const currentTimetableDisplay = $derived(
+		getTimetable($preferences.acadYear, $preferences.currentSemView, $currentlySelectedMods)
+	);
 </script>
 
 {#if modData.length != 0}
 	<SearchBar summaries={modData}></SearchBar>
 
 	<div class="flex">
-		<button class="btn-primary btn" onclick={() => $preferences.currentSemView--}> Prev </button>
+		<button class="btn btn-primary" onclick={() => $preferences.currentSemView--}> Prev </button>
 		<div class="text-center">Semester {$preferences.currentSemView}</div>
-		<button class="btn-primary btn" onclick={() => $preferences.currentSemView++}> Next </button>
+		<button class="btn btn-primary" onclick={() => $preferences.currentSemView++}> Next </button>
 	</div>
 {/if}
 
@@ -31,10 +37,12 @@
 	<Timeline></Timeline>
 	<div class="flex-1 flex-col">
 		<DaysOfWeekHeader></DaysOfWeekHeader>
-		<TimetableComponent></TimetableComponent>
+		<TimetableComponent timetables={currentTimetableDisplay}></TimetableComponent>
 	</div>
 </div>
 
 <div>
-	{$currentlySelectedMods}
+	{#each currentTimetableDisplay as tt (tt.AcademicYear)}
+		Timetable Belongs to: {tt.Name}
+	{/each}
 </div>

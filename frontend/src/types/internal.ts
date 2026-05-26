@@ -6,7 +6,6 @@ export interface TimeTableDayInfo {
 	normalisedStartDuration: number;
 	normalisedEndDuration: number;
 	isAChoiceSelection: boolean;
-	uniqueIdentifer: string;
 	outerGroupIndex: number;
 	outerGroupLength: number;
 	innerGroupIndex: number;
