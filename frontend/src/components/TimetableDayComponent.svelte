@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { chooseModState, currentlySelectedMods } from '../shared/shared.svelte';
+	import {
+		chooseModState,
+		currentlySelectedMods,
+		currentUserInformation
+	} from '../shared/shared.svelte';
 	import type { TimeTableDayInfo } from '../types/internal';
 	import { modifyModEntry } from '../utils/format_db_information';
+
 	interface TimetableDayProps {
 		timeTableDayInfo: TimeTableDayInfo;
 		semester: number;
@@ -34,16 +39,18 @@
 			chooseModState.moduleCode = timeTableDayInfo.moduleCode;
 			chooseModState.classNo = timeTableDayInfo.lessonSchedule.classNo;
 		} else {
-			$currentlySelectedMods = await modifyModEntry(
-				$currentlySelectedMods,
-				acadYear,
-				semester,
-				'you',
-				'test',
-				timeTableDayInfo.moduleCode,
-				timeTableDayInfo.lessonSchedule.lessonType,
-				timeTableDayInfo.lessonSchedule.classNo,
-				chooseModState
+			currentlySelectedMods.set(
+				await modifyModEntry(
+					$currentlySelectedMods,
+					acadYear,
+					semester,
+					$currentUserInformation.displayName,
+					'test',
+					timeTableDayInfo.moduleCode,
+					timeTableDayInfo.lessonSchedule.lessonType,
+					timeTableDayInfo.lessonSchedule.classNo,
+					chooseModState
+				)
 			);
 			chooseModState.lessonType = '';
 			chooseModState.moduleCode = '';

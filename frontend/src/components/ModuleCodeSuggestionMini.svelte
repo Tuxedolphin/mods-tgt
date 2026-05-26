@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { currentlySelectedMods, preferences, searchTerm } from '../shared/shared.svelte';
+	import {
+		currentlySelectedMods,
+		currentUserInformation,
+		preferences,
+		searchTerm
+	} from '../shared/shared.svelte';
 	import type { ModSummary } from '../types/mod_summaries';
 	import { getFullModInfo } from '../utils/fetch_from_cache';
 	import { checkModAlreadyAdded, createModEntry } from '../utils/format_db_information';
@@ -23,20 +28,22 @@
 				$currentlySelectedMods,
 				acadYear,
 				semester,
-				'you',
+				$currentUserInformation.displayName,
 				'test',
 				mod.moduleCode
 			)
 		)
 			return;
-		$currentlySelectedMods = await createModEntry(
-			$currentlySelectedMods,
-			acadYear,
-			semester,
-			'you',
-			'test',
-			modFullInfo.moduleCode,
-			timeTable
+		currentlySelectedMods.set(
+			await createModEntry(
+				$currentlySelectedMods,
+				acadYear,
+				semester,
+				$currentUserInformation.displayName,
+				'test',
+				modFullInfo.moduleCode,
+				timeTable
+			)
 		);
 
 		searchTerm.set('');

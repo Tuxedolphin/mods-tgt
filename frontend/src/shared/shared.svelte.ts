@@ -6,9 +6,16 @@ import { writable } from 'svelte/store';
 export const currentlySelectedMods = persisted('selectedMods', [] as TimeTable[]);
 
 export const preferences = persisted('prefs', {
-	currentSemView: 1,
+	currentSemView: 2,
 	acadYear: '2025-2026'
 });
+
+interface UserInfo {
+	displayName: string;
+	isGuest: boolean;
+}
+
+export const currentUserInformation = persisted('user', {} as UserInfo);
 
 export const chooseModState = $state({
 	moduleCode: '',

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import TimetableDayComponent from './TimetableWeekComponent.svelte';
 	import type { TimeTable } from '../types/mod_summaries';
-	import { filterTimetableByDay, queryAvailableLessons } from '../utils/format_db_information';
+
 	import { chooseModState } from '../shared/shared.svelte';
+	import { filterTimetableByDay, queryAvailableLessons } from '../utils/format_db_information';
 
 	const heightOfOneHourLessonPx = 16;
 
