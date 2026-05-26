@@ -4,26 +4,32 @@
 	import { AllSubstringsIndexStrategy, Search } from 'js-search';
 	import type { ModSummary } from '../types/mod_summaries';
 	import { onMount } from 'svelte';
-	import { preferences, searchTerm } from '../shared/shared.svelte';
-
-	const { summaries } = $props();
-
+	import { searchTerm } from '../shared/shared.svelte';
+	import { getListOfModsSummary } from '../utils/fetch_from_cache';
+	interface SearchBarProps {
+		acadYear: string;
+		semester: number;
+	}
+	const { acadYear, semester }: SearchBarProps = $props();
+	let modData = $state([]) as ModSummary[];
 	const modSearch = new Search('moduleCode');
-	onMount(() => {
+
+	onMount(async () => {
+		modData = await getListOfModsSummary(acadYear);
 		modSearch.indexStrategy = new AllSubstringsIndexStrategy();
 		modSearch.addIndex('moduleCode');
 		modSearch.addIndex('title');
-		modSearch.addDocuments(summaries as ModSummary[]);
+		modSearch.addDocuments(modData as ModSummary[]);
 	});
 
 	let results = $derived(
-		$searchTerm.length < 3 ? [] :
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		(modSearch.search($searchTerm) as ModSummary[]).sort((a, _) =>
-			a.semesters.includes($preferences.currentSemView) ? -1 : 1
-		)
+		$searchTerm.length < 3
+			? []
+			: // eslint-disable-next-line @typescript-eslint/no-unused-vars
+				(modSearch.search($searchTerm) as ModSummary[]).sort((a, _) =>
+					a.semesters.includes(semester) ? -1 : 1
+				)
 	);
-
 </script>
 
 <p>Search</p>

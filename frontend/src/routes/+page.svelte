@@ -5,33 +5,21 @@
 
 	import Timeline from '../components/Timeline.svelte';
 	import SearchBar from '../components/SearchBar.svelte';
-	import { onMount } from 'svelte';
-	import type { ModSummary } from '../types/mod_summaries';
-	import { getListOfModsSummary } from '../utils/fetch_from_cache';
 	import { currentlySelectedMods, preferences } from '../shared/shared.svelte';
 	import { getTimetable } from '../utils/format_db_information';
-
-	let modData = $state([]) as ModSummary[];
-	onMount(async () => {
-		modData = await getListOfModsSummary($preferences.acadYear);
-		// Setup Preferences:
-		console.log('Startup: ' + currentTimetableDisplay);
-	});
 
 	const currentTimetableDisplay = $derived(
 		getTimetable($preferences.acadYear, $preferences.currentSemView, $currentlySelectedMods)
 	);
 </script>
 
-{#if modData.length != 0}
-	<SearchBar summaries={modData}></SearchBar>
+<SearchBar acadYear={$preferences.acadYear} semester={$preferences.currentSemView}></SearchBar>
 
-	<div class="flex">
-		<button class="btn btn-primary" onclick={() => $preferences.currentSemView--}> Prev </button>
-		<div class="text-center">Semester {$preferences.currentSemView}</div>
-		<button class="btn btn-primary" onclick={() => $preferences.currentSemView++}> Next </button>
-	</div>
-{/if}
+<div class="flex">
+	<button class="btn btn-primary" onclick={() => $preferences.currentSemView--}> Prev </button>
+	<div class="text-center">Semester {$preferences.currentSemView}</div>
+	<button class="btn btn-primary" onclick={() => $preferences.currentSemView++}> Next </button>
+</div>
 
 <div class="flex">
 	<Timeline></Timeline>
