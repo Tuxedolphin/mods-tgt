@@ -133,6 +133,27 @@ export async function modifyModEntry(
 	return timetable;
 }
 
+export function checkModAlreadyAdded(
+	timetable: TimeTable[],
+	acadYear: string,
+	semesterNo: number,
+	owner: string,
+	timetableName: string,
+	moduleCode: string
+): boolean {
+	const findTimetableCopy = timetable.filter(
+		(x) =>
+			x.Owner == owner &&
+			x.AcademicYear == acadYear &&
+			x.Semester == semesterNo &&
+			x.Name == timetableName
+	);
+
+	if (findTimetableCopy.length == 0) return false;
+
+	return findTimetableCopy[0].LessonData.findIndex((x) => x.ModuleCode == moduleCode) !== -1;
+}
+
 export async function createModEntry(
 	timetable: TimeTable[],
 	acadYear: string,
@@ -141,7 +162,7 @@ export async function createModEntry(
 	timetableName: string,
 	moduleCode: string,
 	rawLesson: RawLesson[]
-) {
+): Promise<TimeTable[]> {
 	const findTimetableCopy = timetable.filter(
 		(x) =>
 			x.Owner == owner &&

@@ -2,7 +2,7 @@
 	import { currentlySelectedMods, preferences, searchTerm } from '../shared/shared.svelte';
 	import type { ModSummary } from '../types/mod_summaries';
 	import { getFullModInfo } from '../utils/fetch_from_cache';
-	import { createModEntry } from '../utils/format_db_information';
+	import { checkModAlreadyAdded, createModEntry } from '../utils/format_db_information';
 
 	interface ModSuggestionsProp {
 		mod: ModSummary;
@@ -17,6 +17,18 @@
 		const modFullInfo = await getFullModInfo(mod.moduleCode, acadYear);
 
 		const timeTable = modFullInfo.semesterData.find((sem) => sem.semester == semester)!.timetable;
+
+		if (
+			checkModAlreadyAdded(
+				$currentlySelectedMods,
+				acadYear,
+				semester,
+				'you',
+				'test',
+				mod.moduleCode
+			)
+		)
+			return;
 		$currentlySelectedMods = await createModEntry(
 			$currentlySelectedMods,
 			acadYear,
