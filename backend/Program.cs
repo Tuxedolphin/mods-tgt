@@ -1,7 +1,9 @@
 using Backend.Data;
+using Backend.Exceptions;
 using Backend.Services;
 using Backend.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -15,7 +17,11 @@ builder.Services.AddRouting(options =>
     options.LowercaseQueryStrings = true;
 });
 
-/// === Settings ===
+// === Exception Handling ===
+builder.Services.AddScoped<IExceptionHandler, GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+// === Settings ===
 builder.Services.Configure<SupabaseSettings>(builder.Configuration.GetSection("Supabase"));
 
 var supabaseSettings = builder.Configuration.GetSection("Supabase").Get<SupabaseSettings>()!;
@@ -62,6 +68,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
