@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Services;
+using Backend.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -14,13 +15,17 @@ builder.Services.AddRouting(options =>
     options.LowercaseQueryStrings = true;
 });
 
+/// === Settings ===
+builder.Services.Configure<SupabaseSettings>(builder.Configuration.GetSection("Supabase"));
+
+var supabaseSettings = builder.Configuration.GetSection("Supabase").Get<SupabaseSettings>()!;
+
 // === Supabase Connection ===
-var supabaseUrl = builder.Configuration["Supabase:Url"]!;
 
 // Supabase Auth Configuration
 var supabase = new Supabase.Client(
-    supabaseUrl,
-    builder.Configuration["Supabase:PublishableKey"],
+    supabaseSettings.Url,
+    supabaseSettings.PublishableKey,
     new Supabase.SupabaseOptions { AutoRefreshToken = true, AutoConnectRealtime = false }
 );
 
@@ -32,7 +37,7 @@ builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = $"{supabaseUrl}/auth/v1";
+        options.Authority = $"{supabaseSettings.Url}/auth/v1";
         options.Audience = "authenticated";
     });
 builder.Services.AddAuthorization();
@@ -47,7 +52,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<ITimeTableService, TimeTableService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// ===
+// === Defauly setup ===
 
 var app = builder.Build();
 
