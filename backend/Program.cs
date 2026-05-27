@@ -18,7 +18,7 @@ builder.Services.AddRouting(options =>
 });
 
 // === Exception Handling ===
-builder.Services.AddScoped<IExceptionHandler, GlobalExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // === Settings ===
