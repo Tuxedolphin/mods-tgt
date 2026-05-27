@@ -5,9 +5,9 @@ namespace Backend.Services;
 
 public interface ITimeTableService
 {
-    Task<List<TimeTableSummaryResponse>> GetTimeTablesAsync();
-    Task<TimeTable> GetTimeTableByIdAsync(Guid id);
-    Task<TimeTable> CreateTimeTableAsync(TimeTable timeTable);
-    Task UpdateTimeTableAsync(Guid id, TimeTable timeTable);
-    Task DeleteTimeTableAsync(Guid id);
+    Task<List<TimeTableSummaryResponse>> GetTimeTablesAsync(Guid userId);
+    Task<TimeTable> GetTimeTableByIdAsync(Guid timeTableId, Guid userId);
+    Task<TimeTable> CreateTimeTableAsync(CreateTimeTableRequest request, Guid userId);
+    Task UpdateTimeTableAsync(Guid id, TimeTable timeTable, Guid userId);
+    Task DeleteTimeTableAsync(Guid id, Guid userId);
 }

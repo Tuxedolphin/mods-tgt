@@ -10,29 +10,67 @@ public class TimeTableService(AppDbContext context) : ITimeTableService
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<TimeTable> CreateTimeTableAsync(TimeTable timeTable)
+    public async Task<TimeTable> CreateTimeTableAsync(CreateTimeTableRequest request, Guid userId)
     {
-        throw new NotImplementedException();
+        TimeTable timeTable = new TimeTable
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Semester = request.Semester,
+            AcademicYear = request.AcademicYear,
+            UserId = userId,
+            MetaData = request.MetaData,
+        };
+
+        _context.TimeTables.Add(timeTable);
+        await _context.SaveChangesAsync();
+
+        return timeTable;
     }
 
-    public async Task DeleteTimeTableAsync(Guid id)
+    public async Task DeleteTimeTableAsync(Guid timeTableId, Guid userId)
     {
-        throw new NotImplementedException();
+        TimeTable timeTable = await GetTimeTableByIdAsync(timeTableId, userId);
+        _context.TimeTables.Remove(timeTable);
+        await _context.SaveChangesAsync();
     }
 
-    public async Task<TimeTable> GetTimeTableByIdAsync(Guid id)
+    public async Task<TimeTable> GetTimeTableByIdAsync(Guid timeTableId, Guid userId)
     {
-        return await _context.TimeTables.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id)
-            ?? throw new NotFoundException($"TimeTable with ID {id} not found.");
+        return await _context.TimeTables.FirstOrDefaultAsync(t =>
+                t.Id == timeTableId && t.UserId == userId
+            )
+            ?? throw new NotFoundException(
+                $"TimeTable with id {timeTableId} belonging to userId {userId} not found."
+            );
     }
 
-    public async Task<List<TimeTableSummaryResponse>> GetTimeTablesAsync()
+    public async Task<List<TimeTableSummaryResponse>> GetTimeTablesAsync(Guid userId)
     {
-        return await _context.TimeTables.AsNoTracking();
+        return await _context
+            .TimeTables.Where(t => t.UserId == userId)
+            .Select(t => new TimeTableSummaryResponse
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Semester = t.Semester,
+                AcademicYear = t.AcademicYear,
+                CreatedAt = t.CreatedAt,
+            })
+            .ToListAsync();
     }
 
-    public async Task UpdateTimeTableAsync(Guid id, TimeTable timeTable)
+    public async Task UpdateTimeTableAsync(Guid id, TimeTable timeTable, Guid userId)
     {
-        throw new NotImplementedException();
+        TimeTable existingTimeTable = await GetTimeTableByIdAsync(id, userId);
+
+        existingTimeTable.Name = timeTable.Name;
+        existingTimeTable.Semester = timeTable.Semester;
+        existingTimeTable.AcademicYear = timeTable.AcademicYear;
+
+        existingTimeTable.MetaData = timeTable.MetaData;
+
+        _context.TimeTables.Update(existingTimeTable);
+        await _context.SaveChangesAsync();
     }
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Models;
 
 namespace Backend.DTOs;
 
@@ -15,4 +16,20 @@ public class TimeTableSummaryResponse
     public required string Name { get; set; }
     public required int Semester { get; set; }
     public required string AcademicYear { get; set; }
+    public required DateTime CreatedAt { get; set; }
+}
+
+public class CreateTimeTableRequest
+{
+    [Required]
+    public string Name { get; set; } = string.Empty;
+
+    [Required]
+    public int Semester { get; set; }
+
+    [Required]
+    public string AcademicYear { get; set; } = string.Empty;
+
+    [Required]
+    public required List<TimeTableModule> MetaData { get; set; }
 }
