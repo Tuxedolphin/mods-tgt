@@ -49,7 +49,7 @@ public class AuthResponse
 
 public class RegisterResponse
 {
-    public bool RequiresEmailConfirmation { get; set; }
+    public required bool RequiresEmailConfirmation { get; set; }
     public string Message { get; set; } = string.Empty;
     public AuthResponse? Session { get; set; }
 }

@@ -10,9 +10,9 @@ public class TimeTableRequest
 
 public class TimeTableSummaryResponse
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
-    public string Name { get; set; } = string.Empty;
-    public int Semester { get; set; }
-    public string AcademicYear { get; set; } = string.Empty;
+    public required string Name { get; set; }
+    public required int Semester { get; set; }
+    public required string AcademicYear { get; set; }
 }
