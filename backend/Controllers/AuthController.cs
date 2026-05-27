@@ -7,7 +7,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService) : BaseController
 {
     private readonly IAuthService _authService = authService;
 
