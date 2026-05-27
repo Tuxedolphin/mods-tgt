@@ -25,4 +25,7 @@ public class TimeTable
 
     [Column(TypeName = "jsonb")]
     public required List<TimeTableModule> MetaData { get; set; }
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime CreatedAt { get; set; }
 }
