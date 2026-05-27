@@ -6,6 +6,8 @@ info:
 collections:
   - name: "NUSMods API"
     path: "collections/NUSMods API"
+  - name: "Backend | v1"
+    path: "collections/Backend - v1"
 
 specs:
 
