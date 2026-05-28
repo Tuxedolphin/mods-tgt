@@ -1,10 +1,10 @@
 <script lang="ts">
+	import LoginButton from './LoginButton.svelte';
+
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { currentUserInformation } from '../shared/shared.svelte';
-	import { PUBLIC_DB_LINK } from '$env/static/public';
-	import { login_to_db } from '../utils/db_operations';
 
 	let nameInput = $state('');
 	let emailInput = $state('');
@@ -14,10 +14,6 @@
 			goto(resolve('/planner'));
 		}
 	});
-
-	async function login(username: string, password: string) {
-		await login_to_db(username, password);
-	}
 </script>
 
 <div class="hero min-h-screen bg-base-200">
@@ -54,11 +50,7 @@
 					<span class="validator-hint hidden">Required</span>
 				</label>
 
-				<button
-					class="btn mt-4 btn-neutral"
-					type="submit"
-					onclick={() => login(emailInput, passwordInput)}>Login</button
-				>
+				<LoginButton email={emailInput} password={passwordInput}></LoginButton>
 			</form>
 
 			<div class="divider">OR</div>

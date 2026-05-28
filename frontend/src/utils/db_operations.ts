@@ -1,20 +1,30 @@
 import { PUBLIC_DB_LINK } from '$env/static/public';
+import ky, { HTTPError } from 'ky';
+import type { AuthResponse } from '../types/db_raw_types';
+import { Err, Ok, type Result } from 'ts-results';
 
-export async function login_to_db(username: string, password: string) {
-	const url = `${PUBLIC_DB_LINK}/auth/login`;
-	const options = {
-		method: 'POST',
-		headers: { 'content-type': 'application/json' },
-		body: `{"email": "${username}", "password":"${password}"}`
-	};
-
-	console.log(options);
-
+const apiCalls = ky.create({
+	baseUrl: PUBLIC_DB_LINK
+});
+export async function login_to_db(
+	username: string,
+	password: string
+): Promise<Result<AuthResponse, string>> {
 	try {
-		const response = await fetch(url, options);
-		const data = await response.json();
-		console.log(data);
+		const json = await apiCalls
+			.post('auth/login', {
+				json: {
+					email: username,
+					password: password
+				}
+			})
+			.json<AuthResponse>();
+
+		return new Ok(json);
 	} catch (error) {
-		console.error(error);
+		if (error instanceof HTTPError) {
+			console.log(error.data);
+		}
+		return new Err('Wrong email or password');
 	}
 }
