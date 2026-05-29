@@ -1,0 +1,8 @@
+name: mod-tgt
+variables:
+  - name: baseUrl
+    value: http://localhost:5233
+  - secret: true
+    name: accessToken
+  - secret: true
+    name: refreshToken
