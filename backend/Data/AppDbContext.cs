@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<TimeTable>().OwnsMany(t => t.MetaData, builder => builder.ToJson());
         modelBuilder.Entity<TimeTable>().Property(t => t.CreatedAt).HasDefaultValueSql("now()");
     }
 }

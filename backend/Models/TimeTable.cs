@@ -22,8 +22,6 @@ public class TimeTable
     // The following fields are placed here, instead of TimeTableModule since all the modules will havae the same semester and academic year
     public required int Semester { get; set; }
     public required string AcademicYear { get; set; } = string.Empty;
-
-    [Column(TypeName = "jsonb")]
     public required List<TimeTableModule> MetaData { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
