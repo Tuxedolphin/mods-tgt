@@ -4,18 +4,22 @@ using Supabase.Gotrue.Exceptions;
 
 namespace Backend.Exceptions;
 
-public class GlobalExceptionHandler : IExceptionHandler
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
+    private readonly ILogger<GlobalExceptionHandler> _logger = logger;
+
     public async ValueTask<bool> TryHandleAsync(
         HttpContext context,
         Exception exception,
         CancellationToken cancellationToken
     )
     {
+        _logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
         var (statusCode, message) = exception switch
         {
             ValidationException ex => (400, ex.Message),
             GotrueException ex => (ex.StatusCode, ex.Message),
+            UnauthorizedAccessException ex => (401, ex.Message),
             NotFoundException ex => (404, ex.Message),
             ForbiddenException ex => (403, ex.Message),
             ExternalServiceException ex => (502, ex.Message),

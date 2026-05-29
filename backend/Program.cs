@@ -62,6 +62,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // === Defauly setup ===
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

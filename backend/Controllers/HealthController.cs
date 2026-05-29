@@ -6,7 +6,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class HealthController(AppDbContext _context) : ControllerBase
+public class HealthController(AppDbContext _context) : BaseController
 {
     [HttpGet]
     [AllowAnonymous]

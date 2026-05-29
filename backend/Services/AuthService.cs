@@ -10,6 +10,7 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
 {
     private readonly Client _supabase = supabase;
     private readonly string _supabaseUrl = settings.Value.Url;
+    private readonly string _supabaseKey = settings.Value.PublishableKey;
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
@@ -29,6 +30,8 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
 
         using var http = new HttpClient();
 
+        http.DefaultRequestHeaders.Add("apikey", _supabaseKey);
+
         var body = new { refresh_token = request.RefreshToken };
         var response = await http.PostAsJsonAsync(
             $"{_supabaseUrl}/auth/v1/token?grant_type=refresh_token",
@@ -43,7 +46,14 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
             );
         }
 
-        return ValidateTokens(await response.Content.ReadFromJsonAsync<AuthResponse>());
+        var supabaseResponse = await response.Content.ReadFromJsonAsync<SupabaseTokenResponse>();
+        return ValidateTokens(supabaseResponse == null ? null : new AuthResponse
+        {
+            AccessToken = supabaseResponse.AccessToken,
+            RefreshToken = supabaseResponse.RefreshToken,
+            ExpiresIn = supabaseResponse.ExpiresIn,
+            TokenType = supabaseResponse.TokenType,
+        });
     }
 
     public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
