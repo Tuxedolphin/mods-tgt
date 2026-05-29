@@ -11,7 +11,7 @@
 	let passwordInput = $state('');
 	let errorMessage = $state('');
 	onMount(() => {
-		for (const [key, value] of new URLSearchParams(window.location.search)) {
+		for (const [key, value] of new URLSearchParams(window.location.hash)) {
 			if (key.includes('error_description')) {
 				errorMessage = value;
 			}
