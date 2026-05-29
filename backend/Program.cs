@@ -61,6 +61,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // === Defauly setup ===
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -68,7 +69,6 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 

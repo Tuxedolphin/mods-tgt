@@ -46,10 +46,10 @@ public class TimeTableController(ITimeTableService service) : BaseController
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTimeTable(
         [FromRoute] Guid id,
-        [FromBody] TimeTable timeTable
+        [FromBody] UpdateTimeTableRequest request
     )
     {
-        await _service.UpdateTimeTableAsync(id, timeTable, GetUserId());
+        await _service.UpdateTimeTableAsync(id, request, GetUserId());
         return NoContent();
     }
 }

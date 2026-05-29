@@ -33,3 +33,17 @@ public class CreateTimeTableRequest
     [Required]
     public required List<TimeTableModule> MetaData { get; set; }
 }
+
+public class UpdateTimeTableRequest
+{
+    [Required]
+    public string Name { get; set; } = string.Empty;
+
+    public int Semester { get; set; }
+
+    [Required]
+    public string AcademicYear { get; set; } = string.Empty;
+
+    [Required]
+    public List<TimeTableModule> MetaData { get; set; } = [];
+}

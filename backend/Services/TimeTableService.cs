@@ -12,7 +12,7 @@ public class TimeTableService(AppDbContext context) : ITimeTableService
 
     public async Task<TimeTable> CreateTimeTableAsync(CreateTimeTableRequest request, Guid userId)
     {
-        TimeTable timeTable = new TimeTable
+        TimeTable timeTable = new()
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
@@ -30,9 +30,16 @@ public class TimeTableService(AppDbContext context) : ITimeTableService
 
     public async Task DeleteTimeTableAsync(Guid timeTableId, Guid userId)
     {
-        TimeTable timeTable = await GetTimeTableByIdAsync(timeTableId, userId);
-        _context.TimeTables.Remove(timeTable);
-        await _context.SaveChangesAsync();
+        var rows = await _context
+            .TimeTables.Where(t => t.Id == timeTableId && t.UserId == userId)
+            .ExecuteDeleteAsync();
+
+        if (rows == 0)
+        {
+            throw new NotFoundException(
+                $"TimeTable with id {timeTableId} belonging to userId {userId} not found."
+            );
+        }
     }
 
     public async Task<TimeTable> GetTimeTableByIdAsync(Guid timeTableId, Guid userId)
@@ -60,17 +67,22 @@ public class TimeTableService(AppDbContext context) : ITimeTableService
             .ToListAsync();
     }
 
-    public async Task UpdateTimeTableAsync(Guid id, TimeTable timeTable, Guid userId)
+    public async Task UpdateTimeTableAsync(Guid id, UpdateTimeTableRequest request, Guid userId)
     {
-        TimeTable existingTimeTable = await GetTimeTableByIdAsync(id, userId);
+        var rows = await _context
+            .TimeTables.Where(t => t.Id == id && t.UserId == userId)
+            .ExecuteUpdateAsync(t =>
+                t.SetProperty(t => t.Name, request.Name)
+                    .SetProperty(t => t.Semester, request.Semester)
+                    .SetProperty(t => t.AcademicYear, request.AcademicYear)
+                    .SetProperty(t => t.MetaData, request.MetaData)
+            );
 
-        existingTimeTable.Name = timeTable.Name;
-        existingTimeTable.Semester = timeTable.Semester;
-        existingTimeTable.AcademicYear = timeTable.AcademicYear;
-
-        existingTimeTable.MetaData = timeTable.MetaData;
-
-        _context.TimeTables.Update(existingTimeTable);
-        await _context.SaveChangesAsync();
+        if (rows == 0)
+        {
+            throw new NotFoundException(
+                $"TimeTable with id {id} belonging to userId {userId} not found."
+            );
+        }
     }
 }
