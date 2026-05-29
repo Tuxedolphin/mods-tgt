@@ -31,18 +31,29 @@ public class RegisterRequest
 public class AuthResponse
 {
     [Required]
-    [JsonPropertyName("access_token")]
     public string AccessToken { get; set; } = string.Empty;
 
     [Required]
-    [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; } = string.Empty;
 
     [Required]
-    [JsonPropertyName("expires_in")]
     public long ExpiresIn { get; set; }
 
     [Required]
+    public string TokenType { get; set; } = string.Empty;
+}
+
+public class SupabaseTokenResponse
+{
+    [JsonPropertyName("access_token")]
+    public string AccessToken { get; set; } = string.Empty;
+
+    [JsonPropertyName("refresh_token")]
+    public string RefreshToken { get; set; } = string.Empty;
+
+    [JsonPropertyName("expires_in")]
+    public long ExpiresIn { get; set; }
+
     [JsonPropertyName("token_type")]
     public string TokenType { get; set; } = string.Empty;
 }
