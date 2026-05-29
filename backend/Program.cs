@@ -71,7 +71,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseCors(b => b.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod());
+    app.UseCors(b => b.WithOrigins("http://mods-tgt.com").AllowAnyHeader().AllowAnyMethod());
 }
 
 app.UseExceptionHandler();
