@@ -12,8 +12,19 @@ export const preferences = persisted('prefs', {
 
 interface UserInfo {
 	displayName: string;
-	isGuest: boolean;
 }
+
+export const registered = writable(false);
+
+interface AccessTokenInfo {
+	access_token: string;
+	isGuestLogin: boolean;
+}
+
+export const access_token = persisted('ac:tok', {
+	access_token: '',
+	isGuestLogin: false
+} as AccessTokenInfo);
 
 export const currentUserInformation = persisted('user', {} as UserInfo);
 

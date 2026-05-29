@@ -5,6 +5,7 @@ using Backend.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,10 +67,16 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    app.UseCors(b => b.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod());
+}
+else
+{
+    app.UseCors(b => b.WithOrigins("http://mods-tgt.com").AllowAnyHeader().AllowAnyMethod());
 }
 
 app.UseExceptionHandler();
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
