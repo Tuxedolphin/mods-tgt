@@ -10,6 +10,7 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
 {
     private readonly Client _supabase = supabase;
     private readonly string _supabaseUrl = settings.Value.Url;
+    private readonly string _supabaseKey = settings.Value.PublishableKey;
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
@@ -28,6 +29,8 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
         // so we mimic how we'll do it from the frontend
 
         using var http = new HttpClient();
+
+        http.DefaultRequestHeaders.Add("apikey", _supabaseKey);
 
         var body = new { refresh_token = request.RefreshToken };
         var response = await http.PostAsJsonAsync(
