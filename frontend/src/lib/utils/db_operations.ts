@@ -4,7 +4,8 @@ import type {
 	AuthResponse,
 	AuthSucessResponse,
 	ErrorInformation,
-	ErrorResponse
+	ErrorResponse,
+	UserProfileResponse
 } from '../types/db_raw_types';
 import { Err, Ok, type Result } from 'ts-results-es';
 
@@ -73,6 +74,72 @@ export async function login_to_db(
 	}
 }
 
+export async function put_user_info(
+	access_token: string,
+	username: string
+): Promise<Result<string, string>> {
+	try {
+		await apiCalls.put('profile/me', {
+			hooks: {
+				beforeRequest: [
+					({ request }) => {
+						request.headers.set('Authorization', `Bearer ${access_token}`);
+					}
+				]
+			},
+			json: {
+				username: username
+			}
+		});
+		return Ok(username);
+	} catch (error) {
+		try {
+			if (error instanceof HTTPError) {
+				console.log(error.data);
+				const errorResponse = error.data as ErrorResponse;
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
+				return new Err(errorMessage.msg);
+			}
+		} catch {
+			return new Err('Wrong username or password');
+		}
+
+		return new Err('Wrong username or password');
+	}
+}
+
+export async function get_user_info(
+	access_token: string
+): Promise<Result<UserProfileResponse, string>> {
+	try {
+		const timetables = await apiCalls
+			.get('profile/me', {
+				hooks: {
+					beforeRequest: [
+						({ request }) => {
+							request.headers.set('Authorization', `Bearer ${access_token}`);
+						}
+					]
+				}
+			})
+			.json<UserProfileResponse>();
+		return Ok(timetables);
+	} catch (error) {
+		try {
+			if (error instanceof HTTPError) {
+				console.log(error.data);
+				const errorResponse = error.data as ErrorResponse;
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
+				return new Err(errorMessage.msg);
+			}
+		} catch {
+			return new Err('Wrong username or password');
+		}
+
+		return new Err('Wrong username or password');
+	}
+}
+
 export async function get_timetables(access_token: string) {
 	const timetables = await apiCalls.get('/timetable', {
 		hooks: {
@@ -83,4 +150,6 @@ export async function get_timetables(access_token: string) {
 			]
 		}
 	});
+
+	console.log(timetables);
 }

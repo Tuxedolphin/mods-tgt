@@ -5,6 +5,10 @@ export interface AuthResponse {
 	tokenType: string;
 }
 
+export interface UserProfileResponse {
+	username: string | null;
+}
+
 export interface AuthSucessResponse {
 	message: string;
 }
