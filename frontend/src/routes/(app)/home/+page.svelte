@@ -1,4 +1,6 @@
 <script lang="ts">
+  import CreateNewTimetableButton from './CreateNewTimetableButton.svelte';
+
 	import { onMount } from 'svelte';
 	import GreetingComponent from '$lib/components/GreetingComponent.svelte';
 	import { access_token } from '$lib/shared/shared.svelte';
@@ -17,6 +19,10 @@
 </script>
 
 {#if token}
-	<GreetingComponent access_token={token}></GreetingComponent>
+	<div class="flex justify-between">
+		<GreetingComponent access_token={token}></GreetingComponent>
+		<CreateNewTimetableButton></CreateNewTimetableButton>
+	</div>
+
 	<AvailableTimetableGrid access_token={token}></AvailableTimetableGrid>
 {/if}

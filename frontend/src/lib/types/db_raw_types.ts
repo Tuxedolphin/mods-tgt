@@ -44,3 +44,10 @@ export interface TimetableLessonMetadata {
 	lessonNo: string;
 	lessonType: string;
 }
+
+export interface TimetablePostTemplate {
+	name: string;
+	semester: number;
+	academicYear: string;
+	metaData: never[]
+}

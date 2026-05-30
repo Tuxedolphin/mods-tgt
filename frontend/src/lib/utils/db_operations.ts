@@ -5,7 +5,9 @@ import type {
 	AuthSucessResponse,
 	ErrorInformation,
 	ErrorResponse,
+	TimetableInfo,
 	TimetableInfos,
+	TimetablePostTemplate,
 	TimetableWithMetadata,
 	UserProfileResponse
 } from '../types/db_raw_types';
@@ -219,6 +221,37 @@ export async function delete_timetable_by_id(
 			}
 		});
 		return Ok('');
+	} catch (error) {
+		return Err('Something went wrong ' + error);
+	}
+}
+
+export async function create_empty_timetable(
+	access_token: string,
+	timetable_name: string,
+	semester: number,
+	academic_year: string
+): Promise<Result<TimetableInfo, string>> {
+	const timetable_post_template: TimetablePostTemplate = {
+		academicYear: academic_year,
+		metaData: [],
+		name: timetable_name,
+		semester: semester
+	};
+	try {
+		const timetable_info = await apiCalls
+			.post('/timetable', {
+				hooks: {
+					beforeRequest: [
+						({ request }) => {
+							request.headers.set('Authorization', `Bearer ${access_token}`);
+						}
+					]
+				},
+				json: timetable_post_template
+			})
+			.json<TimetableInfo>();
+		return Ok(timetable_info);
 	} catch (error) {
 		return Err('Something went wrong ' + error);
 	}
