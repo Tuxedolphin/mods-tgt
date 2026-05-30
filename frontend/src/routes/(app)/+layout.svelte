@@ -5,10 +5,10 @@
 	let { data, children }: LayoutProps = $props();
 </script>
 
-<div class="navbar bg-base-100 shadow-sm">
+<div class="navbar bg-base-200 shadow-sm">
 	<a class="btn text-xl btn-ghost">Mods Together!</a>
 </div>
 
-<div class="p-4">
+<div class="px-6 pt-2">
 	{@render children()}
 </div>
