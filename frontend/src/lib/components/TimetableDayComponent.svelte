@@ -31,7 +31,7 @@
 	mt-{timeTableDayInfo.normalisedStartDuration * 192} h-{timeTableDayInfo.normalisedEndDuration *
 		192 -
 		timeTableDayInfo.normalisedStartDuration *
-			192} border bg-accent text-xs wrap-break-word text-base-content"
+			192} border bg-red-400 text-xs wrap-break-word text-black"
 	onclick={async () => {
 		if (chooseModState.lessonType === '') {
 			chooseModState.lessonType = timeTableDayInfo.lessonSchedule.lessonType;

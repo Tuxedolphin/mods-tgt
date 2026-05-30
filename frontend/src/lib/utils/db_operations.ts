@@ -188,18 +188,16 @@ export async function put_timetable_by_id(
 	timetable_data: TimetableWithMetadata
 ): Promise<Result<string, string>> {
 	try {
-		const timetables = await apiCalls
-			.put(`/timetable/${timetable_id}`, {
-				hooks: {
-					beforeRequest: [
-						({ request }) => {
-							request.headers.set('Authorization', `Bearer ${access_token}`);
-						}
-					]
-				},
-				json: timetable_data
-			})
-			.json();
+		await apiCalls.put(`/timetable/${timetable_id}`, {
+			hooks: {
+				beforeRequest: [
+					({ request }) => {
+						request.headers.set('Authorization', `Bearer ${access_token}`);
+					}
+				]
+			},
+			json: timetable_data
+		});
 		return Ok('');
 	} catch (error) {
 		return Err('Something went wrong ' + error);

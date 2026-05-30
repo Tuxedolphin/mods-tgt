@@ -40,25 +40,29 @@
 		if (timetable_data.isOk()) {
 			timetable_metadata = timetable_data.value;
 			$currentlySelectedMods = [timetable_data.value];
+
+			currentlySelectedMods.subscribe(
+				async (updated_timetable) => {
+					for (const timetable of updated_timetable) {
+						if (timetable.id == params.timetable_id) {
+							const response = await put_timetable_by_id(
+								$access_token.access_token,
+								timetable.id,
+								timetable
+							);
+							if (response.isOk()) {
+								console.log('Update for Timetable ' + timetable.id);
+							}
+						}
+					}
+				},
+				() => {
+					console.log('cleanup');
+				}
+			);
+
 			is_timetable_loaded = true;
 		}
-
-		currentlySelectedMods.subscribe(async (updated_timetable) => {
-			for (const timetable of updated_timetable) {
-				if (timetable.id == params.timetable_id) {
-					console.log('Update for Timetable ' + timetable.id);
-				}
-				// 	console.log(timetable);
-				// 	const response = await put_timetable_by_id(
-				// 		$access_token.access_token,
-				// 		timetable.id,
-				// 		timetable
-				// 	);
-				// 	if (response.isOk()) {
-				// 	}
-				// }
-			}
-		});
 	});
 </script>
 
