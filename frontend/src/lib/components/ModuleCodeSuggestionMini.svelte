@@ -4,10 +4,10 @@
 		currentUserInformation,
 		preferences,
 		searchTerm
-	} from '../shared/shared.svelte';
-	import type { ModSummary } from '../types/mod_summaries';
-	import { getFullModInfo } from '../utils/fetch_from_cache';
-	import { checkModAlreadyAdded, createModEntry } from '../utils/format_db_information';
+	} from '$lib/shared/shared.svelte';
+	import type { ModSummary } from '$lib/types/mod_summaries';
+	import { getFullModInfo } from '$lib/utils/fetch_from_cache';
+	import { checkModAlreadyAdded, createModEntry } from '$lib/utils/format_db_information';
 
 	interface ModSuggestionsProp {
 		mod: ModSummary;

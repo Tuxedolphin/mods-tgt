@@ -1,10 +1,9 @@
 export interface AuthResponse {
-	access_token: string;
-	refresh_token: string;
-	expires_in: number;
-	token_type: string;
+	accessToken: string;
+	refreshToken: string;
+	expiresIn: number;
+	tokenType: string;
 }
-
 
 export interface AuthSucessResponse {
 	message: string;

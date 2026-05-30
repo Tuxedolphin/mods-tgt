@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LessonData } from '../../types/mod_summaries';
+	import type { LessonData } from '../../lib/types/mod_summaries';
 
 	interface ModListModInfoProps {
 		lessonData: LessonData[];

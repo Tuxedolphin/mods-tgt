@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { registered } from '../../shared/shared.svelte';
-	import { register_db } from '../../utils/db_operations';
+	import { registered } from '$lib/shared/shared.svelte';
+	import { register_db } from '$lib/utils/db_operations';
 
 	interface RegisterButtonProps {
 		email: string;

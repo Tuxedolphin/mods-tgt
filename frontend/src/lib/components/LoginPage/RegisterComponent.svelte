@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { registered } from '../../shared/shared.svelte';
+	import { registered } from '$lib/shared/shared.svelte';
 	import RegisterButton from './RegisterButton.svelte';
 
 	let emailInput = $state('');

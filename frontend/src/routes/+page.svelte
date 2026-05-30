@@ -1,27 +1,16 @@
 <script lang="ts">
-	import GuestTryoutComponent from '../components/LoginPage/GuestTryoutComponent.svelte';
-
-	import LoginComponent from '../components/LoginPage/LoginComponent.svelte';
-
-	import ModTogetherHero from '../components/LoginPage/ModTogetherHero.svelte';
-
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { onMount } from 'svelte';
-	import { currentUserInformation } from '../shared/shared.svelte';
-	import { PUBLIC_DB_LINK } from '$env/static/public';
-
-	onMount(() => {
-		if ($currentUserInformation.displayName) {
-			goto(resolve('/planner'));
-		}
-	});
+	import ModTogetherHero from '$lib/components/LoginPage/ModTogetherHero.svelte';
 </script>
 
-<p>{PUBLIC_DB_LINK}</p>
 <ModTogetherHero>
-	<LoginComponent></LoginComponent>
-	<div class="divider">OR</div>
+	<div>
+		It's a lot like <a class="cursor-pointer underline" href="https://nusmods.com/">NUSMods</a>, but
+		you can plan with your friends live!
+	</div>
 
-	<GuestTryoutComponent></GuestTryoutComponent>
+	<div>And your timetable carries over to every device 😊</div>
+
+	<button class="btn my-5 btn-primary" onclick={() => goto(resolve('/login'))}>Try it out!</button>
 </ModTogetherHero>

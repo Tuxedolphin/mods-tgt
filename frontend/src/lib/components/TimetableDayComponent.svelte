@@ -1,11 +1,11 @@
 <script lang="ts">
 	import {
-		chooseModState,
 		currentlySelectedMods,
-		currentUserInformation
-	} from '../shared/shared.svelte';
-	import type { TimeTableDayInfo } from '../types/internal';
-	import { modifyModEntry } from '../utils/format_db_information';
+		currentUserInformation,
+		chooseModState
+	} from '$lib/shared/shared.svelte';
+	import type { TimeTableDayInfo } from '$lib/types/internal';
+	import { modifyModEntry } from '$lib/utils/format_db_information';
 
 	interface TimetableDayProps {
 		timeTableDayInfo: TimeTableDayInfo;

@@ -1,9 +1,8 @@
 <script lang="ts">
-	import TimetableDayComponent from './TimetableWeekComponent.svelte';
-	import type { TimeTable } from '../types/mod_summaries';
-
-	import { chooseModState } from '../shared/shared.svelte';
-	import { filterTimetableByDay, queryAvailableLessons } from '../utils/format_db_information';
+	import { chooseModState } from '$lib/shared/shared.svelte';
+	import type { TimeTable } from '$lib/types/mod_summaries';
+	import { filterTimetableByDay, queryAvailableLessons } from '$lib/utils/format_db_information';
+	import TimetableWeekComponent from './TimetableWeekComponent.svelte';
 
 	const heightOfOneHourLessonPx = 16;
 
@@ -27,12 +26,12 @@
 	{/each}
 	{#each { length: 5 }, day}
 		{#await Promise.all( [filterTimetableByDay(day, timetables), queryAvailableLessons(day, semester, acadYear, chooseModState)] ) then timetableDayInfo}
-			<TimetableDayComponent
+			<TimetableWeekComponent
 				timetableDayDisplayInfo={timetableDayInfo.flat()}
 				{day}
 				{acadYear}
 				{semester}
-			></TimetableDayComponent>
+			></TimetableWeekComponent>
 		{/await}
 	{/each}
 </div>

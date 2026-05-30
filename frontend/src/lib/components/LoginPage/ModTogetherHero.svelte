@@ -6,7 +6,7 @@
 	<div class="hero-content text-center">
 		<div class="max-w-md">
 			<h1 class="text-5xl font-bold">Mods Together!</h1>
-			<p class="py-4">We ride together. We mod together.</p>
+			<p class="py-4">We ride together. We mods together.</p>
 			<div class="divider"></div>
 			{@render children()}
 		</div>

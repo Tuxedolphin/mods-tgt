@@ -1,7 +1,8 @@
-import type { LessonInfo } from '../shared/shared.svelte';
-import type { TimeTableDayInfo } from '../types/internal';
-import type { LessonData, TimeTable } from '../types/mod_summaries';
-import type { RawLesson } from '../types/modules';
+import type { LessonInfo } from '$lib/shared/shared.svelte';
+import type { TimeTableDayInfo } from '$lib/types/internal';
+import type { TimeTable, LessonData } from '$lib/types/mod_summaries';
+import type { RawLesson } from '$lib/types/modules';
+
 import { normaliseDuration } from './calculations_for_ui';
 import { getFullModInfo } from './fetch_from_cache';
 

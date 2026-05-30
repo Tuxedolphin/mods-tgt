@@ -56,7 +56,6 @@ export async function login_to_db(
 				}
 			})
 			.json<AuthResponse>();
-
 		return new Ok(json);
 	} catch (error) {
 		try {
@@ -72,4 +71,16 @@ export async function login_to_db(
 
 		return new Err('Wrong username or password');
 	}
+}
+
+export async function get_timetables(access_token: string) {
+	const timetables = await apiCalls.get('/timetable', {
+		hooks: {
+			beforeRequest: [
+				({ request }) => {
+					request.headers.set('Authorization', `Bearer ${access_token}`);
+				}
+			]
+		}
+	});
 }

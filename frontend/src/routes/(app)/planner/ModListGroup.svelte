@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ModListModInfo from './ModListModInfo.svelte';
 
-	import type { TimeTable } from '../../types/mod_summaries';
+	import type { TimeTable } from '../../lib/types/mod_summaries';
 
 	interface ModListProps {
 		currentTimetableDisplay: TimeTable[];
