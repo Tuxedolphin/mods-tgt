@@ -1,7 +1,6 @@
 <script lang="ts">
+	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
 	import ModListModInfo from './ModListModInfo.svelte';
-
-	import type { TimeTable } from '../../lib/types/mod_summaries';
 
 	interface ModListProps {
 		currentTimetableDisplay: TimetableWithMetadata[];
@@ -10,8 +9,7 @@
 </script>
 
 {#key currentTimetableDisplay}
-	{#each currentTimetableDisplay as tt (tt.Owner)}
-		{tt.Owner}'s Mod List
-		<ModListModInfo lessonData={tt.LessonData}></ModListModInfo>
+	{#each currentTimetableDisplay as tt (tt.id)}
+		<ModListModInfo lessonData={tt.metaData}></ModListModInfo>
 	{/each}
 {/key}

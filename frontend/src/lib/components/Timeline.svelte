@@ -12,11 +12,13 @@
 	}
 </script>
 
-<div class="row-auto w-20 flex-initial">
-	<div class="h-16"></div>
-	{#each { length: 13 }, i}
-		<div class="h-16 text-center align-middle">
-			<p class="relative bottom-8">{formatShortTime(i + 8)}</p>
+<div class="w-20 flex-initial text-center">
+	<div class="h-12 align-middle">
+		<p class="relative top-8">{formatShortTime(8)}</p>
+	</div>
+	{#each { length: 12 }, i}
+		<div class="h-16 align-middle">
+			<p class="relative top-12">{formatShortTime(i + 9)}</p>
 		</div>
 	{/each}
 </div>

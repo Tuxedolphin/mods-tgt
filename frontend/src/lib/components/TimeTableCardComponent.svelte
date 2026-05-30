@@ -29,13 +29,13 @@
 				onclick={async () => {
 					await delete_timetable_by_id(access_token, timetable.id);
 					timetable_list_should_be_refreshed.set(true);
-				}}>Delete Timetable</button
+				}}>Delete</button
 			>
 			<button
 				class="btn btn-primary"
 				onclick={() =>
 					goto(resolve('/(app)/planner/[timetable_id]', { timetable_id: timetable.id }))}
-				>Edit Timetable</button
+				>Open</button
 			>
 		</div>
 	</div>

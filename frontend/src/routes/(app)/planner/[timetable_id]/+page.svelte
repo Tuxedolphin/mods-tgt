@@ -29,6 +29,8 @@
 	import { get_timetable_by_id, put_timetable_by_id } from '$lib/utils/db_operations';
 	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
 	import type { Unsubscriber } from 'svelte/store';
+	import { format_semester_name } from '$lib/utils/text_formatting';
+	import ModListGroup from '$lib/components/ModListGroup.svelte';
 	let { params }: PageProps = $props();
 	let unsubscribe_from_mods_list: Unsubscriber;
 	onMount(async () => {
@@ -74,6 +76,13 @@
 </script>
 
 {#if is_timetable_loaded}
+	<div class="flex justify-between">
+		<h2 class="text-2xl font-bold">{timetable_metadata.name}</h2>
+		<h2 class="text-2xl">
+			AY{timetable_metadata.academicYear} - {format_semester_name(timetable_metadata.semester)}
+		</h2>
+	</div>
+
 	<SearchBar
 		timetable_id={timetable_metadata.id}
 		timetable_name={timetable_metadata.name}
@@ -95,5 +104,5 @@
 		</div>
 	</div>
 
-	<!-- <ModListGroup {currentTimetableDisplay}></ModListGroup> -->
+	<ModListGroup currentTimetableDisplay={$currentlySelectedMods}></ModListGroup>
 {/if}
