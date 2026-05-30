@@ -64,3 +64,8 @@ public class RegisterResponse
     public string Message { get; set; } = string.Empty;
     public AuthResponse? Session { get; set; }
 }
+
+public class MeResponse
+{
+    public string? Username { get; set; }
+}

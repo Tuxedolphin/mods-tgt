@@ -76,9 +76,7 @@ public class TimeTableService(AppDbContext context) : ITimeTableService
 
         if (rows == 0)
         {
-            throw new NotFoundException(
-                $"TimeTable with id {id} belonging to userId {userId} not found."
-            );
+            throw new NotFoundException($"TimeTable with id {id} not found.");
         }
     }
 }

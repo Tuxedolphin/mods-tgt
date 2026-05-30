@@ -46,11 +46,5 @@ public class AuthController(IAuthService authService) : BaseController
         return NoContent();
     }
 
-    [HttpGet("me")]
-    public async Task<IActionResult> GetCurrentUser()
-    {
-        throw new NotImplementedException();
-    }
-
     // TODO: Implement endpoints for resetting and updating password
 }

@@ -47,13 +47,17 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
         }
 
         var supabaseResponse = await response.Content.ReadFromJsonAsync<SupabaseTokenResponse>();
-        return ValidateTokens(supabaseResponse == null ? null : new AuthResponse
-        {
-            AccessToken = supabaseResponse.AccessToken,
-            RefreshToken = supabaseResponse.RefreshToken,
-            ExpiresIn = supabaseResponse.ExpiresIn,
-            TokenType = supabaseResponse.TokenType,
-        });
+        return ValidateTokens(
+            supabaseResponse == null
+                ? null
+                : new AuthResponse
+                {
+                    AccessToken = supabaseResponse.AccessToken,
+                    RefreshToken = supabaseResponse.RefreshToken,
+                    ExpiresIn = supabaseResponse.ExpiresIn,
+                    TokenType = supabaseResponse.TokenType,
+                }
+        );
     }
 
     public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
