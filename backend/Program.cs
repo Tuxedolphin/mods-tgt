@@ -3,9 +3,7 @@ using Backend.Exceptions;
 using Backend.Services;
 using Backend.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,8 +56,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ITimeTableService, TimeTableService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
-// === Defauly setup ===
+// === Default setup ===
 
 var app = builder.Build();
 app.UseExceptionHandler();

@@ -30,7 +30,7 @@ public class TimeTableController(ITimeTableService service) : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<TimeTable>> GetTimeTables()
+    public async Task<ActionResult<TimeTableSummaryResponse>> GetTimeTables()
     {
         var timeTables = await _service.GetTimeTablesAsync(GetUserId());
         return Ok(timeTables);
