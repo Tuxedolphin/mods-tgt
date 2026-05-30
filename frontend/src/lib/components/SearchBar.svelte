@@ -1,11 +1,14 @@
 <script lang="ts">
-	import ModuleCodeSuggestionMini from './ModuleCodeSuggestionMini.svelte';
+	import { searchTerm } from '$lib/shared/shared.svelte';
+
+	import type { ModSummary } from '$lib/types/mod_summaries';
+
+	import { getListOfModsSummary } from '$lib/utils/fetch_from_cache';
 
 	import { AllSubstringsIndexStrategy, Search } from 'js-search';
-	import type { ModSummary } from '../types/mod_summaries';
 	import { onMount } from 'svelte';
-	import { searchTerm } from '../shared/shared.svelte';
-	import { getListOfModsSummary } from '../utils/fetch_from_cache';
+	import ModuleCodeSuggestionMini from './ModuleCodeSuggestionMini.svelte';
+
 	interface SearchBarProps {
 		acadYear: string;
 		semester: number;

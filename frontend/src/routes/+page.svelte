@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-
-	import ModTogetherHero from '../components/LoginPage/ModTogetherHero.svelte';
+	import ModTogetherHero from '$lib/components/LoginPage/ModTogetherHero.svelte';
 </script>
 
 <ModTogetherHero>

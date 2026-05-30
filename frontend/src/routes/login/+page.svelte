@@ -1,14 +1,10 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
-
-	let { data }: PageProps = $props();
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
-	import ModTogetherHero from '../../components/LoginPage/ModTogetherHero.svelte';
-	import LoginComponent from '../../components/LoginPage/LoginComponent.svelte';
-	import GuestTryoutComponent from '../../components/LoginPage/GuestTryoutComponent.svelte';
-	import { currentUserInformation } from '../../shared/shared.svelte';
+	import LoginComponent from '$lib/components/LoginPage/LoginComponent.svelte';
+	import ModTogetherHero from '$lib/components/LoginPage/ModTogetherHero.svelte';
+	import { currentUserInformation } from '$lib/shared/shared.svelte';
 
 	onMount(() => {
 		if ($currentUserInformation.displayName) {

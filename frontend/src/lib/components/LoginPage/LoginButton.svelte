@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { currentUserInformation, access_token } from '$lib/shared/shared.svelte';
+	import { login_to_db, get_timetables } from '$lib/utils/db_operations';
 	import { onMount } from 'svelte';
-	import { access_token, currentUserInformation } from '../../shared/shared.svelte';
-	import { get_timetables, login_to_db } from '../../utils/db_operations';
+
 
 	interface LoginButtonProps {
 		email: string;

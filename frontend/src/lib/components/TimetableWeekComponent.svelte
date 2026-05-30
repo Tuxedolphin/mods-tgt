@@ -1,8 +1,7 @@
 <script lang="ts">
+	import type { TimeTableDayInfo } from '$lib/types/internal';
+	import { findOverlappingTimeInfo } from '$lib/utils/format_db_information';
 	import TimetableDayComponent from './TimetableDayComponent.svelte';
-
-	import type { TimeTableDayInfo } from '../types/internal';
-	import { findOverlappingTimeInfo } from '../utils/format_db_information';
 
 	interface DisplayInfo {
 		timetableDayDisplayInfo: TimeTableDayInfo[];

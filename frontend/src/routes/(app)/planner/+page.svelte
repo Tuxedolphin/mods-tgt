@@ -1,16 +1,16 @@
 <script lang="ts">
 	import ModList from './ModListGroup.svelte';
 
-	import DaysOfWeekHeader from '../../components/DaysOfWeekHeader.svelte';
-	import SearchBar from '../../components/SearchBar.svelte';
-	import Timeline from '../../components/Timeline.svelte';
-	import TimetableComponent from '../../components/TimetableComponent.svelte';
+	import DaysOfWeekHeader from '$lib/components/DaysOfWeekHeader.svelte';
+	import SearchBar from '$lib/components/SearchBar.svelte';
+	import Timeline from '$lib/components/Timeline.svelte';
+	import TimetableComponent from '$lib/components/TimetableComponent.svelte';
 	import {
+		preferences,
 		currentlySelectedMods,
-		currentUserInformation,
-		preferences
-	} from '../../shared/shared.svelte';
-	import { getTimetable } from '../../utils/format_db_information';
+		currentUserInformation
+	} from '$lib/shared/shared.svelte';
+	import { getTimetable } from '$lib/utils/format_db_information';
 
 	let currentTimetableDisplay = $derived(
 		getTimetable($preferences.acadYear, $preferences.currentSemView, $currentlySelectedMods)

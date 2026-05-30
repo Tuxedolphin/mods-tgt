@@ -4,8 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { access_token, currentUserInformation, registered } from '../../shared/shared.svelte';
-	import type { PageProps } from '../../routes/$types';
+	import { registered, access_token } from '$lib/shared/shared.svelte';
 
 	let emailInput = $state('');
 	let passwordInput = $state('');

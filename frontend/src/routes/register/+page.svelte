@@ -1,7 +1,6 @@
 <script lang="ts">
-	import RegisterComponent from '../../components/LoginPage/RegisterComponent.svelte';
-
-	import ModTogetherHero from '../../components/LoginPage/ModTogetherHero.svelte';
+	import ModTogetherHero from '$lib/components/LoginPage/ModTogetherHero.svelte';
+	import RegisterComponent from '$lib/components/LoginPage/RegisterComponent.svelte';
 </script>
 
 <ModTogetherHero>

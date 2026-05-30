@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { currentUserInformation, access_token } from '$lib/shared/shared.svelte';
 	import { onMount } from 'svelte';
-	import { access_token, currentUserInformation } from '../../shared/shared.svelte';
 
 	let nameInput = $state('');
 	onMount(() => {
