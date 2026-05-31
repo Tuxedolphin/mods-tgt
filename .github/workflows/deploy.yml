@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: frontend
+      - name: Generate Wrangler Types
+        run: pnpm wrangler types
+        working-directory: frontend
       - name: Build
         run: pnpm build
         working-directory: frontend
