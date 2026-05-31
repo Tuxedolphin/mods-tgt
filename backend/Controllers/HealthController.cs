@@ -22,7 +22,7 @@ public class HealthController(AppDbContext _context) : BaseController
         }
         catch (Exception ex)
         {
-            return StatusCode(503, new { status = "Unhealthy", database = "Not Connected", error = ex.Message });
+            return StatusCode(503, new { status = "Unhealthy", database = "Not Connected" });
         }
     }
 }
