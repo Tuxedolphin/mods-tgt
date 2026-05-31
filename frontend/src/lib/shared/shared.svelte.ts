@@ -1,9 +1,9 @@
-import type { TimeTable } from '$lib/types/mod_summaries';
+import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
 import { persisted } from 'svelte-persisted-store';
 import { writable } from 'svelte/store';
 // First param `preferences` is the local storage key.
 // Second param is the initial value.
-export const currentlySelectedMods = persisted('selectedMods', [] as TimeTable[]);
+export const currentlySelectedMods = persisted('selectedMods', [] as TimetableWithMetadata[]);
 
 export const preferences = persisted('prefs', {
 	currentSemView: 2,
@@ -15,6 +15,7 @@ interface UserInfo {
 }
 
 export const registered = writable(false);
+export const timetable_list_should_be_refreshed = writable(false);
 
 interface AccessTokenInfo {
 	access_token: string;
@@ -40,4 +41,5 @@ export interface LessonInfo {
 	moduleCode: string;
 	lessonType: string;
 	classNo: string;
+	colour: string;
 }

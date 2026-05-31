@@ -8,7 +8,7 @@
 
 	onMount(() => {
 		if ($currentUserInformation.displayName) {
-			goto(resolve('/planner'));
+			goto(resolve('/home'));
 		}
 	});
 </script>

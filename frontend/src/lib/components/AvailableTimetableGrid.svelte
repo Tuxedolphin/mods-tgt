@@ -1,0 +1,42 @@
+<script lang="ts">
+	import type { TimetableInfos } from '$lib/types/db_raw_types';
+	import { get_timetables } from '$lib/utils/db_operations';
+	import { onDestroy, onMount } from 'svelte';
+	import TimeTableCardComponent from './TimeTableCardComponent.svelte';
+	import { timetable_list_should_be_refreshed } from '$lib/shared/shared.svelte';
+	import type { Unsubscriber } from 'svelte/store';
+
+	interface AvailableTimetableGridProps {
+		access_token: string;
+	}
+
+	let { access_token }: AvailableTimetableGridProps = $props();
+	let availableTimetables: TimetableInfos = $state([]);
+	let unsubscribe_from_refresh: Unsubscriber;
+	onMount(async () => {
+		unsubscribe_from_refresh = timetable_list_should_be_refreshed.subscribe(
+			async (should_be_refreshed) => {
+				if (!should_be_refreshed) return;
+				const timetable_request = await get_timetables(access_token);
+				console.log('Requested!');
+				if (timetable_request.isOk()) {
+					availableTimetables = [...timetable_request.value];
+				}
+
+				timetable_list_should_be_refreshed.set(false);
+			}
+		);
+
+		timetable_list_should_be_refreshed.set(true);
+	});
+
+	onDestroy(() => {
+		unsubscribe_from_refresh();
+	});
+</script>
+
+<div class="grid grid-cols-3 gap-4">
+	{#each availableTimetables as timetable (timetable.id)}
+		<TimeTableCardComponent {access_token} {timetable}></TimeTableCardComponent>
+	{/each}
+</div>

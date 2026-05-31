@@ -1,0 +1,60 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { access_token } from '$lib/shared/shared.svelte';
+	import { create_empty_timetable } from '$lib/utils/db_operations';
+	import { format_semester_name } from '$lib/utils/formatting_utils';
+
+	let dialog: HTMLDialogElement;
+	let timetable_name = $state('');
+	let semester_number = $state(1);
+	let academic_year = $state('2025-2026');
+
+	async function create_new_empty_timetable() {
+		const timetable_info = await create_empty_timetable(
+			$access_token.access_token,
+			timetable_name,
+			semester_number,
+			academic_year
+		);
+
+		if (timetable_info.isOk()) {
+			dialog.close();
+			goto(resolve('/(app)/planner/[timetable_id]', { timetable_id: timetable_info.value.id }));
+		}
+	}
+</script>
+
+<!-- Open the modal using ID.showModal() method -->
+<button class="btn btn-primary" onclick={() => dialog.showModal()}>Create new timetable</button>
+<dialog bind:this={dialog} class="modal">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold">Create new timetable</h3>
+		<p class="py-4">Name your timetable:</p>
+		<input class="input" bind:value={timetable_name} />
+
+		<p class="py-4">Choose AY:</p>
+		<select class="select" bind:value={academic_year}>
+			<option>2025-2026</option>
+			<option>2024-2025</option>
+		</select>
+
+		<p class="py-4">Choose Semester:</p>
+		<select class="select" bind:value={semester_number}>
+			{#each { length: 4 }, i}
+				<option value={i + 1}>{format_semester_name(i + 1)}</option>
+			{/each}
+		</select>
+
+		<div class="modal-action">
+			<!-- if there is a button in form, it will close the modal -->
+			<button class="btn btn-primary" onclick={() => create_new_empty_timetable()}
+				>Create timetable</button
+			>
+			<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
+		</div>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+</dialog>

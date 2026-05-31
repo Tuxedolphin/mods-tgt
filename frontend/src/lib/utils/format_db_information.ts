@@ -1,10 +1,11 @@
 import type { LessonInfo } from '$lib/shared/shared.svelte';
+import type { TimetableLessonMetadata, TimetableWithMetadata } from '$lib/types/db_raw_types';
 import type { TimeTableDayInfo } from '$lib/types/internal';
-import type { TimeTable, LessonData } from '$lib/types/mod_summaries';
 import type { RawLesson } from '$lib/types/modules';
 
 import { normaliseDuration } from './calculations_for_ui';
 import { getFullModInfo } from './fetch_from_cache';
+import { get_randomised_colour } from './formatting_utils';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const startOfDayTime = '0800';
@@ -12,10 +13,10 @@ const endOfDayTime = '2000';
 export function getTimetable(
 	acadYear: string,
 	semesterNo: number,
-	timetables: TimeTable[]
-): TimeTable[] {
+	timetables: TimetableWithMetadata[]
+): TimetableWithMetadata[] {
 	const timetable = timetables.filter(
-		(x) => x.AcademicYear == acadYear && x.Semester == semesterNo
+		(x) => x.academicYear == acadYear && x.semester == semesterNo
 	);
 
 	return timetable.length === 0 ? [] : timetable;
@@ -48,7 +49,8 @@ export async function queryAvailableLessons(
 				innerGroupIndex: -1,
 				innerGroupLength: -1,
 				outerGroupIndex: -1,
-				outerGroupLength: -1
+				outerGroupLength: -1,
+				timetableColour: userState.colour
 			});
 		}
 	}
@@ -58,21 +60,21 @@ export async function queryAvailableLessons(
 
 export async function filterTimetableByDay(
 	day: number,
-	timetables: TimeTable[]
+	timetables: TimetableWithMetadata[]
 ): Promise<TimeTableDayInfo[]> {
 	if (timetables.length === 0) return [];
 	const resultingTimetables: TimeTableDayInfo[] = [];
 
 	for (const timetable of timetables) {
-		for (const lesson of timetable.LessonData) {
-			const modInfo = await getFullModInfo(lesson.ModuleCode, timetable.AcademicYear);
+		for (const lesson of timetable.metaData) {
+			const modInfo = await getFullModInfo(lesson.moduleCode, timetable.academicYear);
 
-			const weekData = modInfo.semesterData.find((x) => x.semester == timetable.Semester)!;
+			const weekData = modInfo.semesterData.find((x) => x.semester == timetable.semester)!;
 			const lessonForDay = weekData.timetable.filter(
 				(x) =>
 					x.day == daysOfWeek[day] &&
-					x.lessonType == lesson.LessonType &&
-					x.classNo == lesson.LessonNo
+					x.lessonType == lesson.lessonType &&
+					x.classNo == lesson.lessonNo
 			);
 
 			for (const lessonDayInfo of lessonForDay) {
@@ -93,8 +95,9 @@ export async function filterTimetableByDay(
 						endOfDayTime,
 						lessonDayInfo.startTime
 					),
-					moduleCode: lesson.ModuleCode,
-					moduleName: modInfo.title
+					moduleCode: lesson.moduleCode,
+					moduleName: modInfo.title,
+					timetableColour: lesson.colour
 				});
 			}
 		}
@@ -103,14 +106,14 @@ export async function filterTimetableByDay(
 }
 
 export async function modifyModEntry(
-	timetable: TimeTable[],
+	timetable: TimetableWithMetadata[],
 	acadYear: string,
 	semesterNo: number,
-	owner: string,
+	id: string,
 	timetableName: string,
 	moduleCode: string,
 	lessonType: string,
-	newLessonNo: string,
+	newlessonNo: string,
 	userState: LessonInfo
 ) {
 	if (moduleCode != userState.moduleCode || lessonType != userState.lessonType) {
@@ -118,84 +121,77 @@ export async function modifyModEntry(
 	}
 	const findTimetableCopy = timetable.filter(
 		(x) =>
-			x.Owner == owner &&
-			x.AcademicYear == acadYear &&
-			x.Semester == semesterNo &&
-			x.Name == timetableName
+			x.id == id &&
+			x.academicYear == acadYear &&
+			x.semester == semesterNo &&
+			x.name == timetableName
 	)[0];
-	const lessonRef = findTimetableCopy.LessonData.find(
+	const lessonRef = findTimetableCopy.metaData.find(
 		(x) =>
-			x.LessonType == userState.lessonType &&
-			x.ModuleCode == userState.moduleCode &&
-			x.LessonNo == userState.classNo
+			x.lessonType == userState.lessonType &&
+			x.moduleCode == userState.moduleCode &&
+			x.lessonNo == userState.classNo
 	)!;
 
-	lessonRef.LessonNo = newLessonNo;
+	lessonRef.lessonNo = newlessonNo;
 	return timetable;
 }
 
 export function checkModAlreadyAdded(
-	timetable: TimeTable[],
+	timetable: TimetableWithMetadata[],
 	acadYear: string,
 	semesterNo: number,
-	owner: string,
+	id: string,
 	timetableName: string,
 	moduleCode: string
 ): boolean {
 	const findTimetableCopy = timetable.filter(
 		(x) =>
-			x.Owner == owner &&
-			x.AcademicYear == acadYear &&
-			x.Semester == semesterNo &&
-			x.Name == timetableName
+			x.id == id &&
+			x.academicYear == acadYear &&
+			x.semester == semesterNo &&
+			x.name == timetableName
 	);
 
 	if (findTimetableCopy.length == 0) return false;
 
-	return findTimetableCopy[0].LessonData.findIndex((x) => x.ModuleCode == moduleCode) !== -1;
+	return findTimetableCopy[0].metaData.findIndex((x) => x.moduleCode == moduleCode) !== -1;
 }
 
 export async function createModEntry(
-	timetable: TimeTable[],
+	timetable: TimetableWithMetadata[],
 	acadYear: string,
 	semesterNo: number,
-	owner: string,
+	id: string,
 	timetableName: string,
 	moduleCode: string,
 	rawLesson: RawLesson[]
-): Promise<TimeTable[]> {
+): Promise<TimetableWithMetadata[]> {
 	const findTimetableCopy = timetable.filter(
 		(x) =>
-			x.Owner == owner &&
-			x.AcademicYear == acadYear &&
-			x.Semester == semesterNo &&
-			x.Name == timetableName
+			x.id == id &&
+			x.academicYear == acadYear &&
+			x.semester == semesterNo &&
+			x.name == timetableName
 	);
-	const lessonDataRef: LessonData[] = [];
-	// No entries found: create new one:
-	if (findTimetableCopy.length == 0) {
-		timetable.push({
-			AcademicYear: acadYear,
-			LessonData: lessonDataRef,
-			Name: timetableName,
-			Owner: owner,
-			Semester: semesterNo
-		});
-	}
+	const lessonDataRef: TimetableLessonMetadata[] = [];
+
 	const lessonTypes = Object.groupBy(rawLesson, (x) => x.lessonType);
+	const assigned_color = get_randomised_colour(timetable);
 	for (const lessonType in lessonTypes) {
 		const lesson = lessonTypes[lessonType]![0];
 		lessonDataRef.push({
-			LessonNo: lesson.classNo,
-			LessonType: lesson.lessonType,
-			ModuleCode: moduleCode
+			lessonNo: lesson.classNo,
+			lessonType: lesson.lessonType,
+			moduleCode: moduleCode,
+			colour: assigned_color
 		});
 	}
 
 	if (findTimetableCopy.length == 0) {
 		// timetable[0].LessonData = lessonDataRef;
 	} else {
-		findTimetableCopy[0].LessonData.push(...lessonDataRef);
+		findTimetableCopy[0].metaData.push(...lessonDataRef);
 	}
 
 	return timetable;

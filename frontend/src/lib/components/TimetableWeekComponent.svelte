@@ -8,8 +8,17 @@
 		day: number;
 		semester: number;
 		acadYear: string;
+		timetable_id: string;
+		timetable_name: string;
 	}
-	const { timetableDayDisplayInfo, day, acadYear, semester }: DisplayInfo = $props();
+	const {
+		timetableDayDisplayInfo,
+		day,
+		acadYear,
+		semester,
+		timetable_id,
+		timetable_name
+	}: DisplayInfo = $props();
 
 	const filteredInformation: TimeTableDayInfo[] = $derived(
 		findOverlappingTimeInfo(timetableDayDisplayInfo)
@@ -18,7 +27,13 @@
 
 <div class="relative col-start-{day + 1} row-start-1">
 	{#each filteredInformation as timetableDayInfo (timetableDayInfo)}
-		<TimetableDayComponent timeTableDayInfo={timetableDayInfo} {acadYear} {semester}
+		<TimetableDayComponent
+			{timetable_id}
+			{timetable_name}
+			timetable_colour={timetableDayInfo.timetableColour}
+			timeTableDayInfo={timetableDayInfo}
+			{acadYear}
+			{semester}
 		></TimetableDayComponent>
 	{/each}
 </div>

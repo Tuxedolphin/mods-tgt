@@ -4,7 +4,12 @@ import type {
 	AuthResponse,
 	AuthSucessResponse,
 	ErrorInformation,
-	ErrorResponse
+	ErrorResponse,
+	TimetableInfo,
+	TimetableInfos,
+	TimetablePostTemplate,
+	TimetableWithMetadata,
+	UserProfileResponse
 } from '../types/db_raw_types';
 import { Err, Ok, type Result } from 'ts-results-es';
 
@@ -30,7 +35,6 @@ export async function register_db(
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
-				console.log(error.data);
 				const errorResponse = error.data as ErrorResponse;
 				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
 				return new Err(errorMessage.msg);
@@ -60,7 +64,6 @@ export async function login_to_db(
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
-				console.log(error.data);
 				const errorResponse = error.data as ErrorResponse;
 				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
 				return new Err(errorMessage.msg);
@@ -73,14 +76,183 @@ export async function login_to_db(
 	}
 }
 
-export async function get_timetables(access_token: string) {
-	const timetables = await apiCalls.get('/timetable', {
-		hooks: {
-			beforeRequest: [
-				({ request }) => {
-					request.headers.set('Authorization', `Bearer ${access_token}`);
-				}
-			]
+export async function put_user_info(
+	access_token: string,
+	username: string
+): Promise<Result<string, string>> {
+	try {
+		await apiCalls.put('profile/me', {
+			hooks: {
+				beforeRequest: [
+					({ request }) => {
+						request.headers.set('Authorization', `Bearer ${access_token}`);
+					}
+				]
+			},
+			json: {
+				username: username
+			}
+		});
+		return Ok(username);
+	} catch (error) {
+		try {
+			if (error instanceof HTTPError) {
+				const errorResponse = error.data as ErrorResponse;
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
+				return new Err(errorMessage.msg);
+			}
+		} catch {
+			return new Err('Wrong username or password');
 		}
-	});
+
+		return new Err('Wrong username or password');
+	}
+}
+
+export async function get_user_info(
+	access_token: string
+): Promise<Result<UserProfileResponse, string>> {
+	try {
+		const timetables = await apiCalls
+			.get('profile/me', {
+				hooks: {
+					beforeRequest: [
+						({ request }) => {
+							request.headers.set('Authorization', `Bearer ${access_token}`);
+						}
+					]
+				}
+			})
+			.json<UserProfileResponse>();
+		return Ok(timetables);
+	} catch (error) {
+		try {
+			if (error instanceof HTTPError) {
+				const errorResponse = error.data as ErrorResponse;
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
+				return new Err(errorMessage.msg);
+			}
+		} catch {
+			return new Err('Wrong username or password');
+		}
+
+		return new Err('Wrong username or password');
+	}
+}
+
+export async function get_timetables(
+	access_token: string
+): Promise<Result<TimetableInfos, string>> {
+	try {
+		const timetables = await apiCalls
+			.get('/timetable', {
+				hooks: {
+					beforeRequest: [
+						({ request }) => {
+							request.headers.set('Authorization', `Bearer ${access_token}`);
+						}
+					]
+				}
+			})
+			.json<TimetableInfos>();
+
+		return Ok(timetables);
+	} catch (error) {
+		return Err('Something went wrong ' + error);
+	}
+}
+
+export async function get_timetable_by_id(
+	access_token: string,
+	timetable_id: string
+): Promise<Result<TimetableWithMetadata, string>> {
+	try {
+		const timetables = await apiCalls
+			.get(`/timetable/${timetable_id}`, {
+				hooks: {
+					beforeRequest: [
+						({ request }) => {
+							request.headers.set('Authorization', `Bearer ${access_token}`);
+						}
+					]
+				}
+			})
+			.json<TimetableWithMetadata>();
+		return Ok(timetables);
+	} catch (error) {
+		return Err('Something went wrong ' + error);
+	}
+}
+
+export async function put_timetable_by_id(
+	access_token: string,
+	timetable_id: string,
+	timetable_data: TimetableWithMetadata
+): Promise<Result<string, string>> {
+	try {
+		await apiCalls.put(`/timetable/${timetable_id}`, {
+			hooks: {
+				beforeRequest: [
+					({ request }) => {
+						request.headers.set('Authorization', `Bearer ${access_token}`);
+					}
+				]
+			},
+			json: timetable_data
+		});
+		return Ok('');
+	} catch (error) {
+		return Err('Something went wrong ' + error);
+	}
+}
+
+export async function delete_timetable_by_id(
+	access_token: string,
+	timetable_id: string
+): Promise<Result<string, string>> {
+	try {
+		await apiCalls.delete(`/timetable/${timetable_id}`, {
+			hooks: {
+				beforeRequest: [
+					({ request }) => {
+						request.headers.set('Authorization', `Bearer ${access_token}`);
+					}
+				]
+			}
+		});
+		return Ok('');
+	} catch (error) {
+		return Err('Something went wrong ' + error);
+	}
+}
+
+export async function create_empty_timetable(
+	access_token: string,
+	timetable_name: string,
+	semester: number,
+	academic_year: string
+): Promise<Result<TimetableInfo, string>> {
+	const timetable_post_template: TimetablePostTemplate = {
+		academicYear: academic_year,
+		metaData: [],
+		name: timetable_name,
+		semester: semester
+	};
+	try {
+		const timetable_info = await apiCalls
+			.post('/timetable', {
+				hooks: {
+					beforeRequest: [
+						({ request }) => {
+							request.headers.set('Authorization', `Bearer ${access_token}`);
+						}
+					]
+				},
+				json: timetable_post_template
+			})
+			.json<TimetableInfo>();
+		return Ok(timetable_info);
+	} catch (error) {
+		return Err('Something went wrong ' + error);
+	}
 }

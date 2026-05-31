@@ -1,10 +1,5 @@
 <script lang="ts">
-	import {
-		currentlySelectedMods,
-		currentUserInformation,
-		preferences,
-		searchTerm
-	} from '$lib/shared/shared.svelte';
+	import { currentlySelectedMods, preferences, searchTerm } from '$lib/shared/shared.svelte';
 	import type { ModSummary } from '$lib/types/mod_summaries';
 	import { getFullModInfo } from '$lib/utils/fetch_from_cache';
 	import { checkModAlreadyAdded, createModEntry } from '$lib/utils/format_db_information';
@@ -13,9 +8,11 @@
 		mod: ModSummary;
 		semester: number;
 		acadYear: string;
+		timetable_id: string;
+		timetable_name: string;
 	}
 
-	let { mod, semester, acadYear }: ModSuggestionsProp = $props();
+	let { mod, semester, acadYear, timetable_id, timetable_name }: ModSuggestionsProp = $props();
 
 	async function addMod() {
 		if (!mod.semesters.includes(semester)) return;
@@ -28,8 +25,8 @@
 				$currentlySelectedMods,
 				acadYear,
 				semester,
-				$currentUserInformation.displayName,
-				'test',
+				timetable_id,
+				timetable_name,
 				mod.moduleCode
 			)
 		)
@@ -39,8 +36,8 @@
 				$currentlySelectedMods,
 				acadYear,
 				semester,
-				$currentUserInformation.displayName,
-				'test',
+				timetable_id,
+				timetable_name,
 				modFullInfo.moduleCode,
 				timeTable
 			)

@@ -17,13 +17,13 @@
 
 			if (key.includes('access_token')) {
 				$access_token.access_token = value;
-				goto(resolve('/planner'));
+				goto(resolve('/home'));
 			}
 		}
 		registered.set(false);
 
 		if ($access_token.access_token !== '' || $access_token.is_guest_login) {
-			goto(resolve('/planner'));
+			goto(resolve('/home'));
 		}
 	});
 </script>
