@@ -2,7 +2,7 @@ name: Deploy Frontend to Cf
 
 on:
   workflow_run:
-    workflows: [Frontend]
+    workflows: [frontend]
     branches:
       - "prod/**"
     types:
