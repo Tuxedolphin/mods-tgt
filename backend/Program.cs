@@ -69,10 +69,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
     app.UseCors(b => b.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod());
 }
-else
-{
-    app.UseCors(b => b.WithOrigins("http://mods-tgt.com").AllowAnyHeader().AllowAnyMethod());
-}
+
+app.UseCors(b => b.WithOrigins("https://mods-tgt.com").AllowAnyHeader().AllowAnyMethod());
 
 app.UseExceptionHandler();
 app.UseAuthentication();
