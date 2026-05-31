@@ -2,6 +2,7 @@
 	import { currentlySelectedMods, chooseModState } from '$lib/shared/shared.svelte';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import { modifyModEntry } from '$lib/utils/format_db_information';
+	import { onMount } from 'svelte';
 
 	interface TimetableDayProps {
 		timeTableDayInfo: TimeTableDayInfo;
