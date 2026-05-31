@@ -4,6 +4,10 @@ on:
   push:
     branches: ["prod/**"]
 
+env:
+  PUBLIC_DB_LINK: ${{ vars.PUBLIC_DB_LINK }}
+  BUILD_SHA: ${{ github.sha }}
+
 jobs:
   backend-checks:
     uses: ./.github/workflows/build-test-dotnet.yml
