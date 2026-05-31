@@ -70,8 +70,6 @@ public class TimeTableService(AppDbContext context) : ITimeTableService
             ?? throw new NotFoundException($"Timetable with id {id} not found");
 
         timetable.Name = request.Name;
-        timetable.Semester = request.Semester;
-        timetable.AcademicYear = request.AcademicYear;
         timetable.MetaData = request.MetaData;
 
         await _context.SaveChangesAsync();
