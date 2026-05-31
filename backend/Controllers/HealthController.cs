@@ -1,7 +1,7 @@
 using Backend.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Controllers;
 
@@ -28,7 +28,7 @@ public class HealthController(AppDbContext _context) : BaseController
                 database = "Not Connected",
                 error = ex.Message,
                 type = ex.GetType().Name,
-                connectionString = _context.Database.GetConnectionString()
+                connectionString = _context.Database.GetDbConnection().ConnectionString
             });
         }
     }
