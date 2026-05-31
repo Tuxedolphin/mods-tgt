@@ -1,7 +1,6 @@
 using Backend.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
 
 namespace Backend.Controllers;
 
@@ -15,21 +14,14 @@ public class HealthController(AppDbContext _context) : BaseController
     {
         try
         {
-            var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
-            await conn.CloseAsync();
-            return Ok(new { status = "Healthy", database = "Connected" });
+            bool canConnect = await _context.Database.CanConnectAsync();
+            return Ok(
+                new { status = "Healthy", database = canConnect ? "Connected" : "Not Connected" }
+            );
         }
         catch (Exception ex)
         {
-            return StatusCode(503, new
-            {
-                status = "Unhealthy",
-                database = "Not Connected",
-                error = ex.Message,
-                type = ex.GetType().Name,
-                connectionString = _context.Database.GetConnectionString()
-            });
+            return StatusCode(503, new { status = "Unhealthy", error = ex.Message });
         }
     }
 }
