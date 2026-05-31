@@ -1,6 +1,6 @@
 # mod-together
 
-A full-stack web app with a SvelteKit frontend (deployed on Cloudflare Workers) and an ASP.NET Core backend backed by Supabase (PostgreSQL). The live app can be viewed [here](https://www.mods-tgt.com).
+A full-stack web app with a SvelteKit frontend (deployed on Cloudflare Workers) and an ASP.NET Core backend backed by Supabase (PostgreSQL). The live app can be viewed [here](https://mods-tgt.com).
 
 ## Prerequisites
 
