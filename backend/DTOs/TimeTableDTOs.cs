@@ -18,13 +18,14 @@ public class CreateTimeTableRequest
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
+    [Required, Range(1, 4, ErrorMessage = "Semester must be between 1 and 4")]
     public int Semester { get; set; }
 
     [Required]
+    [RegularExpression(@"^\d{4}-\d{4}$", ErrorMessage = "AcademicYear must be in format YYYY-YYYY")]
     public string AcademicYear { get; set; } = string.Empty;
 
-    [Required]
+    [Required, MinLength(1, ErrorMessage = "MetaData must contain at least one module")]
     public required List<TimeTableModule> MetaData { get; set; }
 }
 
@@ -33,12 +34,6 @@ public class UpdateTimeTableRequest
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
-    public int Semester { get; set; }
-
-    [Required]
-    public string AcademicYear { get; set; } = string.Empty;
-
-    [Required]
+    [Required, MinLength(1, ErrorMessage = "MetaData must contain at least one module")]
     public List<TimeTableModule> MetaData { get; set; } = [];
 }
