@@ -25,7 +25,7 @@ public class CreateTimeTableRequest
     [RegularExpression(@"^\d{4}-\d{4}$", ErrorMessage = "AcademicYear must be in format YYYY-YYYY")]
     public string AcademicYear { get; set; } = string.Empty;
 
-    [Required, MinLength(1, ErrorMessage = "MetaData must contain at least one module")]
+    [Required]
     public required List<TimeTableModule> MetaData { get; set; }
 }
 
@@ -34,6 +34,6 @@ public class UpdateTimeTableRequest
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    [Required, MinLength(1, ErrorMessage = "MetaData must contain at least one module")]
+    [Required]
     public List<TimeTableModule> MetaData { get; set; } = [];
 }
