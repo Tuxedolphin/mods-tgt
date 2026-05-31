@@ -1,4 +1,4 @@
-name: Deploy Application
+name: Deploy Application - Prod
 
 on:
   push:
@@ -9,15 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: ls -a
-      - run: ls ./.github/workflows
-      - uses: ./.github/workflows
+      - uses: ./.github/workflows/build-test-dotnet.yml
 
   frontend-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: ./.github/workflows/backend.yml
+      - uses: ./.github/workflows/build-test-sveltekit.yml
 
   on-success:
     runs-on: ubuntu-latest

@@ -1,0 +1,19 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Backend Checks
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["backend/**"]
+  pull_request:
+    branches: ["main"]
+    paths: ["backend/**"]
+
+jobs:
+  dotnet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/workflows/build-test-dotnet.yml
