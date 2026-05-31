@@ -12,8 +12,5 @@ on:
     paths: ["backend/**"]
 
 jobs:
-  dotnet:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/workflows/build-test-dotnet.yml
+  dotnet-build-test:
+    uses: ./.github/workflows/build-test-dotnet.yml
