@@ -12,26 +12,57 @@ import type {
 	UserProfileResponse
 } from '../types/db_raw_types';
 import { Err, Ok, type Result } from 'ts-results-es';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { access_token } from '$lib/shared/shared.svelte';
 
 const apiCalls = ky.create({
 	baseUrl: PUBLIC_DB_LINK
 });
+
+type CustomOptions = {
+	authorised?: boolean;
+	unauthorizedCheck?: boolean;
+	auth_token?: string;
+};
+
+function create_ky_instance(custom_options: CustomOptions) {
+	return apiCalls.extend({
+		hooks: {
+			beforeRequest: [
+				({ request }) => {
+					if (custom_options.authorised) {
+						request.headers.set('Authorization', `Bearer ${custom_options.auth_token}`);
+					}
+				}
+			],
+			afterResponse: [
+				async ({ response }) => {
+					if (custom_options.unauthorizedCheck && response.status === 401) {
+						access_token.reset();
+						const message = 'Login expired, please login in again';
+						goto(resolve(`/login#error_description=${message}`));
+					}
+				}
+			]
+		}
+	});
+}
 
 export async function register_db(
 	username: string,
 	password: string
 ): Promise<Result<AuthSucessResponse, string>> {
 	try {
-		const json = await apiCalls
-			.post('auth/register', {
-				json: {
-					email: username,
-					password: password
-				}
-			})
-			.json<AuthSucessResponse>();
+		const register = create_ky_instance({ authorised: false, unauthorizedCheck: false }).extend({
+			json: {
+				email: username,
+				password: password
+			}
+		});
+		const register_json = await register.post('auth/register').json<AuthSucessResponse>();
 
-		return new Ok(json);
+		return new Ok(register_json);
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
@@ -52,15 +83,14 @@ export async function login_to_db(
 	password: string
 ): Promise<Result<AuthResponse, string>> {
 	try {
-		const json = await apiCalls
-			.post('auth/login', {
-				json: {
-					email: username,
-					password: password
-				}
-			})
-			.json<AuthResponse>();
-		return new Ok(json);
+		const login_db = create_ky_instance({ authorised: false, unauthorizedCheck: false }).extend({
+			json: {
+				email: username,
+				password: password
+			}
+		});
+		const login_json = await login_db.post('auth/login').json<AuthResponse>();
+		return new Ok(login_json);
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
@@ -81,18 +111,16 @@ export async function put_user_info(
 	username: string
 ): Promise<Result<string, string>> {
 	try {
-		await apiCalls.put('profile/me', {
-			hooks: {
-				beforeRequest: [
-					({ request }) => {
-						request.headers.set('Authorization', `Bearer ${access_token}`);
-					}
-				]
-			},
+		const put_user_db = create_ky_instance({
+			authorised: true,
+			unauthorizedCheck: true,
+			auth_token: access_token
+		}).extend({
 			json: {
 				username: username
 			}
 		});
+		await put_user_db.put('profile/me');
 		return Ok(username);
 	} catch (error) {
 		try {
@@ -113,17 +141,12 @@ export async function get_user_info(
 	access_token: string
 ): Promise<Result<UserProfileResponse, string>> {
 	try {
-		const timetables = await apiCalls
-			.get('profile/me', {
-				hooks: {
-					beforeRequest: [
-						({ request }) => {
-							request.headers.set('Authorization', `Bearer ${access_token}`);
-						}
-					]
-				}
-			})
-			.json<UserProfileResponse>();
+		const get_user_info_db = create_ky_instance({
+			authorised: true,
+			unauthorizedCheck: true,
+			auth_token: access_token
+		});
+		const timetables = await get_user_info_db.get('profile/me').json<UserProfileResponse>();
 		return Ok(timetables);
 	} catch (error) {
 		try {
@@ -144,18 +167,12 @@ export async function get_timetables(
 	access_token: string
 ): Promise<Result<TimetableInfos, string>> {
 	try {
-		const timetables = await apiCalls
-			.get('/timetable', {
-				hooks: {
-					beforeRequest: [
-						({ request }) => {
-							request.headers.set('Authorization', `Bearer ${access_token}`);
-						}
-					]
-				}
-			})
-			.json<TimetableInfos>();
-
+		const get_timetables_db = create_ky_instance({
+			authorised: true,
+			unauthorizedCheck: true,
+			auth_token: access_token
+		});
+		const timetables = await get_timetables_db.get('/timetable').json<TimetableInfos>();
 		return Ok(timetables);
 	} catch (error) {
 		return Err('Something went wrong ' + error);
@@ -167,16 +184,13 @@ export async function get_timetable_by_id(
 	timetable_id: string
 ): Promise<Result<TimetableWithMetadata, string>> {
 	try {
-		const timetables = await apiCalls
-			.get(`/timetable/${timetable_id}`, {
-				hooks: {
-					beforeRequest: [
-						({ request }) => {
-							request.headers.set('Authorization', `Bearer ${access_token}`);
-						}
-					]
-				}
-			})
+		const get_timetables_id_db = create_ky_instance({
+			authorised: true,
+			unauthorizedCheck: true,
+			auth_token: access_token
+		});
+		const timetables = await get_timetables_id_db
+			.get(`/timetable/${timetable_id}`)
 			.json<TimetableWithMetadata>();
 		return Ok(timetables);
 	} catch (error) {
@@ -190,16 +204,14 @@ export async function put_timetable_by_id(
 	timetable_data: TimetableWithMetadata
 ): Promise<Result<string, string>> {
 	try {
-		await apiCalls.put(`/timetable/${timetable_id}`, {
-			hooks: {
-				beforeRequest: [
-					({ request }) => {
-						request.headers.set('Authorization', `Bearer ${access_token}`);
-					}
-				]
-			},
+		const put_timetable_id_db = create_ky_instance({
+			authorised: true,
+			unauthorizedCheck: true,
+			auth_token: access_token
+		}).extend({
 			json: timetable_data
 		});
+		await put_timetable_id_db.put(`/timetable/${timetable_id}`);
 		return Ok('');
 	} catch (error) {
 		return Err('Something went wrong ' + error);
@@ -211,15 +223,12 @@ export async function delete_timetable_by_id(
 	timetable_id: string
 ): Promise<Result<string, string>> {
 	try {
-		await apiCalls.delete(`/timetable/${timetable_id}`, {
-			hooks: {
-				beforeRequest: [
-					({ request }) => {
-						request.headers.set('Authorization', `Bearer ${access_token}`);
-					}
-				]
-			}
+		const delete_timetable_id_db = create_ky_instance({
+			authorised: true,
+			unauthorizedCheck: true,
+			auth_token: access_token
 		});
+		await delete_timetable_id_db.delete(`/timetable/${timetable_id}`);
 		return Ok('');
 	} catch (error) {
 		return Err('Something went wrong ' + error);
@@ -239,18 +248,14 @@ export async function create_empty_timetable(
 		semester: semester
 	};
 	try {
-		const timetable_info = await apiCalls
-			.post('/timetable', {
-				hooks: {
-					beforeRequest: [
-						({ request }) => {
-							request.headers.set('Authorization', `Bearer ${access_token}`);
-						}
-					]
-				},
-				json: timetable_post_template
-			})
-			.json<TimetableInfo>();
+		const create_empty_timetable_db = create_ky_instance({
+			authorised: true,
+			unauthorizedCheck: true,
+			auth_token: access_token
+		}).extend({
+			json: timetable_post_template
+		});
+		const timetable_info = await create_empty_timetable_db.post('/timetable').json<TimetableInfo>();
 		return Ok(timetable_info);
 	} catch (error) {
 		return Err('Something went wrong ' + error);

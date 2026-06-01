@@ -19,9 +19,19 @@
 </script>
 
 {#if token}
-	<div class="flex justify-between">
+	<div class="flex justify-between py-4">
 		<GreetingComponent access_token={token}></GreetingComponent>
-		<CreateNewTimetableButton></CreateNewTimetableButton>
+		<div class="flex gap-2">
+			<CreateNewTimetableButton></CreateNewTimetableButton>
+			<button
+				class="btn btn-error"
+				onclick={() => {
+					access_token.reset();
+					const message = 'Logout Successful';
+					goto(resolve(`/login#error_description=${message}`));
+				}}>Logout</button
+			>
+		</div>
 	</div>
 
 	<AvailableTimetableGrid access_token={token}></AvailableTimetableGrid>
