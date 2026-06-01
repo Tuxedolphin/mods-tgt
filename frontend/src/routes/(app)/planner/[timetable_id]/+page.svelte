@@ -31,6 +31,9 @@
 	import type { Unsubscriber } from 'svelte/store';
 	import { format_semester_name } from '$lib/utils/formatting_utils';
 	import ModListGroup from '$lib/components/ModListGroup.svelte';
+	import { CircleX } from '@lucide/svelte';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	let { params }: PageProps = $props();
 	let unsubscribe_from_mods_list: Unsubscriber;
 	onMount(async () => {
@@ -75,7 +78,15 @@
 
 {#if is_timetable_loaded}
 	<div class="flex justify-between">
-		<h2 class="text-2xl font-bold">{timetable_metadata.name}</h2>
+		<div class="flex items-center gap-4">
+			<CircleX
+				onclick={() => {
+					goto(resolve('/(app)/home'));
+				}}
+			></CircleX>
+			<h2 class="text-2xl font-bold">{timetable_metadata.name}</h2>
+		</div>
+
 		<h2 class="text-2xl">
 			AY{timetable_metadata.academicYear} - {format_semester_name(timetable_metadata.semester)}
 		</h2>
