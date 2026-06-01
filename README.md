@@ -38,7 +38,7 @@ dotnet ef database update
 dotnet run
 ```
 
-API runs at `http://localhost:5000`. Scalar API docs available at `/scalar` in Development.
+Dev Server runs at `http://localhost:5233`. Scalar API docs available at `/scalar` in Development.
 
 ---
 
@@ -53,19 +53,25 @@ pnpm install
 
 **2. Configure environment**
 
-Copy `.env.example` to `.env` and fill in values:
+Create an `.env` file in the root of `frontend` with the following entry:
 
 ```shell
-cp .env.example .env
+PUBLIC_DB_LINK=http://localhost:5233
 ```
+
+The `http://localhost:5233` being the Dotnet backend url. In production, this is dynamically replaced with `api.mods-tgt.com`
 
 **3. Run**
 
 ```shell
-pnpm dev
+pnpm run dev
 ```
 
 Frontend runs at `http://localhost:5173`.
+
+**4. Common Errors**
+
+For now, you may sometimes get stuck loading in certain areas of the application due to expired tokens. If you open DevTools you might see a 401 error (Unauthorised). To fix this, clear the site's local storage and refresh the page. 
 
 ---
 
