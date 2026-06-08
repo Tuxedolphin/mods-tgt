@@ -4,7 +4,7 @@ using Backend.Exceptions;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Backend.Services.TimeTables;
 
 public class TimeTableService(AppDbContext context) : ITimeTableService
 {

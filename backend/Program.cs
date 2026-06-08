@@ -1,6 +1,9 @@
 using Backend.Data;
 using Backend.Exceptions;
-using Backend.Services;
+using Backend.Services.Auth;
+using Backend.Services.Profiles;
+using Backend.Services.Room;
+using Backend.Services.TimeTables;
 using Backend.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +18,8 @@ builder.Services.AddRouting(options =>
     options.LowercaseUrls = true;
     options.LowercaseQueryStrings = true;
 });
+
+builder.Services.AddSignalR();
 
 // === Exception Handling ===
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -33,8 +38,8 @@ var supabase = new Supabase.Client(
     supabaseSettings.PublishableKey,
     new Supabase.SupabaseOptions { AutoRefreshToken = true, AutoConnectRealtime = false }
 );
-
 await supabase.InitializeAsync();
+
 builder.Services.AddSingleton(supabase);
 
 // Supabase JWT Configuration
@@ -57,6 +62,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<ITimeTableService, TimeTableService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 // === Default setup ===
 

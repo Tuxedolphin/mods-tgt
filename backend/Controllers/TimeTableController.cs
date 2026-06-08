@@ -1,6 +1,6 @@
 using Backend.DTOs;
 using Backend.Models;
-using Backend.Services;
+using Backend.Services.TimeTables;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

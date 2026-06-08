@@ -3,7 +3,7 @@ using Backend.Exceptions;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Backend.Services.Profiles;
 
 public class ProfileService(AppDbContext context) : IProfileService
 {

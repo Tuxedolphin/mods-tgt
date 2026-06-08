@@ -4,7 +4,7 @@ using Backend.Settings;
 using Microsoft.Extensions.Options;
 using Supabase;
 
-namespace Backend.Services;
+namespace Backend.Services.Auth;
 
 public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) : IAuthService
 {
