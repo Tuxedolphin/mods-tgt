@@ -1,7 +1,7 @@
 using Backend.DTOs;
 using Backend.Models;
 
-namespace Backend.Services;
+namespace Backend.Services.TimeTables;
 
 public interface ITimeTableService
 {
