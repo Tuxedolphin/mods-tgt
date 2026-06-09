@@ -1,6 +1,6 @@
 <script lang="ts">
 	let { children } = $props();
-	import mods_tgt_logo from '$lib/assets/mods_tgt.png?enhanced';
+	import mods_tgt_logo from '$lib/assets/mods_tgt_logo.png?enhanced';
 </script>
 
 <div class="hero min-h-screen bg-base-200">
