@@ -10,7 +10,9 @@
 		timetable: TimetableInfo;
 		access_token: string;
 	}
-
+	let dialog: HTMLDialogElement;
+	let selected_timetable_name = $state('');
+	let selected_timetable_id = $state('');
 	const { timetable, access_token }: TimeTableCardComponentProps = $props();
 </script>
 
@@ -27,8 +29,9 @@
 			<button
 				class="btn btn-error"
 				onclick={async () => {
-					await delete_timetable_by_id(access_token, timetable.id);
-					timetable_list_should_be_refreshed.set(true);
+					selected_timetable_name = timetable.name;
+					selected_timetable_id = timetable.id;
+					dialog.show();
 				}}>Delete</button
 			>
 			<button
@@ -40,3 +43,26 @@
 		</div>
 	</div>
 </div>
+
+<dialog bind:this={dialog} class="modal">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold">Confirm?</h3>
+		<p class="py-4">
+			Delete the timetable: '{selected_timetable_name}' (this action is irreversible!)
+		</p>
+
+		<div class="modal-action">
+			<button
+				class="btn btn-primary"
+				onclick={async () => {
+					await delete_timetable_by_id(access_token, timetable.id);
+					timetable_list_should_be_refreshed.set(true);
+				}}>Delete!</button
+			>
+			<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
+		</div>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+</dialog>
