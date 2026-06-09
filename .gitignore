@@ -22,7 +22,7 @@ Session.vim
 *.suo
 
 # =========================
-# Backend (.NET 8 C#)
+# Backend
 # =========================
 backend/bin/
 backend/obj/
@@ -30,7 +30,6 @@ backend/TestResults/
 backend/logs/
 
 # Local Environment Configuration
-backend/appsettings.Development.json
 backend/appsettings.Local.json
 
 # =========================
