@@ -19,7 +19,7 @@
 </script>
 
 {#if token}
-	<div class="flex justify-between py-4">
+	<div class="mx-0.5 flex flex-col pt-2 pb-4 lg:flex-row lg:justify-between">
 		<GreetingComponent access_token={token}></GreetingComponent>
 		<div class="flex gap-2">
 			<CreateNewTimetableButton></CreateNewTimetableButton>
