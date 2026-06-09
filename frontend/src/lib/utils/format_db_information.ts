@@ -129,6 +129,32 @@ export function removeModEntry(
 	return timetable;
 }
 
+export function modifyModColour(
+	timetable: TimetableWithMetadata[],
+	acadYear: string,
+	semesterNo: number,
+	id: string,
+	timetableName: string,
+	moduleCode: string,
+	newColor: string
+): TimetableWithMetadata[] {
+	const findTimetableCopy = timetable.filter(
+		(x) =>
+			x.id == id &&
+			x.academicYear == acadYear &&
+			x.semester == semesterNo &&
+			x.name == timetableName
+	)[0];
+
+	const lessonRef = findTimetableCopy.metaData.filter((x) => x.moduleCode == moduleCode)!;
+
+	for (let i = 0; i < lessonRef.length; i++) {
+		const element = lessonRef[i];
+		element.colour = newColor;
+	}
+
+	return timetable;
+}
 export function modifyModEntry(
 	timetable: TimetableWithMetadata[],
 	acadYear: string,
@@ -158,6 +184,7 @@ export function modifyModEntry(
 	)!;
 
 	lessonRef.lessonNo = newlessonNo;
+
 	return timetable;
 }
 

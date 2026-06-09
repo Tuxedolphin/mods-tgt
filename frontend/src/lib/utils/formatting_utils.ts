@@ -1,6 +1,6 @@
 import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
 
-const colours = new Set([
+export const colours = new Set([
 	'bg-red-400',
 	'bg-orange-400',
 	'bg-amber-300',
