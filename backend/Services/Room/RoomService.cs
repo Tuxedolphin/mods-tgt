@@ -1,5 +1,3 @@
-using Backend.DTOs;
-
 namespace Backend.Services.Room;
 
 public class RoomService(ILogger<RoomService> logger, IRoomTracker roomTracker) : IRoomService
@@ -7,14 +5,9 @@ public class RoomService(ILogger<RoomService> logger, IRoomTracker roomTracker) 
     private readonly ILogger<RoomService> _logger = logger;
     private readonly IRoomTracker _roomTracker = roomTracker;
 
-    public Guid CreateRoom()
+    public void CreateRoom(Guid timetableId)
     {
-        Guid newGuid = Guid.NewGuid();
-
-        // We don't check for duplicate here since the changes of Guid collision is astronomically low
-        _roomTracker.AddRoom(newGuid);
-
-        return newGuid;
+        _roomTracker.AddRoom(timetableId);
     }
 
     public bool HandleJoinRoom(Guid userId, Guid roomId)

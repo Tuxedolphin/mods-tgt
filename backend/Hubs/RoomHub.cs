@@ -1,10 +1,10 @@
 using Backend.DTOs;
 using Backend.Hubs.Clients;
 using Backend.Infrastructure;
+using Backend.Models;
 using Backend.Services.Room;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 
 namespace Backend.Hubs;
 
@@ -44,10 +44,10 @@ public class RoomHub(ILogger<RoomHub> logger, IRoomService roomService, IRoomTra
         await base.OnDisconnectedAsync(exception);
     }
 
-    public RoomInformation CreateRoom()
+    public RoomInformation CreateRoom(Guid timetableId)
     {
-        Guid roomId = _roomService.CreateRoom();
-        return new RoomInformation(roomId, []);
+        _roomService.CreateRoom(timetableId);
+        return new RoomInformation(timetableId, []);
     }
 
     public async Task JoinRoom(Guid roomId)
@@ -76,6 +76,8 @@ public class RoomHub(ILogger<RoomHub> logger, IRoomService roomService, IRoomTra
     {
         return _roomTracker.GetAllRoomInformation();
     }
+
+    public async Task updateTimetable(Guid timetableId, Timetable timetable) { }
 
     // This method is used mainly as a placeholder for testing, but it could be used in the future
     // to send a message as a chat feature
