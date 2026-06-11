@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Backend.Models;
 
-public class TimeTableModule
+public class TimetableModule
 {
     [Required]
     public required string ModuleCode { get; set; } = string.Empty;
@@ -18,7 +18,7 @@ public class TimeTableModule
     public required string Colour { get; set; } = string.Empty;
 }
 
-public class TimeTable
+public class Timetable
 {
     public required Guid Id { get; set; }
 
@@ -27,9 +27,9 @@ public class TimeTable
     public Guid UserId { get; set; }
     public required string Name { get; set; }
 
-    // The following fields are placed here, instead of TimeTableModule since all the modules will havae the same semester and academic year
+    // The following fields are placed here, instead of TimetableModule since all the modules will havae the same semester and academic year
     public required int Semester { get; set; }
     public required string AcademicYear { get; set; }
-    public required List<TimeTableModule> MetaData { get; set; }
+    public required List<TimetableModule> MetaData { get; set; }
     public DateTime CreatedAt { get; set; }
 }

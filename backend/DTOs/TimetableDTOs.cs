@@ -3,7 +3,7 @@ using Backend.Models;
 
 namespace Backend.DTOs;
 
-public class TimeTableSummaryResponse
+public class TimetableSummaryResponse
 {
     public required Guid Id { get; set; }
 
@@ -13,7 +13,7 @@ public class TimeTableSummaryResponse
     public required DateTime CreatedAt { get; set; }
 }
 
-public class CreateTimeTableRequest
+public class CreateTimetableRequest
 {
     [Required]
     public string Name { get; set; } = string.Empty;
@@ -26,14 +26,14 @@ public class CreateTimeTableRequest
     public string AcademicYear { get; set; } = string.Empty;
 
     [Required]
-    public required List<TimeTableModule> MetaData { get; set; }
+    public required List<TimetableModule> MetaData { get; set; }
 }
 
-public class UpdateTimeTableRequest
+public class UpdateTimetableRequest
 {
     [Required]
     public string Name { get; set; } = string.Empty;
 
     [Required]
-    public List<TimeTableModule> MetaData { get; set; } = [];
+    public List<TimetableModule> MetaData { get; set; } = [];
 }
