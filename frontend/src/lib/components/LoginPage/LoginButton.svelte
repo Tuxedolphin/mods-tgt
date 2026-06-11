@@ -17,8 +17,8 @@
 		const result = await login_to_db(email, password);
 		if (result.isOk()) {
 			// Stores access token in localstorage (FOR NOW) -- Not secure:!
-			$token_information.access_token = result.value.accessToken;
-			$token_information.is_guest_login = false;
+			$token_information.a = result.value.accessToken;
+			$token_information.b = false;
 			goto(resolve('/home'));
 		} else {
 			errorMessage = result.error;

@@ -13,7 +13,7 @@
 
 	async function create_new_empty_timetable() {
 		const timetable_info = await create_empty_timetable(
-			$token_information.access_token,
+			$token_information.a,
 			timetable_name,
 			semester_number,
 			academic_year

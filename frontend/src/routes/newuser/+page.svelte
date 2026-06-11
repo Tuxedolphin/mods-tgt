@@ -14,7 +14,7 @@
 			return;
 		}
 		loading = true;
-		const result = await put_user_info($token_information.access_token, username);
+		const result = await put_user_info($token_information.a, username);
 
 		if (result.isOk()) {
 			goto(resolve('/home'));

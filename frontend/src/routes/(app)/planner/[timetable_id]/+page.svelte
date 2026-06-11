@@ -38,10 +38,7 @@
 	let unsubscribe_from_mods_list: Unsubscriber;
 	onMount(async () => {
 		is_timetable_loaded = false;
-		const timetable_data = await get_timetable_by_id(
-			$token_information.access_token,
-			params.timetable_id
-		);
+		const timetable_data = await get_timetable_by_id($token_information.a, params.timetable_id);
 
 		if (timetable_data.isOk()) {
 			timetable_metadata = timetable_data.value;
@@ -52,7 +49,7 @@
 					for (const timetable of updated_timetable) {
 						if (timetable.id == params.timetable_id) {
 							const response = await put_timetable_by_id(
-								$token_information.access_token,
+								$token_information.a,
 								timetable.id,
 								timetable
 							);

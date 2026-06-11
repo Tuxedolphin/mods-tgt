@@ -10,16 +10,16 @@ export const registered = writable(false);
 export const timetable_list_should_be_refreshed = writable(false);
 
 interface AccessTokenInfo {
-	access_token: string;
-	is_guest_login: boolean;
+	a: string; 		// Access Token
+	b: boolean; 	// Guest Login 
 }
 
-export const token_information = persisted('ac:tok', {
-	access_token: '',
-	is_guest_login: false
+export const token_information = persisted('xhnus', {
+	a: '',
+	b: false
 } as AccessTokenInfo);
 
-export const currentUserInformation = persisted('user', {} as UserProfileResponse, {
+export const currentUserInformation = persisted('clrsnus', {} as UserProfileResponse, {
 	storage: 'session'
 });
 

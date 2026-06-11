@@ -16,13 +16,13 @@
 			}
 
 			if (key.includes('access_token')) {
-				$token_information.access_token = value;
+				$token_information.a = value;
 				goto(resolve('/home'));
 			}
 		}
 		registered.set(false);
 
-		if ($token_information.access_token !== '' || $token_information.is_guest_login) {
+		if ($token_information.a !== '' || $token_information.b) {
 			goto(resolve('/home'));
 		}
 	});

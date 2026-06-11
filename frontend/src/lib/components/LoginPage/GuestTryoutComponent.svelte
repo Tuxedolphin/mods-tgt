@@ -21,8 +21,8 @@
 	class="btn {nameInput.length === 0 ? 'btn-disabled' : ''} btn-primary"
 	onclick={() => {
 		$currentUserInformation.displayName = nameInput;
-		$token_information.is_guest_login = true;
-		$token_information.access_token = '';
+		$token_information.b = true;
+		$token_information.a = '';
 		goto(resolve('/home'));
 	}}>Plan as a guest</button
 >

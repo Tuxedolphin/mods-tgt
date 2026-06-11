@@ -10,11 +10,11 @@
 
 	let token = $state('');
 	onMount(() => {
-		if (!$token_information.access_token) {
+		if (!$token_information.a) {
 			goto(resolve('/login'));
 		}
 
-		token = $token_information.access_token;
+		token = $token_information.a;
 	});
 </script>
 
@@ -26,7 +26,7 @@
 			<button
 				class="btn btn-error"
 				onclick={async () => {
-					$token_information.access_token = '';
+					$token_information.a = '';
 					currentUserInformation.reset();
 					const message = 'Logout Successful';
 					goto(resolve(`/login#error_description=${message}`));
