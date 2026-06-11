@@ -29,7 +29,7 @@
 	import { get_timetable_by_id, put_timetable_by_id } from '$lib/utils/db_operations';
 	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
 	import type { Unsubscriber } from 'svelte/store';
-	import { format_semester_name } from '$lib/utils/formatting_utils';
+	import { format_AY_name, format_semester_name } from '$lib/utils/formatting_utils';
 	import ModListGroup from '$lib/components/ModListGroup.svelte';
 	import { CircleX } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
@@ -74,19 +74,25 @@
 </script>
 
 {#if is_timetable_loaded}
-	<div class="flex justify-between">
-		<div class="flex items-center gap-4">
-			<CircleX
-				onclick={() => {
-					goto(resolve('/(app)/home'));
-				}}
-			></CircleX>
-			<h2 class="text-2xl font-bold">{timetable_metadata.name}</h2>
+	<div class="flex items-center justify-between gap-2">
+		<div class="flex min-w-0 flex-col">
+			<h1 class="min-w-0 truncate text-lg font-semibold">
+				{timetable_metadata.name}
+			</h1>
+			<h2 class="min-w-0 truncate text-xs">
+				{format_AY_name(timetable_metadata.academicYear)} - {format_semester_name(
+					timetable_metadata.semester
+				)}
+			</h2>
 		</div>
 
-		<h2 class="text-2xl">
-			AY{timetable_metadata.academicYear} - {format_semester_name(timetable_metadata.semester)}
-		</h2>
+		<CircleX
+			class="min-w-6"
+			size={32}
+			onclick={() => {
+				goto(resolve('/(app)/home'));
+			}}
+		></CircleX>
 	</div>
 
 	<SearchBar
