@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { registered, access_token } from '$lib/shared/shared.svelte';
+	import { registered, token_information } from '$lib/shared/shared.svelte';
 
 	let emailInput = $state('');
 	let passwordInput = $state('');
@@ -16,13 +16,13 @@
 			}
 
 			if (key.includes('access_token')) {
-				$access_token.access_token = value;
+				$token_information.access_token = value;
 				goto(resolve('/home'));
 			}
 		}
 		registered.set(false);
 
-		if ($access_token.access_token !== '' || $access_token.is_guest_login) {
+		if ($token_information.access_token !== '' || $token_information.is_guest_login) {
 			goto(resolve('/home'));
 		}
 	});

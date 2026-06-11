@@ -3,7 +3,7 @@
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import Timeline from '$lib/components/Timeline.svelte';
 	import TimetableComponent from '$lib/components/TimetableComponent.svelte';
-	import { currentlySelectedMods, access_token } from '$lib/shared/shared.svelte';
+	import { currentlySelectedMods, token_information } from '$lib/shared/shared.svelte';
 	import { getTimetable } from '$lib/utils/format_db_information';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -39,7 +39,7 @@
 	onMount(async () => {
 		is_timetable_loaded = false;
 		const timetable_data = await get_timetable_by_id(
-			$access_token.access_token,
+			$token_information.access_token,
 			params.timetable_id
 		);
 
@@ -52,7 +52,7 @@
 					for (const timetable of updated_timetable) {
 						if (timetable.id == params.timetable_id) {
 							const response = await put_timetable_by_id(
-								$access_token.access_token,
+								$token_information.access_token,
 								timetable.id,
 								timetable
 							);

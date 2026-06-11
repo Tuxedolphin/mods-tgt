@@ -3,18 +3,18 @@
 
 	import { onMount } from 'svelte';
 	import GreetingComponent from '$lib/components/GreetingComponent.svelte';
-	import { access_token } from '$lib/shared/shared.svelte';
+	import { token_information, currentUserInformation } from '$lib/shared/shared.svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import AvailableTimetableGrid from '$lib/components/AvailableTimetableGrid.svelte';
 
 	let token = $state('');
 	onMount(() => {
-		if (!$access_token.access_token) {
+		if (!$token_information.access_token) {
 			goto(resolve('/login'));
 		}
 
-		token = $access_token.access_token;
+		token = $token_information.access_token;
 	});
 </script>
 
@@ -25,8 +25,9 @@
 			<CreateNewTimetableButton></CreateNewTimetableButton>
 			<button
 				class="btn btn-error"
-				onclick={() => {
-					access_token.reset();
+				onclick={async () => {
+					$token_information.access_token = '';
+					currentUserInformation.reset();
 					const message = 'Logout Successful';
 					goto(resolve(`/login#error_description=${message}`));
 				}}>Logout</button

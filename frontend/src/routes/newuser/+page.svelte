@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import ModTogetherHero from '$lib/components/LoginPage/ModTogetherHero.svelte';
-	import { access_token } from '$lib/shared/shared.svelte';
+	import { token_information } from '$lib/shared/shared.svelte';
 	import { put_user_info } from '$lib/utils/db_operations';
 	import { resolve } from '$app/paths';
 
@@ -14,7 +14,7 @@
 			return;
 		}
 		loading = true;
-		const result = await put_user_info($access_token.access_token, username);
+		const result = await put_user_info($token_information.access_token, username);
 
 		if (result.isOk()) {
 			goto(resolve('/home'));

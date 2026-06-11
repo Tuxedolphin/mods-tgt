@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { access_token } from '$lib/shared/shared.svelte';
+	import { token_information } from '$lib/shared/shared.svelte';
 	import { create_empty_timetable } from '$lib/utils/db_operations';
 	import { format_semester_name } from '$lib/utils/formatting_utils';
 	import GenericDialog from '../GenericDialog.svelte';
@@ -13,7 +13,7 @@
 
 	async function create_new_empty_timetable() {
 		const timetable_info = await create_empty_timetable(
-			$access_token.access_token,
+			$token_information.access_token,
 			timetable_name,
 			semester_number,
 			academic_year

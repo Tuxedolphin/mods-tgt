@@ -14,8 +14,9 @@ import type {
 import { Err, Ok, type Result } from 'ts-results-es';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { access_token } from '$lib/shared/shared.svelte';
+import { token_information, currentUserInformation } from '$lib/shared/shared.svelte';
 import { getFromSessionStorage, storeInfoSessionStorage } from './fetch_from_cache';
+import { get } from 'svelte/store';
 
 const apiCalls = ky.create({
 	baseUrl: PUBLIC_DB_LINK
@@ -40,7 +41,7 @@ function create_ky_instance(custom_options: CustomOptions) {
 			afterResponse: [
 				async ({ response }) => {
 					if (custom_options.unauthorizedCheck && response.status === 401) {
-						access_token.reset();
+						token_information.reset();
 						const message = 'Login expired, please login in again';
 						goto(resolve(`/login#error_description=${message}`));
 					}
@@ -141,10 +142,11 @@ export async function put_user_info(
 export async function get_user_info(
 	access_token: string
 ): Promise<Result<UserProfileResponse, string>> {
-	const cache = getFromSessionStorage("user_info")
-
-	if (cache.isOk()) {
-		return Ok(cache.value as UserProfileResponse)
+	//const name = currentUserInformation
+	const user_info = get(currentUserInformation);
+	
+	if (user_info.username) {
+		return Ok(user_info);
 	}
 	try {
 		const get_user_info_db = create_ky_instance({
@@ -154,7 +156,7 @@ export async function get_user_info(
 		});
 		const timetables = await get_user_info_db.get('profile/me').json<UserProfileResponse>();
 
-		storeInfoSessionStorage("user_info", timetables);
+		currentUserInformation.set(timetables);
 		return Ok(timetables);
 	} catch (error) {
 		try {
