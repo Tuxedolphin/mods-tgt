@@ -5,6 +5,7 @@
 	import { modifyModColour, removeModEntry } from '$lib/utils/format_db_information';
 	import { colours } from '$lib/utils/formatting_utils';
 	import { X } from '@lucide/svelte';
+	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 	interface ModListModInfoProps {
 		timetable: TimetableWithMetadata;
 		acadYear: string;
@@ -57,39 +58,26 @@
 	</div>
 {/each}
 
-<dialog bind:this={dialog} class="modal">
-	<div class="modal-box">
-		<h3 class="text-lg font-bold">Change Colour</h3>
-		{#each colours as colour (colour)}
-			<button
-				onclick={() => {
-					currentlySelectedMods.set(
-						modifyModColour(
-							$currentlySelectedMods,
-							timetable.academicYear,
-							timetable.semester,
-							timetable.id,
-							timetable.name,
-							selectedLessonGroup[0].moduleCode,
-							colour
-						)
-					);
+<GenericDialog bind:dialog>
+	<h3 class="text-lg font-bold">Change Colour</h3>
+	{#each colours as colour (colour)}
+		<button
+			onclick={() => {
+				currentlySelectedMods.set(
+					modifyModColour(
+						$currentlySelectedMods,
+						timetable.academicYear,
+						timetable.semester,
+						timetable.id,
+						timetable.name,
+						selectedLessonGroup[0].moduleCode,
+						colour
+					)
+				);
 
-					dialog.close();
-				}}
-				class="flex-initial {colour} badge badge-lg"
-			></button>
-		{/each}
-
-		<div class="modal-action">
-			<!-- if there is a button in form, it will close the modal -->
-			<!-- <button class="btn btn-primary" onclick={() => create_new_empty_timetable()}
-				>Create timetable</button
-			> -->
-			<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
-		</div>
-	</div>
-	<form method="dialog" class="modal-backdrop">
-		<button>close</button>
-	</form>
-</dialog>
+				dialog.close();
+			}}
+			class="flex-initial {colour} badge badge-lg"
+		></button>
+	{/each}
+</GenericDialog>

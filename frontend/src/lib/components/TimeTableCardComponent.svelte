@@ -5,6 +5,7 @@
 	import type { TimetableInfo } from '$lib/types/db_raw_types';
 	import { delete_timetable_by_id } from '$lib/utils/db_operations';
 	import { format_semester_name } from '$lib/utils/formatting_utils';
+	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 
 	interface TimeTableCardComponentProps {
 		timetable: TimetableInfo;
@@ -44,25 +45,20 @@
 	</div>
 </div>
 
-<dialog bind:this={dialog} class="modal">
-	<div class="modal-box">
-		<h3 class="text-lg font-bold">Confirm?</h3>
-		<p class="py-4">
-			Delete the timetable: '{selected_timetable_name}' (this action is irreversible!)
-		</p>
+<GenericDialog bind:dialog>
+	<h3 class="text-lg font-bold">Confirm?</h3>
+	<p class="py-4">
+		Delete the timetable: '{selected_timetable_name}' (this action is irreversible!)
+	</p>
 
-		<div class="modal-action">
-			<button
-				class="btn btn-primary"
-				onclick={async () => {
-					await delete_timetable_by_id(access_token, timetable.id);
-					timetable_list_should_be_refreshed.set(true);
-				}}>Delete!</button
-			>
-			<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
-		</div>
+	<div class="modal-action">
+		<button
+			class="btn btn-primary"
+			onclick={async () => {
+				await delete_timetable_by_id(access_token, timetable.id);
+				timetable_list_should_be_refreshed.set(true);
+			}}>Delete!</button
+		>
+		<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
 	</div>
-	<form method="dialog" class="modal-backdrop">
-		<button>close</button>
-	</form>
-</dialog>
+</GenericDialog>

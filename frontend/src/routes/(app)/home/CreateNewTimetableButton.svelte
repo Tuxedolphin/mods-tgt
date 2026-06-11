@@ -4,6 +4,7 @@
 	import { access_token } from '$lib/shared/shared.svelte';
 	import { create_empty_timetable } from '$lib/utils/db_operations';
 	import { format_semester_name } from '$lib/utils/formatting_utils';
+	import GenericDialog from '../GenericDialog.svelte';
 
 	let dialog: HTMLDialogElement;
 	let timetable_name = $state('');
@@ -27,34 +28,30 @@
 
 <!-- Open the modal using ID.showModal() method -->
 <button class="btn btn-primary" onclick={() => dialog.showModal()}>Create new timetable</button>
-<dialog bind:this={dialog} class="modal">
-	<div class="modal-box">
-		<h3 class="text-lg font-bold">Create new timetable</h3>
-		<p class="py-4">Name your timetable:</p>
-		<input class="input" bind:value={timetable_name} />
 
-		<p class="py-4">Choose AY:</p>
-		<select class="select" bind:value={academic_year}>
-			<option>2025-2026</option>
-			<option>2024-2025</option>
-		</select>
+<GenericDialog bind:dialog>
+	<h3 class="text-lg font-bold">Create new timetable</h3>
+	<p class="py-4">Name your timetable:</p>
+	<input class="input" bind:value={timetable_name} />
 
-		<p class="py-4">Choose Semester:</p>
-		<select class="select" bind:value={semester_number}>
-			{#each { length: 4 }, i}
-				<option value={i + 1}>{format_semester_name(i + 1)}</option>
-			{/each}
-		</select>
+	<p class="py-4">Choose AY:</p>
+	<select class="select" bind:value={academic_year}>
+		<option>2025-2026</option>
+		<option>2024-2025</option>
+	</select>
 
-		<div class="modal-action">
-			<!-- if there is a button in form, it will close the modal -->
-			<button class="btn btn-primary" onclick={() => create_new_empty_timetable()}
-				>Create timetable</button
-			>
-			<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
-		</div>
+	<p class="py-4">Choose Semester:</p>
+	<select class="select" bind:value={semester_number}>
+		{#each { length: 4 }, i}
+			<option value={i + 1}>{format_semester_name(i + 1)}</option>
+		{/each}
+	</select>
+
+	<div class="modal-action">
+		<!-- if there is a button in form, it will close the modal -->
+		<button class="btn btn-primary" onclick={() => create_new_empty_timetable()}
+			>Create timetable</button
+		>
+		<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
 	</div>
-	<form method="dialog" class="modal-backdrop">
-		<button>close</button>
-	</form>
-</dialog>
+</GenericDialog>
