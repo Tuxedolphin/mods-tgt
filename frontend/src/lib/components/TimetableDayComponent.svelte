@@ -28,18 +28,8 @@
 	);
 	const showModName = $state(false);
 	const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
-</script>
 
-<button
-	style:margin-left="{leftMarginPercentage}%"
-	style:width="{width}%;"
-	class="absolute
-	{timeTableDayInfo.isAChoiceSelection ? 'opacity-30' : 'opacity-100'}
-	mt-{timeTableDayInfo.normalisedStartDuration * 192} h-{timeTableDayInfo.normalisedEndDuration *
-		192 -
-		timeTableDayInfo.normalisedStartDuration *
-			192} border {timetable_colour} text-xs wrap-break-word text-black"
-	onclick={async () => {
+	async function changeTimetable() {
 		if ($chooseModState.lessonType === '') {
 			$chooseModState = {
 				lessonType: timeTableDayInfo.lessonSchedule.lessonType,
@@ -68,14 +58,49 @@
 				moduleCode: ''
 			};
 		}
-	}}
+	}
+
+	function styledAsPossibleSelection(): string {
+		return timeTableDayInfo.isAChoiceSelection ? 'opacity-30' : 'opacity-100';
+	}
+
+	function calculateHeight(): string {
+		return `h-${
+			timeTableDayInfo.normalisedEndDuration * 192 - timeTableDayInfo.normalisedStartDuration * 192
+		}`;
+	}
+	function calculateTopMargin(): string {
+		return `mt-${timeTableDayInfo.normalisedStartDuration * 192}`;
+	}
+</script>
+
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	style:margin-left="{leftMarginPercentage}%"
+	style:width="{width}%;"
+	class="absolute
+	rounded
+	p-1
+	{calculateHeight()}
+	{styledAsPossibleSelection()}
+	{calculateTopMargin()}  
+	{timetable_colour} 
+	text-[10px]
+	wrap-break-word
+	text-black
+	md:text-xs"
+	onclick={async () => changeTimetable()}
 >
-	<div class="text-base font-bold">
+	<div class="font-semibold">
 		{timeTableDayInfo.moduleCode}
 		{showModName ? timeTableDayInfo.moduleName : ''}
 	</div>
 
 	<div class="truncate">
-		{timeTableDayInfo.lessonSchedule.lessonType} [{timeTableDayInfo.lessonSchedule.classNo}]
+		{timeTableDayInfo.lessonSchedule.lessonType}
 	</div>
-</button>
+	<div class="opacity-50">
+		[{timeTableDayInfo.lessonSchedule.classNo}]
+	</div>
+</div>
