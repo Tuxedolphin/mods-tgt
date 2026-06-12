@@ -13,12 +13,12 @@
 	}
 </script>
 
-<div class="w-10 flex-initial text-center text-xs">
-	<div class="h-12 align-middle">
+<div class="w-8 flex-initial text-center text-xs">
+	<div class="h-8 align-middle">
 		<p class="relative top-4">{formatShortTime(8)}</p>
 	</div>
 	{#each { length: 12 }, i}
-		<div class="h-16 align-middle">
+		<div class="h-12 align-middle">
 			<p class="relative top-8">{formatShortTime(i + 9)}</p>
 		</div>
 	{/each}

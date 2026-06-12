@@ -25,8 +25,6 @@
 	});
 </script>
 
-<h2 class="p-1 text-2xl">Selected Mods:</h2>
-
 <div class="grid grid-cols-1 gap-4 p-1 lg:grid-cols-3">
 	{#each updated_mod_list as tt (tt.id)}
 		<ModListModInfo timetable={tt} {acadYear}></ModListModInfo>

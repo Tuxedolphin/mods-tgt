@@ -9,13 +9,12 @@
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import type { Unsubscriber } from 'svelte/store';
 
-	const heightOfOneHourLessonPx = 16;
+	const height_of_one_hour_lesson = 12;
 
 	interface TimetablesProps {
 		timetables: TimetableWithMetadata[];
 		acadYear: string;
 		semester: number;
-
 		timetable_id: string;
 		timetable_name: string;
 	}
@@ -59,7 +58,11 @@
 	<div class="grid grid-cols-{Object.keys(lmao).length} grid-rows-12">
 		{#each { length: max_hours_displayed }, y}
 			{#each { length: Object.keys(lmao).length }, x}
-				<BackgroundTiles {max_hours_displayed} x_cord={x} y_cord={y} {heightOfOneHourLessonPx}
+				<BackgroundTiles
+					{max_hours_displayed}
+					x_cord={x}
+					y_cord={y}
+					heightOfOneHourLessonPx={height_of_one_hour_lesson}
 				></BackgroundTiles>
 			{/each}
 		{/each}
@@ -68,6 +71,7 @@
 				<TimetableWeekComponent
 					{timetable_id}
 					{timetable_name}
+					{height_of_one_hour_lesson}
 					timetableDayDisplayInfo={timetableDayInfo.flat()}
 					day={idx}
 					{acadYear}
@@ -80,7 +84,11 @@
 	<div class="grid grid-cols-5 grid-rows-12">
 		{#each { length: max_hours_displayed }, y}
 			{#each { length: max_days_displayed }, x}
-				<BackgroundTiles {max_hours_displayed} x_cord={x} y_cord={y} {heightOfOneHourLessonPx}
+				<BackgroundTiles
+					{max_hours_displayed}
+					x_cord={x}
+					y_cord={y}
+					heightOfOneHourLessonPx={height_of_one_hour_lesson}
 				></BackgroundTiles>
 			{/each}
 		{/each}

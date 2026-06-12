@@ -10,6 +10,7 @@
 		timetable_id: string;
 		timetable_name: string;
 		timetable_colour: string;
+		height_of_one_hour_lesson: number;
 	}
 	const {
 		timeTableDayInfo,
@@ -17,7 +18,8 @@
 		semester,
 		timetable_id,
 		timetable_name,
-		timetable_colour
+		timetable_colour,
+		height_of_one_hour_lesson
 	}: TimetableDayProps = $props();
 
 	const spaceAllowedToUse = $derived(100.0 / timeTableDayInfo.outerGroupLength);
@@ -64,13 +66,16 @@
 		return timeTableDayInfo.isAChoiceSelection ? 'opacity-30' : 'opacity-100';
 	}
 
+	const pixel_conversion = 12 * height_of_one_hour_lesson;
+
 	function calculateHeight(): string {
 		return `h-${
-			timeTableDayInfo.normalisedEndDuration * 192 - timeTableDayInfo.normalisedStartDuration * 192
+			timeTableDayInfo.normalisedEndDuration * pixel_conversion -
+			timeTableDayInfo.normalisedStartDuration * pixel_conversion
 		}`;
 	}
 	function calculateTopMargin(): string {
-		return `mt-${timeTableDayInfo.normalisedStartDuration * 192}`;
+		return `mt-${timeTableDayInfo.normalisedStartDuration * pixel_conversion}`;
 	}
 </script>
 
