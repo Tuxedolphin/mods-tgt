@@ -94,14 +94,6 @@
 			}}
 		></CircleX>
 	</div>
-
-	<SearchBar
-		timetable_id={timetable_metadata.id}
-		timetable_name={timetable_metadata.name}
-		acadYear={timetable_metadata.academicYear}
-		semester={timetable_metadata.semester}
-	></SearchBar>
-
 	<div class="flex">
 		<Timeline></Timeline>
 		<div class="flex-1 flex-col">
@@ -121,6 +113,13 @@
 			></TimetableComponent>
 		</div>
 	</div>
+
+	<SearchBar
+		timetable_id={timetable_metadata.id}
+		timetable_name={timetable_metadata.name}
+		acadYear={timetable_metadata.academicYear}
+		semester={timetable_metadata.semester}
+	></SearchBar>
 
 	<ModListGroup acadYear={timetable_metadata.academicYear} timetables={currentTimetableDisplay}
 	></ModListGroup>
