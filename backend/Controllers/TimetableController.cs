@@ -1,5 +1,4 @@
 using Backend.DTOs;
-using Backend.Models;
 using Backend.Services.Timetables;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +15,7 @@ public class TimetableController(ITimetableService service) : BaseController
     [HttpPost]
     public async Task<IActionResult> CreateTimetable([FromBody] CreateTimetableRequest request)
     {
-        Timetable timetable = await _service.CreateTimetableAsync(request, GetUserId());
+        TimetableResponse timetable = await _service.CreateTimetableAsync(request, GetUserId());
 
         return CreatedAtAction(nameof(GetTimetableById), new { id = timetable.Id }, timetable);
     }
@@ -25,6 +24,7 @@ public class TimetableController(ITimetableService service) : BaseController
     public async Task<IActionResult> DeleteTimetable([FromRoute] Guid id)
     {
         await _service.DeleteTimetableAsync(id, GetUserId());
+
         return NoContent();
     }
 
@@ -36,7 +36,7 @@ public class TimetableController(ITimetableService service) : BaseController
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Timetable>> GetTimetableById([FromRoute] Guid id)
+    public async Task<ActionResult<TimetableResponse>> GetTimetableById([FromRoute] Guid id)
     {
         var timetable = await _service.GetTimetableByIdAsync(id, GetUserId());
         return Ok(timetable);
