@@ -1,0 +1,210 @@
+using Backend.Data;
+using Backend.DTOs;
+using Backend.DTOs.Mappings;
+using Backend.Infrastructure;
+using Backend.Models;
+using Backend.Services.Timetables;
+using Microsoft.EntityFrameworkCore;
+
+namespace Backend.Services.Rooms;
+
+public class RoomService(
+    ILogger<RoomService> logger,
+    IRoomTracker roomTracker,
+    IProfileTracker profileTracker,
+    ITimetableService timetableService,
+    AppDbContext context
+) : IRoomService
+{
+    private readonly ILogger<RoomService> _logger = logger;
+    private readonly IRoomTracker _roomTracker = roomTracker;
+    private readonly IProfileTracker _profileTracker = profileTracker;
+    private readonly ITimetableService _timetableService = timetableService;
+    private readonly AppDbContext _context = context;
+
+    // This is only for creating a SignalR room, not for actually creating a timetable room
+    // For that please use create timetable API endpoint
+    public void CreateRoom(Guid roomId)
+    {
+        _roomTracker.AddRoom(roomId);
+    }
+
+    public bool RoomExists(Guid roomId)
+    {
+        return _roomTracker.RoomExists(roomId);
+    }
+
+    public bool HandleJoinRoom(Guid userId, Guid roomId)
+    {
+        if (_roomTracker.GetRoomOfUser(userId, out Guid oldRoomId))
+            HandleLeaveRoom(userId, oldRoomId);
+
+        if (_roomTracker.AddUserToRoom(userId, roomId))
+            return true;
+
+        RoomServiceLogs.LogAttemptedJoinNonExistentRoom(_logger, roomId, userId);
+        return false;
+    }
+
+    public bool HandleLeaveRoom(Guid userId, Guid roomId)
+    {
+        if (_roomTracker.RemoveUserFromRoom(userId, roomId))
+        {
+            if (_roomTracker.GetUsersInRoom(roomId, out var users) && users.Count > 0)
+                return true;
+
+            CloseRoom(roomId);
+        }
+
+        RoomServiceLogs.LogAttemptedLeaveNonExistentRoom(_logger, roomId, userId);
+        return false;
+    }
+
+    public async Task<RoomInformation?> GetRoomInformation(Guid roomId)
+    {
+        // If room cannot be found
+        if (
+            !_roomTracker.GetTimetablesInRoom(roomId, out var timetables)
+            || !_roomTracker.GetUsersInRoom(roomId, out var users)
+        )
+        {
+            return null;
+        }
+
+        var profilesOfUsers = await Task.WhenAll(users.ToList().Select(FindOrAddProfileAsync))
+            .MapAsync(p => p.OfType<Profile>().ToList());
+
+        var timetablesInformation = await Task.WhenAll(
+                timetables
+                    .ToList()
+                    .Select(async t =>
+                    {
+                        var profile = await FindOrAddProfileAsync(t.UserId);
+                        return profile == null ? null : t.ToDetailedResponse(profile);
+                    })
+            )
+            .MapAsync(t => t.OfType<TimetableDetailedResponse>().ToList());
+
+        return new RoomInformation(roomId, profilesOfUsers, timetablesInformation);
+    }
+
+    public CreateTimetableResult HandleCreateTimetable(
+        Guid roomId,
+        Guid userId,
+        CreateTimetableRequest timetableRequest,
+        Guid? copyOf
+    )
+    {
+        if (!_roomTracker.GetTimetablesInRoom(roomId, out var timetables))
+            return CreateTimetableResult.RoomNotFound;
+
+        if (copyOf is not null && timetables.Any(t => t.OriginalTimetableId == copyOf))
+            return CreateTimetableResult.TImetableIdConflict;
+
+        _roomTracker.AddOrUpdateTimetable(
+            roomId,
+            new()
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Name = timetableRequest.Name,
+                Semester = timetableRequest.Semester,
+                AcademicYear = timetableRequest.AcademicYear,
+                MetaData = timetableRequest.MetaData,
+                OriginalTimetableId = copyOf,
+                RoomId = roomId,
+            }
+        );
+
+        return CreateTimetableResult.Success;
+    }
+
+    public async Task<bool> HandleUpdateTimetable(
+        Guid roomId,
+        Guid timetableId,
+        UpdateTimetableRequest timetableRequest
+    )
+    {
+        var timetable =
+            _roomTracker.GetTimetableById(roomId, timetableId)
+            ?? await _context.Timetables.FirstOrDefaultAsync(t =>
+                t.Id == timetableId && t.RoomId == roomId
+            );
+
+        if (timetable is null)
+            return false;
+
+        _roomTracker.AddOrUpdateTimetable(roomId, timetable.ApplyUpdate(timetableRequest));
+        return true;
+    }
+
+    private async Task<Profile?> FindOrAddProfileAsync(Guid userId)
+    {
+        if (_profileTracker.GetUserById(userId, out Profile? profile))
+            return profile;
+
+        profile = await _context.Profiles.FirstOrDefaultAsync(t => t.Id == userId);
+        if (profile == null)
+            return null;
+
+        _profileTracker.SetUser(profile);
+        return profile;
+    }
+
+    public bool CloseRoom(Guid roomId)
+    {
+        if (!_roomTracker.GetUsersInRoom(roomId, out var users))
+            return false;
+
+        return _profileTracker.RemoveUsers(users) && _roomTracker.CloseRoom(roomId);
+    }
+
+    public bool HandleDeleteTimetable(Guid roomId, Guid timetableId)
+    {
+        // The main timetable is the one the roomId is named after
+        if (roomId == timetableId)
+            return false;
+
+        _roomTracker.DeleteTimetable(roomId, timetableId);
+        return true;
+
+        // TODO: Add logging
+    }
+
+    public async Task<bool> CommitChanges(Guid roomId)
+    {
+        try
+        {
+            if (_roomTracker.GetChangedTimetables(roomId, out var changedTimetables))
+                await changedTimetables.ForEachAsync(_timetableService.UpsertTimetableAsync);
+
+            if (_roomTracker.GetDeletedTimetables(roomId) is { } deletedTimetables)
+            {
+                await deletedTimetables.ForEachAsync(_timetableService.FlushDeleteTimetableAsync);
+                _roomTracker.RemoveTimetablesFromDeleted(roomId, deletedTimetables);
+            }
+
+            await _context.SaveChangesAsync();
+            _roomTracker.RemoveTimetablesFromChanged([.. changedTimetables.Select(t => t.Id)]);
+
+            return true;
+        }
+        catch (InvalidOperationException e)
+        {
+            // TODO: Add logging, this is when the main timetable is going to be deleted
+            return false;
+        }
+        catch (DbUpdateException e)
+        {
+            // TODO: Some DB writing error
+            return false;
+        }
+    }
+}
+
+public enum CreateTimetableResult
+{
+    Success,
+    RoomNotFound,
+    TImetableIdConflict,
+}

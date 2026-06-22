@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using Backend.Infrastructure;
 using Backend.Models;
 
-namespace Backend.Services.Room;
+namespace Backend.Services.Rooms;
 
 public class RoomTracker : IRoomTracker
 {
@@ -20,9 +20,17 @@ public class RoomTracker : IRoomTracker
 
     private readonly ConcurrentHashSet<Guid> _changedTimetables = [];
 
+    // Dict of roomId: Hash set of timetableIds
+    private readonly ConcurrentDictionary<Guid, ConcurrentHashSet<Guid>> _deletedTimetables = [];
+
     public bool AddRoom(Guid roomId)
     {
         return _rooms.TryAdd(roomId, new RoomState());
+    }
+
+    public bool RoomExists(Guid roomId)
+    {
+        return _rooms.ContainsKey(roomId);
     }
 
     public bool AddUserToRoom(Guid userId, Guid roomId)
@@ -67,7 +75,7 @@ public class RoomTracker : IRoomTracker
         {
             roomState.Users.Remove(userId);
             if (roomState.Users.Count == 0)
-                DeleteRoom(roomId);
+                CloseRoom(roomId);
 
             // We don't remove the timetable from here as the timetable should be independent
             // of whether or not the user is in the room
@@ -79,11 +87,14 @@ public class RoomTracker : IRoomTracker
         return false;
     }
 
-    public bool UpdateTimetable(Guid roomId, Timetable timetable)
+    // This assumes that there is something to be changed about the timetable,
+    // be it to create it in the database or to update the entry in the database
+    public bool AddOrUpdateTimetable(Guid roomId, Timetable timetable)
     {
         if (_rooms.TryGetValue(roomId, out var roomState))
         {
             roomState.Timetables[timetable.Id] = timetable;
+            _changedTimetables.Add(roomId);
             return true;
         }
 
@@ -95,6 +106,8 @@ public class RoomTracker : IRoomTracker
         if (_rooms.TryGetValue(roomId, out var roomState))
         {
             roomState.Timetables.TryRemove(timetableId, out _);
+            _changedTimetables.Remove(roomId);
+            _deletedTimetables.GetOrAdd(roomId, []).Add(timetableId);
             return true;
         }
 
@@ -118,7 +131,7 @@ public class RoomTracker : IRoomTracker
         return _rooms.TryAdd(roomId, roomState);
     }
 
-    public bool DeleteRoom(Guid roomId)
+    public bool CloseRoom(Guid roomId)
     {
         bool success = _rooms.TryRemove(roomId, out RoomState? roomState);
 
@@ -135,4 +148,35 @@ public class RoomTracker : IRoomTracker
         // We don't silently fail, even though the behaviour is the same, for logging purposes
         return success;
     }
+
+    public Timetable? GetTimetableById(Guid roomId, Guid timetableId) =>
+        _rooms.TryGetValue(roomId, out var roomInfo)
+            ? roomInfo.Timetables.GetValueOrDefault(timetableId)
+            : null;
+
+    public bool GetChangedTimetables(Guid roomId, out IReadOnlyCollection<Timetable> timetables)
+    {
+        if (!GetTimetablesInRoom(roomId, out timetables))
+            return false;
+
+        timetables = [.. timetables.Where(t => _changedTimetables.Contains(t.Id))];
+        return true;
+    }
+
+    public IReadOnlyCollection<Guid> GetDeletedTimetables(Guid roomId) =>
+        _deletedTimetables.TryGetValue(roomId, out var timetableIds) ? [.. timetableIds] : [];
+
+    public IReadOnlyCollection<Guid> RemoveTimetablesFromChanged(
+        IReadOnlyCollection<Guid> timetables
+    ) => [.. timetables.Where(id => !_changedTimetables.Remove(id))];
+
+    public IReadOnlyCollection<Guid> RemoveTimetablesFromDeleted(
+        Guid roomId,
+        IReadOnlyCollection<Guid> timetables
+    ) =>
+        [
+            .. timetables.Where(id =>
+                _deletedTimetables.TryGetValue(roomId, out var hash) && hash.Remove(id)
+            ),
+        ];
 }

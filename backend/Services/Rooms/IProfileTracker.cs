@@ -1,6 +1,6 @@
 using Backend.Models;
 
-namespace Backend.Services.Room;
+namespace Backend.Services.Rooms;
 
 public interface IProfileTracker
 {
@@ -9,5 +9,6 @@ public interface IProfileTracker
     public bool GetUserById(Guid userId, out Profile? profile);
     public void SetUser(Profile profile);
     public bool RemoveUser(Guid userId);
+    public bool RemoveUsers(IReadOnlyCollection<Guid> users);
     public void ClearAllUsers();
 }

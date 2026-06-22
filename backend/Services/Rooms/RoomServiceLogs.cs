@@ -1,4 +1,4 @@
-namespace Backend.Services.Room;
+namespace Backend.Services.Rooms;
 
 public static partial class RoomServiceLogs
 {
