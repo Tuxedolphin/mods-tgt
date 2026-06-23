@@ -5,6 +5,7 @@ using Backend.Infrastructure;
 using Backend.Services.Rooms;
 using Backend.Services.Timetables;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Hubs;
@@ -22,7 +23,7 @@ public class RoomHub(
     private readonly IRoomService _roomService = roomService;
     private readonly ITimetableService _timetableService = timetableService;
     private readonly IRoomTracker _roomTracker = roomTracker;
-    private readonly IProfileTracker profileTracker = profileTracker;
+    private readonly IProfileTracker _profileTracker = profileTracker;
 
     private Guid GetUserId()
     {
@@ -45,6 +46,8 @@ public class RoomHub(
         var userId = GetUserId();
         RoomHubLogs.LogUserConnected(_logger, userId, Context.ConnectionId);
 
+        await _roomService.AddProfileAsync(userId);
+
         // TODO: some sort of timer (with below) which automatically reconnects a user back to a room
 
         await base.OnConnectedAsync();
@@ -56,7 +59,7 @@ public class RoomHub(
         RoomHubLogs.LogUserDisconnected(_logger, exception, userId, Context.ConnectionId);
 
         await LeaveRoom(GetCurrentRoomId(userId));
-        profileTracker.RemoveUser(userId);
+        _profileTracker.RemoveUser(userId);
 
         // TODO: some sort of timer which when expires logs the user out of the room as well
 
@@ -76,8 +79,13 @@ public class RoomHub(
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
         RoomHubLogs.LogUserJoinedRoom(_logger, userId, roomId);
 
-        return await _roomService.GetRoomInformation(roomId)
+        var roomInformation =
+            await _roomService.GetRoomInformationAsync(roomId)
             ?? throw new HubException("Failed to retrieve room information");
+
+        await Clients.OthersInGroup(roomId.ToString()).ReceiveUserUpdate(roomInformation.Users);
+
+        return roomInformation;
     }
 
     public async Task LeaveRoom(Guid roomId)
@@ -88,22 +96,34 @@ public class RoomHub(
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
         RoomHubLogs.LogUserLeftRoom(_logger, userId, roomId);
 
+        try
+        {
+            await SendUpdatedProfilesToGroupAsync(roomId);
+        }
+        catch (NotFoundException)
+        {
+            // We ignore the error here, since the room may have been deleted after the user left
+            // (i.e. no user left)
+        }
+
         await _roomService.CommitChanges(roomId);
     }
 
     public async Task<RoomInformation> GetRoomInformation(Guid roomId)
     {
-        return await _roomService.GetRoomInformation(roomId)
+        return await _roomService.GetRoomInformationAsync(roomId)
             ?? throw new HubException($"Room {roomId} not found");
     }
 
-    public async Task CreateTimetable(CreateTimetableRequest timetableRequest) =>
-        _roomService.HandleCreateTimetable(
-            GetCurrentRoomId(GetUserId()),
-            GetUserId(),
-            timetableRequest,
-            null
-        );
+    public async Task CreateTimetable(CreateTimetableRequest timetableRequest)
+    {
+        var userId = GetUserId();
+        var roomId = GetCurrentRoomId(userId);
+
+        _roomService.HandleCreateTimetable(roomId, userId, timetableRequest, null);
+
+        await SendUpdatedTimetableToGroupAsync(roomId);
+    }
 
     public async Task CreateCopyOfTimetable(Guid timetableId)
     {
@@ -124,6 +144,8 @@ public class RoomHub(
                 timetable,
                 timetableId
             );
+
+            await SendUpdatedTimetableToGroupAsync(GetCurrentRoomId(userId));
         }
         catch (NotFoundException)
         {
@@ -148,7 +170,25 @@ public class RoomHub(
                 "Cannot delete main timetable of the room in Hub. Please use DEL /timetable/{id}"
             );
         }
+
+        await SendUpdatedTimetableToGroupAsync(roomId);
     }
+
+    private async Task SendUpdatedTimetableToGroupAsync(Guid roomId) =>
+        await Clients
+            .Group(roomId.ToString())
+            .ReceiveTimetableUpdate(
+                await _roomService.GetTimetablesDetailedInRoomAsync(roomId)
+                    ?? throw new NotFoundException($"Room with id ${roomId} was not found")
+            );
+
+    private async Task SendUpdatedProfilesToGroupAsync(Guid roomId) =>
+        await Clients
+            .Group(roomId.ToString())
+            .ReceiveUserUpdate(
+                await _roomService.GetProfilesInRoomAsync(roomId)
+                    ?? throw new NotFoundException($"Room with id ${roomId} was not found")
+            );
 
     // This method is used mainly as a placeholder for testing, but it could be used in the future
     // to send a message as a chat feature

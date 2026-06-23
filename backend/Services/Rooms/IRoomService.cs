@@ -8,6 +8,8 @@ public interface IRoomService
     public void CreateRoom(Guid roomId);
     public bool RoomExists(Guid roomId);
 
+    public Task<bool> AddProfileAsync(Guid userId);
+
     public bool HandleJoinRoom(Guid userId, Guid roomId);
     public bool HandleLeaveRoom(Guid userId, Guid roomId);
     public bool HandleDeleteTimetable(Guid roomId, Guid timetableId);
@@ -26,7 +28,12 @@ public interface IRoomService
         Guid timetableId,
         UpdateTimetableRequest timetableRequest
     );
-    public Task<RoomInformation?> GetRoomInformation(Guid roomId);
+
+    public Task<RoomInformation?> GetRoomInformationAsync(Guid roomId);
+    public Task<IReadOnlyCollection<Profile>?> GetProfilesInRoomAsync(Guid roomId);
+    public Task<IReadOnlyCollection<TimetableDetailedResponse>?> GetTimetablesDetailedInRoomAsync(
+        Guid roomId
+    );
 
     public bool CloseRoom(Guid roomId);
     public Task<bool> CommitChanges(Guid roomId);

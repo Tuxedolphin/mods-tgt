@@ -60,21 +60,34 @@ public class RoomService(
         return false;
     }
 
-    public async Task<RoomInformation?> GetRoomInformation(Guid roomId)
+    public async Task<RoomInformation?> GetRoomInformationAsync(Guid roomId)
     {
-        // If room cannot be found
-        if (
-            !_roomTracker.GetTimetablesInRoom(roomId, out var timetables)
-            || !_roomTracker.GetUsersInRoom(roomId, out var users)
-        )
-        {
+        var profilesOfUsers = await GetProfilesInRoomAsync(roomId);
+        var timetablesInformation = await GetTimetablesDetailedInRoomAsync(roomId);
+
+        if (profilesOfUsers is null || timetablesInformation is null)
             return null;
-        }
 
-        var profilesOfUsers = await Task.WhenAll(users.ToList().Select(FindOrAddProfileAsync))
+        return new RoomInformation(roomId, profilesOfUsers, timetablesInformation);
+    }
+
+    public async Task<IReadOnlyCollection<Profile>?> GetProfilesInRoomAsync(Guid roomId)
+    {
+        if (!_roomTracker.GetUsersInRoom(roomId, out var users))
+            return null;
+
+        return await Task.WhenAll(users.ToList().Select(FindOrAddProfileAsync))
             .MapAsync(p => p.OfType<Profile>().ToList());
+    }
 
-        var timetablesInformation = await Task.WhenAll(
+    public async Task<IReadOnlyCollection<TimetableDetailedResponse>?> GetTimetablesDetailedInRoomAsync(
+        Guid roomId
+    )
+    {
+        if (!_roomTracker.GetTimetablesInRoom(roomId, out var timetables))
+            return null;
+
+        return await Task.WhenAll(
                 timetables
                     .ToList()
                     .Select(async t =>
@@ -84,8 +97,6 @@ public class RoomService(
                     })
             )
             .MapAsync(t => t.OfType<TimetableDetailedResponse>().ToList());
-
-        return new RoomInformation(roomId, profilesOfUsers, timetablesInformation);
     }
 
     public CreateTimetableResult HandleCreateTimetable(
@@ -138,13 +149,27 @@ public class RoomService(
         return true;
     }
 
+    // Will not add/ update existing profiles
+    public async Task<bool> AddProfileAsync(Guid userId)
+    {
+        if (_profileTracker.GetUserById(userId, out _))
+            return true;
+
+        var profile = await _context.Profiles.FirstOrDefaultAsync(t => t.Id == userId);
+        if (profile is null)
+            return false;
+
+        _profileTracker.SetUser(profile);
+        return true;
+    }
+
     private async Task<Profile?> FindOrAddProfileAsync(Guid userId)
     {
         if (_profileTracker.GetUserById(userId, out Profile? profile))
             return profile;
 
         profile = await _context.Profiles.FirstOrDefaultAsync(t => t.Id == userId);
-        if (profile == null)
+        if (profile is null)
             return null;
 
         _profileTracker.SetUser(profile);
