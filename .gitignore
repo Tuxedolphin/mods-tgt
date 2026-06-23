@@ -26,11 +26,12 @@ Session.vim
 # =========================
 **/obj/
 **/bin/
-backend/TestResults/
+**/TestResults/
 backend/logs/
 
 # Local Environment Configuration
 backend/appsettings.Local.json
+backend.tests/appsettings.Local.json
 
 # =========================
 # Frontend (SvelteKit / Node)
