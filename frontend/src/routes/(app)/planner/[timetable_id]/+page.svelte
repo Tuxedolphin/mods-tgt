@@ -3,7 +3,7 @@
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import Timeline from '$lib/components/Timeline.svelte';
 	import TimetableComponent from '$lib/components/TimetableComponent.svelte';
-	import { currentlySelectedMods, access_token } from '$lib/shared/shared.svelte';
+	import { currentlySelectedMods, token_information } from '$lib/shared/shared.svelte';
 	import { getTimetable } from '$lib/utils/format_db_information';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -29,7 +29,7 @@
 	import { get_timetable_by_id, put_timetable_by_id } from '$lib/utils/db_operations';
 	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
 	import type { Unsubscriber } from 'svelte/store';
-	import { format_semester_name } from '$lib/utils/formatting_utils';
+	import { format_AY_name, format_semester_name } from '$lib/utils/formatting_utils';
 	import ModListGroup from '$lib/components/ModListGroup.svelte';
 	import { CircleX } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
@@ -38,10 +38,7 @@
 	let unsubscribe_from_mods_list: Unsubscriber;
 	onMount(async () => {
 		is_timetable_loaded = false;
-		const timetable_data = await get_timetable_by_id(
-			$access_token.access_token,
-			params.timetable_id
-		);
+		const timetable_data = await get_timetable_by_id($token_information.a, params.timetable_id);
 
 		if (timetable_data.isOk()) {
 			timetable_metadata = timetable_data.value;
@@ -52,7 +49,7 @@
 					for (const timetable of updated_timetable) {
 						if (timetable.id == params.timetable_id) {
 							const response = await put_timetable_by_id(
-								$access_token.access_token,
+								$token_information.a,
 								timetable.id,
 								timetable
 							);
@@ -77,32 +74,36 @@
 </script>
 
 {#if is_timetable_loaded}
-	<div class="flex justify-between">
-		<div class="flex items-center gap-4">
-			<CircleX
-				onclick={() => {
-					goto(resolve('/(app)/home'));
-				}}
-			></CircleX>
-			<h2 class="text-2xl font-bold">{timetable_metadata.name}</h2>
+	<div class="flex items-center justify-between gap-2">
+		<div class="flex min-w-0 flex-col">
+			<h1 class="min-w-0 truncate text-lg font-semibold">
+				{timetable_metadata.name}
+			</h1>
+			<h2 class="min-w-0 truncate text-xs">
+				{format_AY_name(timetable_metadata.academicYear)} - {format_semester_name(
+					timetable_metadata.semester
+				)}
+			</h2>
 		</div>
 
-		<h2 class="text-2xl">
-			AY{timetable_metadata.academicYear} - {format_semester_name(timetable_metadata.semester)}
-		</h2>
+		<CircleX
+			class="min-w-6"
+			size={32}
+			onclick={() => {
+				goto(resolve('/(app)/home'));
+			}}
+		></CircleX>
 	</div>
-
-	<SearchBar
-		timetable_id={timetable_metadata.id}
-		timetable_name={timetable_metadata.name}
-		acadYear={timetable_metadata.academicYear}
-		semester={timetable_metadata.semester}
-	></SearchBar>
-
 	<div class="flex">
 		<Timeline></Timeline>
 		<div class="flex-1 flex-col">
-			<DaysOfWeekHeader></DaysOfWeekHeader>
+			<DaysOfWeekHeader
+				timetable_id={timetable_metadata.id}
+				timetable_name={timetable_metadata.name}
+				timetables={currentTimetableDisplay}
+				acadYear={timetable_metadata.academicYear}
+				semester={timetable_metadata.semester}
+			></DaysOfWeekHeader>
 			<TimetableComponent
 				timetable_id={timetable_metadata.id}
 				timetable_name={timetable_metadata.name}
@@ -113,5 +114,13 @@
 		</div>
 	</div>
 
-	<ModListGroup></ModListGroup>
+	<SearchBar
+		timetable_id={timetable_metadata.id}
+		timetable_name={timetable_metadata.name}
+		acadYear={timetable_metadata.academicYear}
+		semester={timetable_metadata.semester}
+	></SearchBar>
+
+	<ModListGroup acadYear={timetable_metadata.academicYear} timetables={currentTimetableDisplay}
+	></ModListGroup>
 {/if}

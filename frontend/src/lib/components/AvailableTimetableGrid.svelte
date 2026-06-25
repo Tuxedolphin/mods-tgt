@@ -35,7 +35,7 @@
 	});
 </script>
 
-<div class="grid grid-cols-3 gap-4">
+<div class="grid gap-4 lg:grid-cols-3">
 	{#each availableTimetables as timetable (timetable.id)}
 		<TimeTableCardComponent {access_token} {timetable}></TimeTableCardComponent>
 	{/each}

@@ -2,9 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import ModTogetherHero from '$lib/components/LoginPage/ModTogetherHero.svelte';
+	
 </script>
 
 <ModTogetherHero>
+	
 	<div>
 		It's a lot like <a class="cursor-pointer underline" href="https://nusmods.com/">NUSMods</a>, but
 		you can plan with your friends live!

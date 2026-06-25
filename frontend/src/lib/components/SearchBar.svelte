@@ -6,7 +6,7 @@
 	import { getListOfModsSummary } from '$lib/utils/fetch_from_cache';
 
 	import { AllSubstringsIndexStrategy, Search } from 'js-search';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import ModuleCodeSuggestionMini from './ModuleCodeSuggestionMini.svelte';
 
 	interface SearchBarProps {
@@ -35,10 +35,18 @@
 					a.semesters.includes(semester) ? -1 : 1
 				)
 	);
+
+	onDestroy(() => {
+		searchTerm.set('');
+	});
 </script>
 
-<p>Search</p>
-<input type="text" placeholder="Type here" class="input w-full" bind:value={$searchTerm} />
+<input
+	type="text"
+	placeholder="Search for a mod here"
+	class="input mx-1 w-full"
+	bind:value={$searchTerm}
+/>
 
 <div class="max-h-36 overflow-auto scroll-auto">
 	{#each results as res (res.moduleCode)}

@@ -47,10 +47,13 @@
 	}
 </script>
 
-<button class="h-12 w-full" onclick={addMod}>
+<div class="flex h-12 w-full items-center gap-2 p-4" onclick={addMod}>
 	{#if !mod.semesters.includes(semester)}
-		{mod.moduleCode} - {mod.title} - Not Offered in this semester
+		<p class="font-semibold">{mod.moduleCode}</p>
+		<p>{mod.title}</p>
+		<p class="opacity-65">Not Offered in this semester</p>
 	{:else}
-		{mod.moduleCode} - {mod.title}
+		<p class="font-semibold">{mod.moduleCode}</p>
+		<p>{mod.title}</p>
 	{/if}
-</button>
+</div>

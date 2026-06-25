@@ -23,7 +23,7 @@
 </script>
 
 {#if username}
-	<div class="text-3xl">Welcome, {username}, glad you could join us.</div>
+	<div class="text-xl font-semibold text-ellipsis">Welcome, {username}</div>
 {:else}
-	<div class="h-12 w-full skeleton"></div>
+	<div class="h-12 w-fit skeleton"></div>
 {/if}

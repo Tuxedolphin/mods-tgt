@@ -10,6 +10,7 @@
 		timetable_id: string;
 		timetable_name: string;
 		timetable_colour: string;
+		height_of_one_hour_lesson: number;
 	}
 	const {
 		timeTableDayInfo,
@@ -17,7 +18,8 @@
 		semester,
 		timetable_id,
 		timetable_name,
-		timetable_colour
+		timetable_colour,
+		height_of_one_hour_lesson
 	}: TimetableDayProps = $props();
 
 	const spaceAllowedToUse = $derived(100.0 / timeTableDayInfo.outerGroupLength);
@@ -28,23 +30,15 @@
 	);
 	const showModName = $state(false);
 	const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
-</script>
 
-<button
-	style:margin-left="{leftMarginPercentage}%"
-	style:width="{width}%;"
-	class="absolute
-	{timeTableDayInfo.isAChoiceSelection ? 'opacity-30' : 'opacity-100'}
-	mt-{timeTableDayInfo.normalisedStartDuration * 192} h-{timeTableDayInfo.normalisedEndDuration *
-		192 -
-		timeTableDayInfo.normalisedStartDuration *
-			192} border {timetable_colour} text-xs wrap-break-word text-black"
-	onclick={async () => {
-		if (chooseModState.lessonType === '') {
-			chooseModState.lessonType = timeTableDayInfo.lessonSchedule.lessonType;
-			chooseModState.moduleCode = timeTableDayInfo.moduleCode;
-			chooseModState.classNo = timeTableDayInfo.lessonSchedule.classNo;
-			chooseModState.colour = timetable_colour;
+	async function changeTimetable() {
+		if ($chooseModState.lessonType === '') {
+			$chooseModState = {
+				lessonType: timeTableDayInfo.lessonSchedule.lessonType,
+				moduleCode: timeTableDayInfo.moduleCode,
+				classNo: timeTableDayInfo.lessonSchedule.classNo,
+				colour: timetable_colour
+			};
 		} else {
 			currentlySelectedMods.set(
 				await modifyModEntry(
@@ -56,17 +50,62 @@
 					timeTableDayInfo.moduleCode,
 					timeTableDayInfo.lessonSchedule.lessonType,
 					timeTableDayInfo.lessonSchedule.classNo,
-					chooseModState
+					$chooseModState
 				)
 			);
-			chooseModState.lessonType = '';
-			chooseModState.moduleCode = '';
-			chooseModState.classNo = '';
-			chooseModState.colour = '';
+			$chooseModState = {
+				classNo: '',
+				colour: '',
+				lessonType: '',
+				moduleCode: ''
+			};
 		}
-	}}
->
-	<div>{timeTableDayInfo.moduleCode} {showModName ? timeTableDayInfo.moduleName : ''}</div>
+	}
 
-	{timeTableDayInfo.lessonSchedule.lessonType} [{timeTableDayInfo.lessonSchedule.classNo}]
-</button>
+	function styledAsPossibleSelection(): string {
+		return timeTableDayInfo.isAChoiceSelection ? 'opacity-30' : 'opacity-100';
+	}
+
+	const pixel_conversion = 12 * height_of_one_hour_lesson;
+
+	function calculateHeight(): string {
+		return `h-${
+			timeTableDayInfo.normalisedEndDuration * pixel_conversion -
+			timeTableDayInfo.normalisedStartDuration * pixel_conversion
+		}`;
+	}
+	function calculateTopMargin(): string {
+		return `mt-${timeTableDayInfo.normalisedStartDuration * pixel_conversion}`;
+	}
+</script>
+
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	style:margin-left="{leftMarginPercentage}%"
+	style:width="{width}%;"
+	class="absolute
+	rounded
+	p-1
+	{calculateHeight()}
+	{styledAsPossibleSelection()}
+	{calculateTopMargin()}  
+	{timetable_colour} 
+	text-[10px]
+	wrap-break-word
+	text-black
+	md:text-xs"
+	onclick={async () => changeTimetable()}
+>
+	<div class="font-semibold">
+		{timeTableDayInfo.moduleCode}
+		{showModName ? timeTableDayInfo.moduleName : ''}
+	</div>
+
+	<div class="truncate">
+		{timeTableDayInfo.lessonSchedule.lessonType}
+	</div>
+	<div class="opacity-50">
+		[{timeTableDayInfo.lessonSchedule.classNo}]
+	</div>
+</div>

@@ -8,6 +8,8 @@
 @source inline('col-start-{1..6}');
 @source inline('row-start-{1..12}');
 
+@source inline('grid-cols-{1..5}');
+
 @source inline('h-{8..384..4}');
 @source inline('mt-{8..384..4}');
 @source inline('w-1/{1..24}');

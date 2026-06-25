@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { access_token } from '$lib/shared/shared.svelte';
+	import { token_information } from '$lib/shared/shared.svelte';
 	import { login_to_db } from '$lib/utils/db_operations';
 
 	interface LoginButtonProps {
@@ -17,8 +17,8 @@
 		const result = await login_to_db(email, password);
 		if (result.isOk()) {
 			// Stores access token in localstorage (FOR NOW) -- Not secure:!
-			$access_token.access_token = result.value.accessToken;
-			$access_token.is_guest_login = false;
+			$token_information.a = result.value.accessToken;
+			$token_information.b = false;
 			goto(resolve('/home'));
 		} else {
 			errorMessage = result.error;
