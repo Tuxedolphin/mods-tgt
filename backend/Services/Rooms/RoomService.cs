@@ -44,10 +44,10 @@ public class RoomService(
 
     public async Task<bool> HandleLeaveRoom(Guid userId, Guid roomId)
     {
+        await CommitChangesAsync(roomId);
+
         if (_roomTracker.RemoveUserFromRoom(userId, roomId))
         {
-            await CommitChangesAsync(roomId);
-
             if (_roomTracker.GetUsersInRoom(roomId, out var users) && users.Count > 0)
                 return true;
 
@@ -137,9 +137,11 @@ public class RoomService(
     {
         var timetable =
             _roomTracker.GetTimetableById(roomId, timetableId)
-            ?? await _context.Timetables.FirstOrDefaultAsync(t =>
-                t.Id == timetableId && t.RoomId == roomId
-            );
+            ?? (
+                await _context.Timetables.FirstOrDefaultAsync(t =>
+                    t.Id == timetableId && t.RoomId == roomId
+                )
+            )?.ToRoomTimetable();
 
         if (timetable is null)
             return false;
@@ -215,12 +217,12 @@ public class RoomService(
         }
         catch (InvalidOperationException e)
         {
-            // TODO: Add logging, this is when the main timetable is going to be deleted
+            RoomServiceLogs.LogCommitInvalidOperation(_logger, e, roomId);
             return false;
         }
         catch (DbUpdateException e)
         {
-            // TODO: Some DB writing error
+            RoomServiceLogs.LogCommitDbUpdateFailed(_logger, e, roomId);
             return false;
         }
     }

@@ -370,7 +370,7 @@ public class RoomTrackerTests
         _tracker.AddRoom(roomId);
         _tracker.AddOrUpdateTimetable(timetable);
 
-        var updated = new Timetable
+        var updated = new RoomTimetable
         {
             Id = timetable.Id,
             Name = changedName,
@@ -533,7 +533,7 @@ public class RoomTrackerTests
         var roomId = Guid.NewGuid();
 
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
-        IReadOnlyCollection<Timetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
+        IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
         _tracker.SetRoom(roomId, users, timetables);
 
@@ -561,7 +561,7 @@ public class RoomTrackerTests
         var roomId = Guid.NewGuid();
 
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
-        IReadOnlyCollection<Timetable> timetables =
+        IReadOnlyCollection<RoomTimetable> timetables =
         [
             MakeTimetable(roomId),
             MakeTimetable(Guid.NewGuid()),
@@ -599,7 +599,7 @@ public class RoomTrackerTests
         var roomId = Guid.NewGuid();
 
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
-        IReadOnlyCollection<Timetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
+        IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
         _tracker.SetRoom(roomId, users, timetables);
         _tracker.CloseRoom(roomId);
@@ -616,7 +616,7 @@ public class RoomTrackerTests
         var roomId = Guid.NewGuid();
 
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
-        List<Timetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
+        List<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
         timetables[0].Name = "Changed!";
 
@@ -657,7 +657,7 @@ public class RoomTrackerTests
         _tracker.AddRoom(roomId);
 
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
-        List<Timetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
+        List<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
         _tracker.SetRoom(roomId, users, timetables);
 
@@ -714,7 +714,7 @@ public class RoomTrackerTests
     {
         var roomId = Guid.NewGuid();
 
-        IReadOnlyCollection<Timetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
+        IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
         _tracker.SetRoom(roomId, [], timetables);
 
@@ -779,7 +779,7 @@ public class RoomTrackerTests
     {
         var roomId = Guid.NewGuid();
 
-        IReadOnlyCollection<Timetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
+        IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
         _tracker.SetRoom(roomId, [], timetables);
         _tracker.DeleteTimetable(roomId, timetables.ElementAt(0).Id);
@@ -794,7 +794,7 @@ public class RoomTrackerTests
         deletedRes.ShouldBe([timetables.ElementAt(1).Id]);
     }
 
-    private static Timetable MakeTimetable(Guid? roomId = null, string name = "Test") =>
+    private static RoomTimetable MakeTimetable(Guid? roomId = null, string name = "Test") =>
         new()
         {
             Id = Guid.NewGuid(),

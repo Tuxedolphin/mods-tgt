@@ -9,7 +9,7 @@ public interface IRoomTracker
     public bool SetRoom(
         Guid roomId,
         IReadOnlyCollection<Guid> users,
-        IReadOnlyCollection<Timetable> timetables
+        IReadOnlyCollection<RoomTimetable> timetables
     );
 
     public bool AddUserToRoom(Guid userId, Guid roomId);
@@ -18,14 +18,14 @@ public interface IRoomTracker
     public bool GetRoomOfUser(Guid userId, out Guid rooomId);
     public bool GetUsersInRoom(Guid roomId, out IReadOnlyCollection<Guid> users);
 
-    public bool GetTimetablesInRoom(Guid roomId, out IReadOnlyCollection<Timetable> timetables);
-    public Timetable? GetTimetableById(Guid roomId, Guid timetableId);
-    public bool AddOrUpdateTimetable(Timetable timetable);
+    public bool GetTimetablesInRoom(Guid roomId, out IReadOnlyCollection<RoomTimetable> timetables);
+    public RoomTimetable? GetTimetableById(Guid roomId, Guid timetableId);
+    public bool AddOrUpdateTimetable(RoomTimetable timetable);
     public bool DeleteTimetable(Guid roomId, Guid timetableId);
 
     public bool CloseRoom(Guid roomId);
 
-    public bool GetChangedTimetables(Guid roomId, out IReadOnlyCollection<Timetable> timetables);
+    public bool GetChangedTimetables(Guid roomId, out IReadOnlyCollection<RoomTimetable> timetables);
     public IReadOnlyCollection<Guid> GetDeletedTimetables(Guid roomId);
     public IReadOnlyCollection<Guid> RemoveTimetablesFromChanged(
         IReadOnlyCollection<Guid> timetables
