@@ -118,29 +118,9 @@ public class TimetableService(AppDbContext context) : ITimetableService
         var existing = await _context.Timetables.FirstOrDefaultAsync(t => t.Id == timetable.Id);
 
         if (existing is null)
-        {
-            _context.Timetables.Add(
-                new Timetable
-                {
-                    Id = timetable.Id,
-                    UserId = timetable.UserId,
-                    Name = timetable.Name,
-                    Semester = timetable.Semester,
-                    AcademicYear = timetable.AcademicYear,
-                    MetaData = [.. timetable.MetaData],
-                    RoomId = timetable.RoomId,
-                    OriginalTimetableId = timetable.OriginalTimetableId,
-                }
-            );
-        }
+            _context.Timetables.Add(timetable.ToTimetable());
         else
-        {
-            existing.Name = timetable.Name;
-            existing.Semester = timetable.Semester;
-            existing.AcademicYear = timetable.AcademicYear;
-            existing.MetaData = [.. timetable.MetaData];
-            existing.OriginalTimetableId = timetable.OriginalTimetableId;
-        }
+            timetable.ApplyTo(existing);
 
         return true;
     }

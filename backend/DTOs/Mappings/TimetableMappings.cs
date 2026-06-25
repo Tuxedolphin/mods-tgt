@@ -65,4 +65,26 @@ public static class TimetableMappings
 
         return timetable;
     }
+
+    public static Timetable ToTimetable(this RoomTimetable timetable) =>
+        new()
+        {
+            Id = timetable.Id,
+            UserId = timetable.UserId,
+            Name = timetable.Name,
+            Semester = timetable.Semester,
+            AcademicYear = timetable.AcademicYear,
+            MetaData = [.. timetable.MetaData],
+            RoomId = timetable.RoomId,
+            OriginalTimetableId = timetable.OriginalTimetableId,
+        };
+
+    public static void ApplyTo(this RoomTimetable timetable, Timetable existing)
+    {
+        existing.Name = timetable.Name;
+        existing.Semester = timetable.Semester;
+        existing.AcademicYear = timetable.AcademicYear;
+        existing.MetaData = [.. timetable.MetaData];
+        existing.OriginalTimetableId = timetable.OriginalTimetableId;
+    }
 }
