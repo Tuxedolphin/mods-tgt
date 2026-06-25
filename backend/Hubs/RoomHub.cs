@@ -5,7 +5,6 @@ using Backend.Infrastructure;
 using Backend.Services.Rooms;
 using Backend.Services.Timetables;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Hubs;
@@ -151,12 +150,22 @@ public class RoomHub(
         }
     }
 
-    public async Task UpdateTimetable(Guid timetableId, UpdateTimetableRequest timetableRequest) =>
-        await _roomService.HandleUpdateTimetableAsync(
-            GetCurrentRoomId(GetUserId()),
+    public async Task<bool> UpdateTimetable(
+        Guid timetableId,
+        UpdateTimetableRequest timetableRequest
+    )
+    {
+        var roomId = GetCurrentRoomId(GetUserId());
+
+        var success = await _roomService.HandleUpdateTimetableAsync(
+            roomId,
             timetableId,
             timetableRequest
         );
+        await SendUpdatedTimetableToGroupAsync(roomId);
+
+        return success;
+    }
 
     public async Task DeleteTimetable(Guid timetableId)
     {
