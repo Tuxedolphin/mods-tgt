@@ -70,7 +70,7 @@ public class RoomHub(
         // TODO: Check if the user is allowed to join the room before adding them to the group
 
         var userId = GetUserId();
-        _roomService.CreateOrJoinRoom(userId, roomId);
+        await _roomService.CreateOrJoinRoom(userId, roomId);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
         RoomHubLogs.LogUserJoinedRoom(_logger, userId, roomId);
@@ -88,7 +88,7 @@ public class RoomHub(
     {
         var userId = GetUserId();
 
-        _roomService.HandleLeaveRoom(userId, roomId);
+        await _roomService.HandleLeaveRoom(userId, roomId);
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
         RoomHubLogs.LogUserLeftRoom(_logger, userId, roomId);
@@ -102,8 +102,6 @@ public class RoomHub(
             // We ignore the error here, since the room may have been deleted after the user left
             // (i.e. no user left)
         }
-
-        await _roomService.CommitChangesAsync(roomId);
     }
 
     public async Task<RoomInformation> GetRoomInformation(Guid roomId)
