@@ -3,6 +3,7 @@ using Backend.DTOs;
 using Backend.DTOs.Mappings;
 using Backend.Exceptions;
 using Backend.Models;
+using Backend.Services.Rooms;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services.Timetables;
@@ -112,24 +113,15 @@ public class TimetableService(AppDbContext context) : ITimetableService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> UpsertTimetableAsync(Timetable timetable)
+    public async Task<bool> UpsertTimetableAsync(RoomTimetable timetable)
     {
-        try
-        {
-            var exists = await _context.Timetables.AnyAsync(t => t.Id == timetable.Id);
+        var existing = await _context.Timetables.FirstOrDefaultAsync(t => t.Id == timetable.Id);
 
-            if (exists)
-                _context.Timetables.Update(timetable);
-            else
-                _context.Timetables.Add(timetable);
+        if (existing is null)
+            _context.Timetables.Add(timetable.ToTimetable());
+        else
+            timetable.ApplyTo(existing);
 
-            return true;
-        }
-        catch (DbUpdateException e)
-        {
-            // TODO: Add logging here
-
-            return false;
-        }
+        return true;
     }
 }

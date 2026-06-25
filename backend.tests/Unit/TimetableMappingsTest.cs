@@ -1,6 +1,7 @@
 using Backend.DTOs;
 using Backend.DTOs.Mappings;
 using Backend.Models;
+using Backend.Services.Rooms;
 using Shouldly;
 
 namespace Backend.Tests.Unit;
@@ -19,6 +20,19 @@ public class TimetableMappingsTests
         };
 
     private static Timetable MakeTimetable() =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Name = "Test Timetable",
+            Semester = 1,
+            AcademicYear = "2024/2025",
+            CreatedAt = DateTime.UtcNow,
+            MetaData = [MakeModule(), MakeModule()],
+            RoomId = Guid.NewGuid(),
+        };
+
+    private static RoomTimetable MakeRoomTimetable() =>
         new()
         {
             Id = Guid.NewGuid(),
@@ -94,7 +108,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ToDetailedResponse_MapsAllFieldsCorrectly()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var profile = MakeProfile();
 
         var result = timetable.ToDetailedResponse(profile);
@@ -111,7 +125,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ApplyUpdate_MetaData_IsNewCollection_NotSameReferenceAsRequest()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var requestMetaData = new List<TimetableModule> { MakeModule() };
         var request = new UpdateTimetableRequest { Name = "Name", MetaData = requestMetaData };
 
@@ -124,7 +138,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ToDetailedResponse_ProfileIsSameInstance()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var profile = MakeProfile();
 
         var result = timetable.ToDetailedResponse(profile);
@@ -137,7 +151,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ApplyUpdate_MutatesNameCorrectly()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var request = MakeUpdateRequest();
 
         timetable.ApplyUpdate(request);
@@ -148,7 +162,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ApplyUpdate_MutatesMetaDataCorrectly()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var request = MakeUpdateRequest();
 
         timetable.ApplyUpdate(request);
@@ -159,7 +173,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ApplyUpdate_MetaData_IsShallowCopy()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var requestMetaData = new List<TimetableModule> { MakeModule() };
         var request = new UpdateTimetableRequest { Name = "Name", MetaData = requestMetaData };
 
@@ -173,7 +187,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ApplyUpdate_ReturnsSameTimetableInstance()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var request = MakeUpdateRequest();
 
         var result = timetable.ApplyUpdate(request);
@@ -184,7 +198,7 @@ public class TimetableMappingsTests
     [Fact]
     public void ApplyUpdate_DoesNotMutateUnrelatedFields()
     {
-        var timetable = MakeTimetable();
+        var timetable = MakeRoomTimetable();
         var originalId = timetable.Id;
         var originalUserId = timetable.UserId;
         var originalRoomId = timetable.RoomId;

@@ -23,4 +23,26 @@ public static partial class RoomServiceLogs
         Guid roomId,
         Guid userId
     );
+
+    [LoggerMessage(
+        EventId = 3005,
+        Level = LogLevel.Error,
+        Message = "Failed to commit changes for room {RoomId} due to an invalid operation"
+    )]
+    public static partial void LogCommitInvalidOperation(
+        ILogger logger,
+        Exception exception,
+        Guid roomId
+    );
+
+    [LoggerMessage(
+        EventId = 3006,
+        Level = LogLevel.Error,
+        Message = "Failed to commit changes for room {RoomId} due to a database update error"
+    )]
+    public static partial void LogCommitDbUpdateFailed(
+        ILogger logger,
+        Exception exception,
+        Guid roomId
+    );
 }

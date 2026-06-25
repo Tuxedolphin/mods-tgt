@@ -1,4 +1,5 @@
 using Backend.Models;
+using Backend.Services.Rooms;
 
 namespace Backend.DTOs.Mappings;
 
@@ -26,7 +27,7 @@ public static class TimetableMappings
         };
 
     public static TimetableDetailedResponse ToDetailedResponse(
-        this Timetable timetable,
+        this RoomTimetable timetable,
         Profile profile
     ) =>
         new()
@@ -40,11 +41,50 @@ public static class TimetableMappings
             MetaData = [.. timetable.MetaData],
         };
 
-    public static Timetable ApplyUpdate(this Timetable timetable, UpdateTimetableRequest request)
+    public static RoomTimetable ToRoomTimetable(this Timetable timetable) =>
+        new()
+        {
+            Id = timetable.Id,
+            UserId = timetable.UserId,
+            Name = timetable.Name,
+            Semester = timetable.Semester,
+            AcademicYear = timetable.AcademicYear,
+            MetaData = [.. timetable.MetaData],
+            RoomId = timetable.RoomId,
+            OriginalTimetableId = timetable.OriginalTimetableId,
+            CreatedAt = timetable.CreatedAt,
+        };
+
+    public static RoomTimetable ApplyUpdate(
+        this RoomTimetable timetable,
+        UpdateTimetableRequest request
+    )
     {
         timetable.Name = request.Name;
         timetable.MetaData = [.. request.MetaData];
 
         return timetable;
+    }
+
+    public static Timetable ToTimetable(this RoomTimetable timetable) =>
+        new()
+        {
+            Id = timetable.Id,
+            UserId = timetable.UserId,
+            Name = timetable.Name,
+            Semester = timetable.Semester,
+            AcademicYear = timetable.AcademicYear,
+            MetaData = [.. timetable.MetaData],
+            RoomId = timetable.RoomId,
+            OriginalTimetableId = timetable.OriginalTimetableId,
+        };
+
+    public static void ApplyTo(this RoomTimetable timetable, Timetable existing)
+    {
+        existing.Name = timetable.Name;
+        existing.Semester = timetable.Semester;
+        existing.AcademicYear = timetable.AcademicYear;
+        existing.MetaData = [.. timetable.MetaData];
+        existing.OriginalTimetableId = timetable.OriginalTimetableId;
     }
 }
