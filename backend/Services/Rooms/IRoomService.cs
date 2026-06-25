@@ -5,12 +5,11 @@ namespace Backend.Services.Rooms;
 
 public interface IRoomService
 {
-    public void CreateRoom(Guid roomId);
     public bool RoomExists(Guid roomId);
 
     public Task<bool> AddProfileAsync(Guid userId);
 
-    public bool HandleJoinRoom(Guid userId, Guid roomId);
+    public bool CreateOrJoinRoom(Guid userId, Guid roomId);
     public bool HandleLeaveRoom(Guid userId, Guid roomId);
     public bool HandleDeleteTimetable(Guid roomId, Guid timetableId);
 

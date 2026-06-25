@@ -16,10 +16,9 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Restore dependencies
-        run: dotnet restore
-        working-directory: backend
+        run: dotnet restore backend/Backend.csproj && dotnet restore backend.tests/Backend.Tests.csproj
       - name: Build
-        run: dotnet build --no-restore
-        working-directory: backend
-    # - name: Test
-    #   run: dotnet test --no-build --verbosity normal
+        run: dotnet build --no-restore backend/Backend.csproj && dotnet build --no-restore backend.tests/Backend.Tests.csproj
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+        working-directory: backend.tests

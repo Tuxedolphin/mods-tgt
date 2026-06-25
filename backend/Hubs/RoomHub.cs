@@ -70,11 +70,8 @@ public class RoomHub(
     {
         // TODO: Check if the user is allowed to join the room before adding them to the group
 
-        if (!_roomService.RoomExists(roomId))
-            _roomService.CreateRoom(roomId);
-
         var userId = GetUserId();
-        _roomService.HandleJoinRoom(userId, roomId);
+        _roomService.CreateOrJoinRoom(userId, roomId);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
         RoomHubLogs.LogUserJoinedRoom(_logger, userId, roomId);

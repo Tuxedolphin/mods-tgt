@@ -22,21 +22,17 @@ public class RoomService(
     private readonly ITimetableService _timetableService = timetableService;
     private readonly AppDbContext _context = context;
 
-    // This is only for creating a SignalR room, not for actually creating a timetable room
-    // For that please use create timetable API endpoint
-    public void CreateRoom(Guid roomId)
-    {
-        _roomTracker.AddRoom(roomId);
-    }
-
     public bool RoomExists(Guid roomId)
     {
         return _roomTracker.RoomExists(roomId);
     }
 
-    public bool HandleJoinRoom(Guid userId, Guid roomId)
+    public bool CreateOrJoinRoom(Guid userId, Guid roomId)
     {
-        if (_roomTracker.GetRoomOfUser(userId, out Guid oldRoomId))
+        if (!_roomTracker.RoomExists(roomId))
+            _roomTracker.AddRoom(roomId);
+
+        if (_roomTracker.GetRoomOfUser(userId, out Guid oldRoomId) && oldRoomId != roomId)
             HandleLeaveRoom(userId, oldRoomId);
 
         if (_roomTracker.AddUserToRoom(userId, roomId))
@@ -113,7 +109,6 @@ public class RoomService(
             return CreateTimetableResult.TImetableIdConflict;
 
         _roomTracker.AddOrUpdateTimetable(
-            roomId,
             new()
             {
                 Id = Guid.NewGuid(),
@@ -145,7 +140,7 @@ public class RoomService(
         if (timetable is null)
             return false;
 
-        _roomTracker.AddOrUpdateTimetable(roomId, timetable.ApplyUpdate(timetableRequest));
+        _roomTracker.AddOrUpdateTimetable(timetable.ApplyUpdate(timetableRequest));
         return true;
     }
 

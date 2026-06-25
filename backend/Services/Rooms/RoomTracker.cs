@@ -37,10 +37,10 @@ public class RoomTracker : IRoomTracker
     {
         if (_rooms.TryGetValue(roomId, out var roomState))
         {
-            // TODO: maybe add checks to make sure user is not in another room
+            if (GetRoomOfUser(userId, out var oldRoomId) && oldRoomId != roomId)
+                RemoveUserFromRoom(userId, oldRoomId);
 
             roomState.Users.Add(userId);
-
             _userToRoomMap[userId] = roomId;
             return true;
         }
@@ -89,12 +89,14 @@ public class RoomTracker : IRoomTracker
 
     // This assumes that there is something to be changed about the timetable,
     // be it to create it in the database or to update the entry in the database
-    public bool AddOrUpdateTimetable(Guid roomId, Timetable timetable)
+    public bool AddOrUpdateTimetable(Timetable timetable)
     {
+        var roomId = timetable.RoomId;
+
         if (_rooms.TryGetValue(roomId, out var roomState))
         {
             roomState.Timetables[timetable.Id] = timetable;
-            _changedTimetables.Add(roomId);
+            _changedTimetables.Add(timetable.Id);
             return true;
         }
 
@@ -106,7 +108,7 @@ public class RoomTracker : IRoomTracker
         if (_rooms.TryGetValue(roomId, out var roomState))
         {
             roomState.Timetables.TryRemove(timetableId, out _);
-            _changedTimetables.Remove(roomId);
+            _changedTimetables.Add(timetableId);
             _deletedTimetables.GetOrAdd(roomId, []).Add(timetableId);
             return true;
         }
@@ -120,6 +122,15 @@ public class RoomTracker : IRoomTracker
         IReadOnlyCollection<Timetable> timetables
     )
     {
+        var invalidTimetable = timetables.FirstOrDefault(t => t.RoomId != roomId);
+        if (invalidTimetable is not null)
+        {
+            throw new ArgumentException(
+                $"Timetable {invalidTimetable.Id} does not belong to room {roomId}.",
+                nameof(timetables)
+            );
+        }
+
         var roomState = new RoomState
         {
             Users = [.. users],
@@ -136,13 +147,23 @@ public class RoomTracker : IRoomTracker
         bool success = _rooms.TryRemove(roomId, out RoomState? roomState);
 
         if (roomState?.Users.IsEmpty == false)
-            roomState.Users.ToList().ForEach(userId => _userToRoomMap.TryRemove(userId, out _));
+        {
+            roomState
+                .Users.ToList()
+                .ForEach(userId =>
+                {
+                    _userToRoomMap.TryRemove(userId, out _);
+                    roomState.Users.Remove(userId);
+                });
+        }
 
         if (roomState?.Timetables.IsEmpty == false)
         {
             roomState
                 .Timetables.Keys.ToList()
                 .ForEach(timetableId => _changedTimetables.Remove(timetableId));
+
+            roomState.Timetables.TryRemove(roomId, out _);
         }
 
         // We don't silently fail, even though the behaviour is the same, for logging purposes
@@ -176,7 +197,7 @@ public class RoomTracker : IRoomTracker
     ) =>
         [
             .. timetables.Where(id =>
-                _deletedTimetables.TryGetValue(roomId, out var hash) && hash.Remove(id)
+                !(_deletedTimetables.TryGetValue(roomId, out var hash) && hash.Remove(id))
             ),
         ];
 }

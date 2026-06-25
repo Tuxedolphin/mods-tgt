@@ -20,7 +20,7 @@ public interface IRoomTracker
 
     public bool GetTimetablesInRoom(Guid roomId, out IReadOnlyCollection<Timetable> timetables);
     public Timetable? GetTimetableById(Guid roomId, Guid timetableId);
-    public bool AddOrUpdateTimetable(Guid roomId, Timetable timetable);
+    public bool AddOrUpdateTimetable(Timetable timetable);
     public bool DeleteTimetable(Guid roomId, Guid timetableId);
 
     public bool CloseRoom(Guid roomId);
