@@ -46,10 +46,11 @@ public class RoomService(
     {
         if (_roomTracker.RemoveUserFromRoom(userId, roomId))
         {
+            await CommitChangesAsync(roomId);
+
             if (_roomTracker.GetUsersInRoom(roomId, out var users) && users.Count > 0)
                 return true;
 
-            // If there are no more users in the room
             await CloseRoom(roomId);
         }
 
@@ -179,7 +180,6 @@ public class RoomService(
         if (!_roomTracker.GetUsersInRoom(roomId, out var users))
             return false;
 
-        await CommitChangesAsync(roomId);
         return _profileTracker.RemoveUsers(users) && _roomTracker.CloseRoom(roomId);
     }
 

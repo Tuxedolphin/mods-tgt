@@ -88,7 +88,6 @@ public class RoomHub(
     {
         var userId = GetUserId();
 
-        await _roomService.CommitChangesAsync(roomId);
         await _roomService.HandleLeaveRoom(userId, roomId);
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
