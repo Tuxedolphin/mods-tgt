@@ -47,14 +47,12 @@ export function format_semester_name(number: number): string {
 }
 
 export function format_AY_name(ay_string: string): string {
-	const year_split = ay_string.split('-')
-	return `AY${year_split[0]}/${year_split[1]}`
+	const year_split = ay_string.split('-');
+	return `AY${year_split[0]}/${year_split[1]}`;
 }
 
-
-export function format_created_time(time_string: string) : string {
+export function format_created_time(time_string: string): string {
 	const date = new Date(time_string);
-	console.log(date)
 	return date.toLocaleString();
 }
 

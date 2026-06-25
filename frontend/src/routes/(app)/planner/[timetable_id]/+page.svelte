@@ -34,42 +34,78 @@
 	import { CircleX } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { roomHub } from '$lib/stores/roomHub';
 	let { params }: PageProps = $props();
 	let unsubscribe_from_mods_list: Unsubscriber;
+
 	onMount(async () => {
+		// SignalR Related Actions
+		await roomHub.connect($token_information.a);
+
+		const info = await $roomHub?.invoke('CreateOrJoinRoom', params.timetable_id);
+
+		console.log(info);
 		is_timetable_loaded = false;
+
 		const timetable_data = await get_timetable_by_id($token_information.a, params.timetable_id);
 
 		if (timetable_data.isOk()) {
 			timetable_metadata = timetable_data.value;
 			$currentlySelectedMods = [timetable_data.value];
-
-			unsubscribe_from_mods_list = currentlySelectedMods.subscribe(
-				async (updated_timetable) => {
-					for (const timetable of updated_timetable) {
-						if (timetable.id == params.timetable_id) {
-							const response = await put_timetable_by_id(
-								$token_information.a,
-								timetable.id,
-								timetable
-							);
-							if (response.isOk()) {
-								console.log('Update for Timetable ' + timetable.id);
-							}
-						}
-					}
-				},
-				() => {}
-			);
-
-			is_timetable_loaded = true;
 		}
+
+		$roomHub?.on('ReceiveMessage', (msg) => console.log(msg));
+		$roomHub?.on('ReceiveTimetableUpdate', (msg) => console.log(msg));
+		$roomHub?.on('ReceiveUserUpdate', (msg) => console.log(msg));
+		// if (timetable_data.isOk()) {
+		// 	timetable_metadata = timetable_data.value;
+		// 	$currentlySelectedMods = [timetable_data.value];
+
+		// 	unsubscribe_from_mods_list = currentlySelectedMods.subscribe(
+		// 		async (updated_timetable) => {
+		// 			for (const timetable of updated_timetable) {
+		// 				if (timetable.id == params.timetable_id) {
+		// 					const response = await put_timetable_by_id(
+		// 						$token_information.a,
+		// 						timetable.id,
+		// 						timetable
+		// 					);
+		// 					if (response.isOk()) {
+		// 						console.log('Update for Timetable ' + timetable.id);
+		// 					}
+		// 				}
+		// 			}
+		// 		},
+		// 		() => {}
+		// 	);
+
+		// 	is_timetable_loaded = true;
+		// }
+
+		unsubscribe_from_mods_list = currentlySelectedMods.subscribe(async (updated_timetable) => {
+			for (const timetable of updated_timetable) {
+				if (timetable.id === params.timetable_id) {
+					const update_info = await $roomHub?.invoke('UpdateTimetable', params.timetable_id, {
+						Name: 'Lmao Dab',
+						MetaData: timetable.metaData
+					});
+
+					console.log('Update: ' + update_info);
+				}
+			}
+		});
+		is_timetable_loaded = true;
 	});
 
-	onDestroy(() => {
+	onDestroy(async () => {
 		if (unsubscribe_from_mods_list) {
 			unsubscribe_from_mods_list();
 		}
+		await $roomHub?.invoke('LeaveRoom', params.timetable_id);
+
+		roomHub.disconnect();
+
+		currentlySelectedMods.reset();
 	});
 </script>
 
