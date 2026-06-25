@@ -112,24 +112,35 @@ public class TimetableService(AppDbContext context) : ITimetableService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> UpsertTimetableAsync(Timetable timetable)
+    public async Task<bool> UpsertTimetableAsync(RoomTimetable timetable)
     {
-        try
+        var existing = await _context.Timetables.FirstOrDefaultAsync(t => t.Id == timetable.Id);
+
+        if (existing is null)
         {
-            var exists = await _context.Timetables.AnyAsync(t => t.Id == timetable.Id);
-
-            if (exists)
-                _context.Timetables.Update(timetable);
-            else
-                _context.Timetables.Add(timetable);
-
-            return true;
+            _context.Timetables.Add(
+                new Timetable
+                {
+                    Id = timetable.Id,
+                    UserId = timetable.UserId,
+                    Name = timetable.Name,
+                    Semester = timetable.Semester,
+                    AcademicYear = timetable.AcademicYear,
+                    MetaData = [.. timetable.MetaData],
+                    RoomId = timetable.RoomId,
+                    OriginalTimetableId = timetable.OriginalTimetableId,
+                }
+            );
         }
-        catch (DbUpdateException e)
+        else
         {
-            // TODO: Add logging here
-
-            return false;
+            existing.Name = timetable.Name;
+            existing.Semester = timetable.Semester;
+            existing.AcademicYear = timetable.AcademicYear;
+            existing.MetaData = [.. timetable.MetaData];
+            existing.OriginalTimetableId = timetable.OriginalTimetableId;
         }
+
+        return true;
     }
 }
