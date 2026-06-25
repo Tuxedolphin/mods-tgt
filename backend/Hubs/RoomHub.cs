@@ -150,6 +150,7 @@ public class RoomHub(
         }
     }
 
+    // Returns null when timetable was not found
     public async Task<bool> UpdateTimetable(
         Guid timetableId,
         UpdateTimetableRequest timetableRequest
