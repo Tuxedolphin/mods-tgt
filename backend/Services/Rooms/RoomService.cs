@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.DTOs;
 using Backend.DTOs.Mappings;
+using Backend.Exceptions;
 using Backend.Infrastructure;
 using Backend.Models;
 using Backend.Services.Timetables;
@@ -30,7 +31,25 @@ public class RoomService(
     public async Task<bool> CreateOrJoinRoom(Guid userId, Guid roomId)
     {
         if (!_roomTracker.RoomExists(roomId))
-            _roomTracker.AddRoom(roomId);
+        {
+            var timetables =
+                await _context
+                    .Timetables.Where(t => t.RoomId == roomId)
+                    .ToListAsync()
+                    .MapAsync(list => list.Select(t => t.ToRoomTimetable()))
+                ?? throw new NotFoundException($"Room with roomId {roomId} not found");
+
+            _roomTracker.SetRoom(roomId, [userId], [.. timetables]);
+        }
+
+        if (!_profileTracker.GetUserById(userId, out _))
+        {
+            var profile =
+                await _context.Profiles.FirstOrDefaultAsync(p => p.Id == userId)
+                ?? throw new NotFoundException($"User with id {userId} not found");
+
+            _profileTracker.SetUser(profile);
+        }
 
         if (_roomTracker.GetRoomOfUser(userId, out Guid oldRoomId) && oldRoomId != roomId)
             await HandleLeaveRoom(userId, oldRoomId);
