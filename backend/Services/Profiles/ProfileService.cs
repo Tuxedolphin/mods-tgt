@@ -1,4 +1,6 @@
 using Backend.Data;
+using Backend.DTOs;
+using Backend.DTOs.Mappings;
 using Backend.Exceptions;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +11,11 @@ public class ProfileService(AppDbContext context) : IProfileService
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<Profile> GetCurrentUserProfileAsync(Guid userId)
+    public async Task<ProfileResponse> GetCurrentUserProfileAsync(Guid userId)
     {
-        return await _context.Profiles.FirstOrDefaultAsync(p => p.Id == userId)
+        var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == userId)
             ?? throw new NotFoundException("User not found");
+        return profile.ToResponse();
     }
 
     public async Task UpdateCurrentUserProfileAsync(Guid userId, Profile updatedProfile)

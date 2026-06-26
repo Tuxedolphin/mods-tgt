@@ -1,5 +1,4 @@
 using Backend.DTOs;
-using Backend.Models;
 
 namespace Backend.Services.Rooms;
 
@@ -29,7 +28,7 @@ public interface IRoomService
     );
 
     public Task<RoomInformation?> GetRoomInformationAsync(Guid roomId);
-    public Task<IReadOnlyCollection<Profile>?> GetProfilesInRoomAsync(Guid roomId);
+    public Task<IReadOnlyCollection<ProfileResponse>?> GetProfilesInRoomAsync(Guid roomId);
     public Task<IReadOnlyCollection<TimetableDetailedResponse>?> GetTimetablesDetailedInRoomAsync(
         Guid roomId
     );

@@ -1,4 +1,5 @@
 using Backend.Models;
+using Backend.DTOs;
 using Backend.Services.Rooms;
 
 namespace Backend.DTOs.Mappings;
@@ -34,7 +35,7 @@ public static class TimetableMappings
         {
             Id = timetable.Id,
             Name = timetable.Name,
-            Profile = profile,
+            Profile = profile.ToResponse(),
             Semester = timetable.Semester,
             AcademicYear = timetable.AcademicYear,
             CreatedAt = timetable.CreatedAt,

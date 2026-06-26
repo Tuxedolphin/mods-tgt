@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.DTOs;
 using Backend.DTOs.Mappings;
+
 using Backend.Exceptions;
 using Backend.Infrastructure;
 using Backend.Models;
@@ -90,13 +91,13 @@ public class RoomService(
         return new RoomInformation(roomId, profilesOfUsers, timetablesInformation);
     }
 
-    public async Task<IReadOnlyCollection<Profile>?> GetProfilesInRoomAsync(Guid roomId)
+    public async Task<IReadOnlyCollection<ProfileResponse>?> GetProfilesInRoomAsync(Guid roomId)
     {
         if (!_roomTracker.GetUsersInRoom(roomId, out var users))
             return null;
 
         return await Task.WhenAll(users.ToList().Select(FindOrAddProfileAsync))
-            .MapAsync(p => p.OfType<Profile>().ToList());
+            .MapAsync(p => p.OfType<Profile>().Select(profile => profile.ToResponse()).ToList());
     }
 
     public async Task<IReadOnlyCollection<TimetableDetailedResponse>?> GetTimetablesDetailedInRoomAsync(

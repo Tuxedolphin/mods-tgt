@@ -3,6 +3,7 @@ using Backend.Models;
 
 namespace Backend.DTOs;
 
+
 public record TimetableSummaryResponse
 {
     public required Guid Id { get; init; }
@@ -19,7 +20,7 @@ public record TimetableResponse : TimetableSummaryResponse
 
 public record TimetableDetailedResponse : TimetableResponse
 {
-    public required Profile Profile { get; init; }
+    public required ProfileResponse Profile { get; init; }
 }
 
 public class CreateTimetableRequest
