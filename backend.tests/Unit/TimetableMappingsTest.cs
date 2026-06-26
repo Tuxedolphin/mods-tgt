@@ -115,7 +115,8 @@ public class TimetableMappingsTests
 
         result.Id.ShouldBe(timetable.Id);
         result.Name.ShouldBe(timetable.Name);
-        result.Profile.ShouldBe(profile);
+        result.Profile.UserId.ShouldBe(profile.Id);
+        result.Profile.Username.ShouldBe(profile.Username);
         result.Semester.ShouldBe(timetable.Semester);
         result.AcademicYear.ShouldBe(timetable.AcademicYear);
         result.CreatedAt.ShouldBe(timetable.CreatedAt);
@@ -136,14 +137,15 @@ public class TimetableMappingsTests
     }
 
     [Fact]
-    public void ToDetailedResponse_ProfileIsSameInstance()
+    public void ToDetailedResponse_ProfileMapsCorrectly()
     {
         var timetable = MakeRoomTimetable();
         var profile = MakeProfile();
 
         var result = timetable.ToDetailedResponse(profile);
 
-        result.Profile.ShouldBeSameAs(profile);
+        result.Profile.UserId.ShouldBe(profile.Id);
+        result.Profile.Username.ShouldBe(profile.Username);
     }
 
     // === ApplyUpdate ===
