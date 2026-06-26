@@ -1,4 +1,4 @@
-import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
+import type { TimetableResponse } from '$lib/types/db_raw_types';
 
 export const colours = new Set([
 	'bg-red-400',
@@ -56,7 +56,7 @@ export function format_created_time(time_string: string): string {
 	return date.toLocaleString();
 }
 
-export function get_randomised_colour(timetable_info: TimetableWithMetadata[]): string {
+export function get_randomised_colour(timetable_info: TimetableResponse[]): string {
 	const currentSelectedColours = new Set<string>();
 
 	for (const tt of timetable_info) {

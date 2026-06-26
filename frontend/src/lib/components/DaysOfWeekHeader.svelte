@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { chooseModState } from '$lib/shared/shared.svelte';
-	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
+	import type { TimetableResponse } from '$lib/types/db_raw_types';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import { queryAvailableLessons } from '$lib/utils/format_db_information';
 	import { onDestroy, onMount } from 'svelte';
@@ -21,7 +21,7 @@
 	const { timetables, acadYear, semester, timetable_id, timetable_name }: DaysOfWeekProp = $props();
 
 	interface DaysOfWeekProp {
-		timetables: TimetableWithMetadata[];
+		timetables: TimetableResponse[];
 		acadYear: string;
 		semester: number;
 

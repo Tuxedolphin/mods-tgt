@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
+	import type { TimetableResponse } from '$lib/types/db_raw_types';
 	import { onDestroy, onMount } from 'svelte';
 	import ModListModInfo from './ModListModInfo.svelte';
 	import { currentlySelectedMods } from '$lib/shared/shared.svelte';
@@ -12,7 +12,7 @@
 
 	let { acadYear }: ModListGroupProps = $props();
 
-	let updated_mod_list: TimetableWithMetadata[] = $state([]);
+	let updated_mod_list: TimetableResponse[] = $state([]);
 
 	onMount(() => {
 		current_selected_mods_unsubsriber = currentlySelectedMods.subscribe((new_mods) => {

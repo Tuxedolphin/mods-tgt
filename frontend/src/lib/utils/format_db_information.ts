@@ -1,5 +1,5 @@
 import type { LessonInfo } from '$lib/shared/shared.svelte';
-import type { TimetableLessonMetadata, TimetableWithMetadata } from '$lib/types/db_raw_types';
+import type { TimetableModule, TimetableResponse } from '$lib/types/db_raw_types';
 import type { TimeTableDayInfo } from '$lib/types/internal';
 import type { RawLesson } from '$lib/types/modules';
 
@@ -13,8 +13,8 @@ const endOfDayTime = '2000';
 export function getTimetable(
 	acadYear: string,
 	semesterNo: number,
-	timetables: TimetableWithMetadata[]
-): TimetableWithMetadata[] {
+	timetables: TimetableResponse[]
+): TimetableResponse[] {
 	const timetable = timetables.filter(
 		(x) => x.academicYear == acadYear && x.semester == semesterNo
 	);
@@ -59,7 +59,7 @@ export async function queryAvailableLessons(
 
 export async function filterTimetableByDay(
 	day: number,
-	timetables: TimetableWithMetadata[]
+	timetables: TimetableResponse[]
 ): Promise<TimeTableDayInfo[]> {
 	if (timetables.length === 0) return [];
 	const resultingTimetables: TimeTableDayInfo[] = [];
@@ -105,13 +105,13 @@ export async function filterTimetableByDay(
 }
 
 export function removeModEntry(
-	timetable: TimetableWithMetadata[],
+	timetable: TimetableResponse[],
 	acadYear: string,
 	semesterNo: number,
 	id: string,
 	timetableName: string,
 	moduleCode: string
-): TimetableWithMetadata[] {
+): TimetableResponse[] {
 	const findTimetableCopy = timetable.filter(
 		(x) =>
 			x.id == id &&
@@ -130,14 +130,14 @@ export function removeModEntry(
 }
 
 export function modifyModColour(
-	timetable: TimetableWithMetadata[],
+	timetable: TimetableResponse[],
 	acadYear: string,
 	semesterNo: number,
 	id: string,
 	timetableName: string,
 	moduleCode: string,
 	newColor: string
-): TimetableWithMetadata[] {
+): TimetableResponse[] {
 	const findTimetableCopy = timetable.filter(
 		(x) =>
 			x.id == id &&
@@ -156,7 +156,7 @@ export function modifyModColour(
 	return timetable;
 }
 export function modifyModEntry(
-	timetable: TimetableWithMetadata[],
+	timetable: TimetableResponse[],
 	acadYear: string,
 	semesterNo: number,
 	id: string,
@@ -165,7 +165,7 @@ export function modifyModEntry(
 	lessonType: string,
 	newlessonNo: string,
 	userState: LessonInfo
-): TimetableWithMetadata[] {
+): TimetableResponse[] {
 	if (moduleCode != userState.moduleCode || lessonType != userState.lessonType) {
 		return timetable;
 	}
@@ -189,7 +189,7 @@ export function modifyModEntry(
 }
 
 export function checkModAlreadyAdded(
-	timetable: TimetableWithMetadata[],
+	timetable: TimetableResponse[],
 	acadYear: string,
 	semesterNo: number,
 	id: string,
@@ -210,14 +210,14 @@ export function checkModAlreadyAdded(
 }
 
 export async function createModEntry(
-	timetable: TimetableWithMetadata[],
+	timetable: TimetableResponse[],
 	acadYear: string,
 	semesterNo: number,
 	id: string,
 	timetableName: string,
 	moduleCode: string,
 	rawLesson: RawLesson[]
-): Promise<TimetableWithMetadata[]> {
+): Promise<TimetableResponse[]> {
 	const findTimetableCopy = timetable.filter(
 		(x) =>
 			x.id == id &&
@@ -225,7 +225,7 @@ export async function createModEntry(
 			x.semester == semesterNo &&
 			x.name == timetableName
 	);
-	const lessonDataRef: TimetableLessonMetadata[] = [];
+	const lessonDataRef: TimetableModule[] = [];
 
 	const lessonTypes = Object.groupBy(rawLesson, (x) => x.lessonType);
 	const assigned_color = get_randomised_colour(timetable);

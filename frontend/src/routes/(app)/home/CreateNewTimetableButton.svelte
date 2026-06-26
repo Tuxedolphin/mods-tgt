@@ -23,19 +23,6 @@
 		);
 
 		if (timetable_info.isOk()) {
-			await roomHub.connect($token_information.a);
-
-			const info = await $roomHub?.invoke('CreateOrJoinRoom', timetable_info.value.id);
-
-			const timetable_post_template: TimetablePostTemplate = {
-				academicYear: academic_year,
-				metaData: [],
-				name: timetable_name,
-				semester: semester_number
-			};
-			await $roomHub?.invoke('CreateTimetable', timetable_post_template);
-
-			roomHub.disconnect();
 			dialog.close();
 			goto(resolve('/(app)/planner/[timetable_id]', { timetable_id: timetable_info.value.id }));
 		}

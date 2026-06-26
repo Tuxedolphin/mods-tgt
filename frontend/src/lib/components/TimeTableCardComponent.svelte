@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { timetable_list_should_be_refreshed } from '$lib/shared/shared.svelte';
-	import type { TimetableInfo } from '$lib/types/db_raw_types';
+	import type { TimetableSummaryResponse } from '$lib/types/db_raw_types';
 	import { delete_timetable_by_id } from '$lib/utils/db_operations';
 	import {
 		format_AY_name,
@@ -13,7 +13,7 @@
 	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 
 	interface TimeTableCardComponentProps {
-		timetable: TimetableInfo;
+		timetable: TimetableSummaryResponse;
 		access_token: string;
 	}
 	let dialog: HTMLDialogElement;

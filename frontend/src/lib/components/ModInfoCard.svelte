@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { currentlySelectedMods } from '$lib/shared/shared.svelte';
-	import type { TimetableLessonMetadata, TimetableWithMetadata } from '$lib/types/db_raw_types';
+	import type { TimetableModule, TimetableResponse } from '$lib/types/db_raw_types';
 	import { getFullModInfo } from '$lib/utils/fetch_from_cache';
 	import { modifyModColour, removeModEntry } from '$lib/utils/format_db_information';
 	import { X } from '@lucide/svelte';
 	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 	import { colours } from '$lib/utils/formatting_utils';
 	interface ModInfoCardProps {
-		lesson_groups: Partial<Record<string, TimetableLessonMetadata[]>>;
+		lesson_groups: Partial<Record<string, TimetableModule[]>>;
 		acadYear: string;
 		lesson_header: string;
-		timetable: TimetableWithMetadata;
+		timetable: TimetableResponse;
 	}
 	let { lesson_groups, acadYear, lesson_header, timetable }: ModInfoCardProps = $props();
-	let selectedLessonGroup: TimetableLessonMetadata[] = $state([]);
+	let selectedLessonGroup: TimetableModule[] = $state([]);
 	let dialog: HTMLDialogElement;
 </script>
 

@@ -8,7 +8,8 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	let is_timetable_loaded = $state(false);
-	let timetable_metadata: TimetableWithMetadata = $state({
+	let profiles: Profile[] = $state([]);
+	let timetable_metadata: TimetableResponse = $state({
 		academicYear: '',
 		createdAt: '',
 		id: '',
@@ -27,7 +28,7 @@
 
 	import type { PageProps } from './$types';
 	import { get_timetable_by_id, put_timetable_by_id } from '$lib/utils/db_operations';
-	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
+	import type { Profile, RoomInformation, TimetableResponse } from '$lib/types/db_raw_types';
 	import type { Unsubscriber } from 'svelte/store';
 	import { format_AY_name, format_semester_name } from '$lib/utils/formatting_utils';
 	import ModListGroup from '$lib/components/ModListGroup.svelte';
@@ -42,21 +43,25 @@
 		// SignalR Related Actions
 		await roomHub.connect($token_information.a);
 
-		const info = await $roomHub?.invoke('CreateOrJoinRoom', params.timetable_id);
-
+		const info: RoomInformation = await $roomHub?.invoke('CreateOrJoinRoom', params.timetable_id);
 		console.log(info);
 		is_timetable_loaded = false;
 
-		const timetable_data = await get_timetable_by_id($token_information.a, params.timetable_id);
+		timetable_metadata = info.timetables[0];
+		profiles = info.users;
+		//const timetable_data = await get_timetable_by_id($token_information.a, params.timetable_id);
 
-		if (timetable_data.isOk()) {
-			timetable_metadata = timetable_data.value;
-			$currentlySelectedMods = [timetable_data.value];
-		}
+		$currentlySelectedMods = info.timetables;
+		// if (timetable_data.isOk()) {
+		// 	timetable_metadata = timetable_data.value;
+		// 	$currentlySelectedMods = [timetable_data.value];
+		// }
 
 		$roomHub?.on('ReceiveMessage', (msg) => console.log(msg));
 		$roomHub?.on('ReceiveTimetableUpdate', (msg) => console.log(msg));
-		$roomHub?.on('ReceiveUserUpdate', (msg) => console.log(msg));
+		$roomHub?.on('ReceiveUserUpdate', (msg: Profile[]) => {
+			profiles = msg;
+		});
 		// if (timetable_data.isOk()) {
 		// 	timetable_metadata = timetable_data.value;
 		// 	$currentlySelectedMods = [timetable_data.value];
@@ -81,12 +86,16 @@
 
 		// 	is_timetable_loaded = true;
 		// }
-
+		let first_time_subscribe = true;
 		unsubscribe_from_mods_list = currentlySelectedMods.subscribe(async (updated_timetable) => {
+			if (first_time_subscribe) {
+				first_time_subscribe = false;
+				return;
+			}
 			for (const timetable of updated_timetable) {
 				if (timetable.id === params.timetable_id) {
 					const update_info = await $roomHub?.invoke('UpdateTimetable', params.timetable_id, {
-						Name: 'Lmao Dab',
+						Name: timetable.name,
 						MetaData: timetable.metaData
 					});
 
@@ -101,7 +110,7 @@
 		if (unsubscribe_from_mods_list) {
 			unsubscribe_from_mods_list();
 		}
-		await $roomHub?.invoke('LeaveRoom', params.timetable_id);
+		// await $roomHub?.invoke('LeaveRoom', params.timetable_id);
 
 		roomHub.disconnect();
 
@@ -121,14 +130,20 @@
 				)}
 			</h2>
 		</div>
-
-		<CircleX
-			class="min-w-6"
-			size={32}
-			onclick={() => {
-				goto(resolve('/(app)/home'));
-			}}
-		></CircleX>
+		<div class="flex">
+			<div>
+				{#each profiles as profile (profile.username)}
+					<p>{profile.username}</p>
+				{/each}
+			</div>
+			<CircleX
+				class="min-w-6"
+				size={32}
+				onclick={() => {
+					goto(resolve('/(app)/home'));
+				}}
+			></CircleX>
+		</div>
 	</div>
 	<div class="flex">
 		<Timeline></Timeline>
@@ -157,6 +172,5 @@
 		semester={timetable_metadata.semester}
 	></SearchBar>
 
-	<ModListGroup acadYear={timetable_metadata.academicYear} timetables={currentTimetableDisplay}
-	></ModListGroup>
+	<ModListGroup acadYear={timetable_metadata.academicYear}></ModListGroup>
 {/if}

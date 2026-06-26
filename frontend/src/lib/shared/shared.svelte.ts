@@ -1,17 +1,16 @@
-import type { TimetableWithMetadata, UserProfileResponse } from '$lib/types/db_raw_types';
+import type { TimetableResponse, Profile } from '$lib/types/db_raw_types';
 import { persisted } from 'svelte-persisted-store';
 import { writable } from 'svelte/store';
 // First param `preferences` is the local storage key.
 // Second param is the initial value.
-export const currentlySelectedMods = persisted('selectedMods', [] as TimetableWithMetadata[]);
-
+export const currentlySelectedMods = persisted('selectedMods', [] as TimetableResponse[]);
 
 export const registered = writable(false);
 export const timetable_list_should_be_refreshed = writable(false);
 
 interface AccessTokenInfo {
-	a: string; 		// Access Token
-	b: boolean; 	// Guest Login 
+	a: string; // Access Token
+	b: boolean; // Guest Login
 }
 
 export const token_information = persisted('xhnus', {
@@ -19,11 +18,15 @@ export const token_information = persisted('xhnus', {
 	b: false
 } as AccessTokenInfo);
 
-export const currentUserInformation = persisted('clrsnus', {
-	username: ''
-} as UserProfileResponse, {
-	storage: 'session'
-});
+export const currentUserInformation = persisted(
+	'clrsnus',
+	{
+		username: ''
+	} as Profile,
+	{
+		storage: 'session'
+	}
+);
 
 export const chooseModState = writable({
 	moduleCode: '',
