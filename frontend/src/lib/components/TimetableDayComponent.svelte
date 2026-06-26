@@ -100,6 +100,7 @@
 	<div class="font-semibold">
 		{timeTableDayInfo.moduleCode}
 		{showModName ? timeTableDayInfo.moduleName : ''}
+		{timetable_id}
 	</div>
 
 	<div class="truncate">

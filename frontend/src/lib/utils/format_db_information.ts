@@ -49,7 +49,8 @@ export async function queryAvailableLessons(
 				innerGroupLength: -1,
 				outerGroupIndex: -1,
 				outerGroupLength: -1,
-				timetableColour: userState.colour
+				timetableColour: userState.colour,
+				timetableId: ''
 			});
 		}
 	}
@@ -96,7 +97,8 @@ export async function filterTimetableByDay(
 					),
 					moduleCode: lesson.moduleCode,
 					moduleName: modInfo.title,
-					timetableColour: lesson.colour
+					timetableColour: lesson.colour,
+					timetableId: timetable.id
 				});
 			}
 		}

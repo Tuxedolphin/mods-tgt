@@ -11,4 +11,5 @@ export interface TimeTableDayInfo {
 	innerGroupIndex: number;
 	innerGroupLength: number;
 	timetableColour: string;
+	timetableId: string;
 }

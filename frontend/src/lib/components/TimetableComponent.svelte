@@ -15,15 +15,12 @@
 		timetables: TimetableResponse[];
 		acadYear: string;
 		semester: number;
-		timetable_id: string;
-		timetable_name: string;
 	}
 
 	const max_hours_displayed = 12;
 	const max_days_displayed = 5;
 
-	const { timetables, acadYear, semester, timetable_id, timetable_name }: TimetablesProps =
-		$props();
+	const { timetables, acadYear, semester }: TimetablesProps = $props();
 
 	onDestroy(() => {
 		$chooseModState = {
@@ -69,8 +66,6 @@
 		{#each Object.entries(lmao) as [day, tt_info], idx (day)}
 			{#await Promise.all( [filterTimetableByDay(Number.parseInt(day), timetables), $state.snapshot(tt_info)] ) then timetableDayInfo}
 				<TimetableWeekComponent
-					{timetable_id}
-					{timetable_name}
 					{height_of_one_hour_lesson}
 					timetableDayDisplayInfo={timetableDayInfo.flat()}
 					day={idx}
@@ -96,8 +91,6 @@
 			{#await Promise.all( [filterTimetableByDay(day, timetables), queryAvailableLessons(day, semester, acadYear, $chooseModState)] ) then timetableDayInfo}
 				<TimetableWeekComponent
 					{height_of_one_hour_lesson}
-					{timetable_id}
-					{timetable_name}
 					timetableDayDisplayInfo={timetableDayInfo.flat()}
 					{day}
 					{acadYear}

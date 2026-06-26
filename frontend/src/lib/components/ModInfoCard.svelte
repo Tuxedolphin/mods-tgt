@@ -58,7 +58,7 @@
 			</div>
 		</summary>
 		<div class="collapse-content text-sm">
-			{#each lesson_groups[lesson_header] as lesson_metadata (lesson_metadata.lessonNo)}
+			{#each lesson_groups[lesson_header] as lesson_metadata}
 				<div>
 					{lesson_metadata.lessonType}: {lesson_metadata.lessonNo}
 				</div>
