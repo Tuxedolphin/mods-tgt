@@ -79,7 +79,8 @@ public class RoomHub(
             await _roomService.GetRoomInformationAsync(roomId)
             ?? throw new HubException("Failed to retrieve room information");
 
-        await Clients.OthersInGroup(roomId.ToString()).ReceiveUserUpdate(roomInformation.Users);
+        await Clients.Group(roomId.ToString()).ReceiveUserUpdate(roomInformation.Users);
+        await Clients.Caller.ReceiveTimetableUpdate(roomInformation.Timetables);
 
         return roomInformation;
     }
