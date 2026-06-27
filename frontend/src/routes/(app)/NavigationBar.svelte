@@ -6,6 +6,8 @@
 	import type { LayoutProps } from '../$types';
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let { children, params }: LayoutProps = $props();
+
+	import { currentUserInformation } from '$lib/shared/shared.svelte';
 </script>
 
 <div class="navbar justify-between bg-base-200 shadow-sm">
@@ -19,7 +21,10 @@
 			alt="Mods Together Logo"
 		/>
 	</div>
-	<UserAvatar></UserAvatar>
+	<div class="flex items-center gap-1">
+		<p>{$currentUserInformation.username}</p>
+		<UserAvatar></UserAvatar>
+	</div>
 </div>
 
 <div class="px-2 pt-2">

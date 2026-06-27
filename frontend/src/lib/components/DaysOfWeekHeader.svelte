@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { chooseModState } from '$lib/shared/shared.svelte';
-	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import { queryAvailableLessons } from '$lib/utils/format_db_information';
 	import { onDestroy, onMount } from 'svelte';
@@ -18,15 +17,11 @@
 		new Date('31 Jan 2026') // Monday
 	];
 
-	const { timetables, acadYear, semester, timetable_id, timetable_name }: DaysOfWeekProp = $props();
+	const { acadYear, semester }: DaysOfWeekProp = $props();
 
 	interface DaysOfWeekProp {
-		timetables: TimetableWithMetadata[];
 		acadYear: string;
 		semester: number;
-
-		timetable_id: string;
-		timetable_name: string;
 	}
 
 	const dateFormatter = new Intl.DateTimeFormat(undefined, { weekday: 'short' });
@@ -59,7 +54,7 @@
 
 {#if length_of_lmao != 0}
 	<div class="grid grid-cols-{length_of_lmao} gap-0 text-center">
-		{#each Object.entries(lmao) as [day, tt_info] (day)}
+		{#each Object.entries(lmao) as [day] (day)}
 			<div class="flex h-6 items-center bg-base-200 text-xs">
 				<p class="w-full text-center">{formatShortDate(daysOfWeek[Number.parseInt(day) + 1])}</p>
 			</div>

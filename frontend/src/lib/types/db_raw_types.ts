@@ -5,7 +5,8 @@ export interface AuthResponse {
 	tokenType: string;
 }
 
-export interface UserProfileResponse {
+export interface Profile {
+	userId: string;
 	username: string | null;
 }
 
@@ -25,9 +26,9 @@ export interface ErrorInformation {
 	msg: string;
 }
 
-export type TimetableInfos = TimetableInfo[];
+export type TimetableInfos = TimetableSummaryResponse[];
 
-export interface TimetableInfo {
+export interface TimetableSummaryResponse {
 	id: string;
 	name: string;
 	semester: number;
@@ -35,11 +36,21 @@ export interface TimetableInfo {
 	createdAt: string;
 }
 
-export interface TimetableWithMetadata extends TimetableInfo {
-	metaData: TimetableLessonMetadata[];
+export interface TimetableResponse extends TimetableSummaryResponse {
+	metaData: TimetableModule[];
 }
 
-export interface TimetableLessonMetadata {
+export interface RoomInformation {
+	roomId: string;
+	users: Profile[];
+	timetables: TimetableDetailedResponse[];
+}
+
+export interface TimetableDetailedResponse extends TimetableResponse {
+	profile: Profile;
+}
+
+export interface TimetableModule {
 	moduleCode: string;
 	lessonNo: string;
 	lessonType: string;

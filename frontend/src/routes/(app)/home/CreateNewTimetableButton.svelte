@@ -6,6 +6,8 @@
 	import { format_semester_name } from '$lib/utils/formatting_utils';
 	import { CirclePlus } from '@lucide/svelte';
 	import GenericDialog from '../GenericDialog.svelte';
+	import { roomHub } from '$lib/stores/roomHub';
+	import type { TimetablePostTemplate } from '$lib/types/db_raw_types';
 
 	let dialog: HTMLDialogElement;
 	let timetable_name = $state('');

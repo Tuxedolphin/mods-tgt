@@ -1,5 +1,16 @@
 <script lang="ts">
-	let { dialog = $bindable<HTMLDialogElement>(), children } = $props();
+	import type { Snippet } from 'svelte';
+
+	interface DialogProps {
+		dialog: HTMLDialogElement;
+		closeHandler: (() => void) | never;
+		children: Snippet;
+	}
+	let {
+		dialog = $bindable<HTMLDialogElement>(),
+		closeHandler = () => {},
+		children
+	} = $props() as DialogProps;
 </script>
 
 <dialog bind:this={dialog} class="modal">
@@ -7,6 +18,12 @@
 		{@render children()}
 	</div>
 	<form method="dialog" class="modal-backdrop">
-		<button>close</button>
+		<button
+			onclick={() => {
+				if (closeHandler) {
+					closeHandler();
+				}
+			}}>close</button
+		>
 	</form>
 </dialog>

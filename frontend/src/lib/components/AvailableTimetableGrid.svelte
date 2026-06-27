@@ -18,7 +18,6 @@
 			async (should_be_refreshed) => {
 				if (!should_be_refreshed) return;
 				const timetable_request = await get_timetables(access_token);
-				console.log('Requested!');
 				if (timetable_request.isOk()) {
 					availableTimetables = [...timetable_request.value];
 				}

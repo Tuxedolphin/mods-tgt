@@ -1,4 +1,4 @@
-import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
+import type { TimetableResponse } from '$lib/types/db_raw_types';
 
 export const colours = new Set([
 	'bg-red-400',
@@ -47,18 +47,16 @@ export function format_semester_name(number: number): string {
 }
 
 export function format_AY_name(ay_string: string): string {
-	const year_split = ay_string.split('-')
-	return `AY${year_split[0]}/${year_split[1]}`
+	const year_split = ay_string.split('-');
+	return `AY${year_split[0]}/${year_split[1]}`;
 }
 
-
-export function format_created_time(time_string: string) : string {
+export function format_created_time(time_string: string): string {
 	const date = new Date(time_string);
-	console.log(date)
 	return date.toLocaleString();
 }
 
-export function get_randomised_colour(timetable_info: TimetableWithMetadata[]): string {
+export function get_randomised_colour(timetable_info: TimetableResponse[]): string {
 	const currentSelectedColours = new Set<string>();
 
 	for (const tt of timetable_info) {

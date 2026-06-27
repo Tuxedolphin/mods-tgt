@@ -7,9 +7,9 @@
 	let dialog: HTMLDialogElement;
 </script>
 
-<div class="avatar" onclick={() => dialog.show()}>
-	<div class="w-12 rounded-full">
-		<img src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp" />
+<div class="avatar avatar-placeholder" onclick={() => dialog.show()}>
+	<div class="w-12 rounded-full bg-neutral text-neutral-content">
+		<span class="text-3xl">{$currentUserInformation.username?.charAt(0)}</span>
 	</div>
 </div>
 
@@ -19,7 +19,7 @@
 	<button
 		class="btn btn-error"
 		onclick={async () => {
-			$token_information.a = '';
+			token_information.reset();
 			currentUserInformation.reset();
 			const message = 'Logout Successful';
 			goto(resolve(`/login#error_description=${message}`));

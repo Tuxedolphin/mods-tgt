@@ -5,11 +5,11 @@ import type {
 	AuthSucessResponse,
 	ErrorInformation,
 	ErrorResponse,
-	TimetableInfo,
+	TimetableSummaryResponse,
 	TimetableInfos,
 	TimetablePostTemplate,
-	TimetableWithMetadata,
-	UserProfileResponse
+	TimetableResponse,
+	Profile
 } from '../types/db_raw_types';
 import { Err, Ok, type Result } from 'ts-results-es';
 import { goto } from '$app/navigation';
@@ -41,6 +41,7 @@ function create_ky_instance(custom_options: CustomOptions) {
 				async ({ response }) => {
 					if (custom_options.unauthorizedCheck && response.status === 401) {
 						token_information.reset();
+						currentUserInformation.reset();
 						const message = 'Login expired, please login in again';
 						goto(resolve(`/login#error_description=${message}`));
 					}
@@ -138,12 +139,10 @@ export async function put_user_info(
 	}
 }
 
-export async function get_user_info(
-	access_token: string
-): Promise<Result<UserProfileResponse, string>> {
+export async function get_user_info(access_token: string): Promise<Result<Profile, string>> {
 	//const name = currentUserInformation
 	const user_info = get(currentUserInformation);
-	
+
 	if (user_info.username) {
 		return Ok(user_info);
 	}
@@ -153,7 +152,7 @@ export async function get_user_info(
 			unauthorizedCheck: true,
 			auth_token: access_token
 		});
-		const timetables = await get_user_info_db.get('profile/me').json<UserProfileResponse>();
+		const timetables = await get_user_info_db.get('profile/me').json<Profile>();
 
 		currentUserInformation.set(timetables);
 		return Ok(timetables);
@@ -191,7 +190,7 @@ export async function get_timetables(
 export async function get_timetable_by_id(
 	access_token: string,
 	timetable_id: string
-): Promise<Result<TimetableWithMetadata, string>> {
+): Promise<Result<TimetableResponse, string>> {
 	try {
 		const get_timetables_id_db = create_ky_instance({
 			authorised: true,
@@ -200,7 +199,7 @@ export async function get_timetable_by_id(
 		});
 		const timetables = await get_timetables_id_db
 			.get(`/timetable/${timetable_id}`)
-			.json<TimetableWithMetadata>();
+			.json<TimetableResponse>();
 		return Ok(timetables);
 	} catch (error) {
 		return Err('Something went wrong ' + error);
@@ -210,7 +209,7 @@ export async function get_timetable_by_id(
 export async function put_timetable_by_id(
 	access_token: string,
 	timetable_id: string,
-	timetable_data: TimetableWithMetadata
+	timetable_data: TimetableResponse
 ): Promise<Result<string, string>> {
 	try {
 		const put_timetable_id_db = create_ky_instance({
@@ -249,7 +248,7 @@ export async function create_empty_timetable(
 	timetable_name: string,
 	semester: number,
 	academic_year: string
-): Promise<Result<TimetableInfo, string>> {
+): Promise<Result<TimetableSummaryResponse, string>> {
 	const timetable_post_template: TimetablePostTemplate = {
 		academicYear: academic_year,
 		metaData: [],
@@ -264,7 +263,9 @@ export async function create_empty_timetable(
 		}).extend({
 			json: timetable_post_template
 		});
-		const timetable_info = await create_empty_timetable_db.post('/timetable').json<TimetableInfo>();
+		const timetable_info = await create_empty_timetable_db
+			.post('/timetable')
+			.json<TimetableSummaryResponse>();
 		return Ok(timetable_info);
 	} catch (error) {
 		return Err('Something went wrong ' + error);

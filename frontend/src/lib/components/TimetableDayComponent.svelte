@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { currentlySelectedMods, chooseModState } from '$lib/shared/shared.svelte';
+	import {
+		currentlySelectedMods,
+		chooseModState,
+		currentUserInformation
+	} from '$lib/shared/shared.svelte';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import { modifyModEntry } from '$lib/utils/format_db_information';
 
@@ -8,7 +12,6 @@
 		semester: number;
 		acadYear: string;
 		timetable_id: string;
-		timetable_name: string;
 		timetable_colour: string;
 		height_of_one_hour_lesson: number;
 	}
@@ -17,7 +20,6 @@
 		acadYear,
 		semester,
 		timetable_id,
-		timetable_name,
 		timetable_colour,
 		height_of_one_hour_lesson
 	}: TimetableDayProps = $props();
@@ -32,12 +34,18 @@
 	const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
 
 	async function changeTimetable() {
+		if (
+			$currentUserInformation.userId !== timeTableDayInfo.timetableOwner?.userId &&
+			!timeTableDayInfo.isAChoiceSelection
+		)
+			return;
 		if ($chooseModState.lessonType === '') {
 			$chooseModState = {
 				lessonType: timeTableDayInfo.lessonSchedule.lessonType,
 				moduleCode: timeTableDayInfo.moduleCode,
 				classNo: timeTableDayInfo.lessonSchedule.classNo,
-				colour: timetable_colour
+				colour: timetable_colour,
+				selectedTimetableId: timetable_id
 			};
 		} else {
 			currentlySelectedMods.set(
@@ -46,7 +54,6 @@
 					acadYear,
 					semester,
 					timetable_id,
-					timetable_name,
 					timeTableDayInfo.moduleCode,
 					timeTableDayInfo.lessonSchedule.lessonType,
 					timeTableDayInfo.lessonSchedule.classNo,
@@ -57,7 +64,8 @@
 				classNo: '',
 				colour: '',
 				lessonType: '',
-				moduleCode: ''
+				moduleCode: '',
+				selectedTimetableId: ''
 			};
 		}
 	}
@@ -69,10 +77,10 @@
 	const pixel_conversion = 12 * height_of_one_hour_lesson;
 
 	function calculateHeight(): string {
-		return `h-${
+		return `h-${Math.floor(
 			timeTableDayInfo.normalisedEndDuration * pixel_conversion -
-			timeTableDayInfo.normalisedStartDuration * pixel_conversion
-		}`;
+				timeTableDayInfo.normalisedStartDuration * pixel_conversion
+		)}`;
 	}
 	function calculateTopMargin(): string {
 		return `mt-${timeTableDayInfo.normalisedStartDuration * pixel_conversion}`;
@@ -102,10 +110,20 @@
 		{showModName ? timeTableDayInfo.moduleName : ''}
 	</div>
 
-	<div class="truncate">
-		{timeTableDayInfo.lessonSchedule.lessonType}
+	<div class="flex gap-1">
+		<div class="truncate">
+			{timeTableDayInfo.lessonSchedule.lessonType}
+		</div>
+		<div class="opacity-50">
+			[{timeTableDayInfo.lessonSchedule.classNo}]
+		</div>
 	</div>
-	<div class="opacity-50">
-		[{timeTableDayInfo.lessonSchedule.classNo}]
+
+	<div class="text-[10px] italic">
+		{#if timeTableDayInfo.timetableOwner?.userId === $currentUserInformation.userId}
+			{timeTableDayInfo.timetableOwner?.username} (You)
+		{:else}
+			{timeTableDayInfo.timetableOwner?.username}
+		{/if}
 	</div>
 </div>

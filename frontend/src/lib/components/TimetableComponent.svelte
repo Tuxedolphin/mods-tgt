@@ -2,35 +2,33 @@
 	import BackgroundTiles from './BackgroundTiles.svelte';
 
 	import { chooseModState } from '$lib/shared/shared.svelte';
-	import type { TimetableWithMetadata } from '$lib/types/db_raw_types';
+	import type { TimetableResponse } from '$lib/types/db_raw_types';
 	import { filterTimetableByDay, queryAvailableLessons } from '$lib/utils/format_db_information';
 	import { onDestroy, onMount } from 'svelte';
 	import TimetableWeekComponent from './TimetableWeekComponent.svelte';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import type { Unsubscriber } from 'svelte/store';
 
-	const height_of_one_hour_lesson = 12;
+	const height_of_one_hour_lesson = 18;
 
 	interface TimetablesProps {
-		timetables: TimetableWithMetadata[];
+		timetables: TimetableResponse[];
 		acadYear: string;
 		semester: number;
-		timetable_id: string;
-		timetable_name: string;
 	}
 
 	const max_hours_displayed = 12;
 	const max_days_displayed = 5;
 
-	const { timetables, acadYear, semester, timetable_id, timetable_name }: TimetablesProps =
-		$props();
+	const { timetables, acadYear, semester }: TimetablesProps = $props();
 
 	onDestroy(() => {
 		$chooseModState = {
 			classNo: '',
 			colour: '',
 			lessonType: '',
-			moduleCode: ''
+			moduleCode: '',
+			selectedTimetableId: ''
 		};
 
 		chooseModStateCleanUpFunction();
@@ -69,8 +67,6 @@
 		{#each Object.entries(lmao) as [day, tt_info], idx (day)}
 			{#await Promise.all( [filterTimetableByDay(Number.parseInt(day), timetables), $state.snapshot(tt_info)] ) then timetableDayInfo}
 				<TimetableWeekComponent
-					{timetable_id}
-					{timetable_name}
 					{height_of_one_hour_lesson}
 					timetableDayDisplayInfo={timetableDayInfo.flat()}
 					day={idx}
@@ -96,8 +92,6 @@
 			{#await Promise.all( [filterTimetableByDay(day, timetables), queryAvailableLessons(day, semester, acadYear, $chooseModState)] ) then timetableDayInfo}
 				<TimetableWeekComponent
 					{height_of_one_hour_lesson}
-					{timetable_id}
-					{timetable_name}
 					timetableDayDisplayInfo={timetableDayInfo.flat()}
 					{day}
 					{acadYear}

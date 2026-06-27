@@ -31,7 +31,7 @@
 					<span>Home</span>
 				</button>
 			</li>
-			<li>
+			<!-- <li>
 				<button>
 					<UsersRound />
 					<span>Shared with me</span>
@@ -43,7 +43,7 @@
 					<Settings />
 					<span>Settings</span>
 				</button>
-			</li>
+			</li> -->
 		</ul>
 	</div>
 </div>

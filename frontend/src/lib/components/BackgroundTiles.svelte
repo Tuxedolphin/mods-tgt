@@ -19,7 +19,8 @@
 			classNo: '',
 			colour: '',
 			lessonType: '',
-			moduleCode: ''
+			moduleCode: '',
+			selectedTimetableId: ''
 		};
 	}}
 	class="col-start-{x_cord + 1} row-start-{y_cord + 1} h-{heightOfOneHourLessonPx} {y_cord % 2 == 0

@@ -9,10 +9,9 @@
 		semester: number;
 		acadYear: string;
 		timetable_id: string;
-		timetable_name: string;
 	}
 
-	let { mod, semester, acadYear, timetable_id, timetable_name }: ModSuggestionsProp = $props();
+	let { mod, semester, acadYear, timetable_id }: ModSuggestionsProp = $props();
 
 	async function addMod() {
 		if (!mod.semesters.includes(semester)) return;
@@ -21,14 +20,7 @@
 		const timeTable = modFullInfo.semesterData.find((sem) => sem.semester == semester)!.timetable;
 
 		if (
-			checkModAlreadyAdded(
-				$currentlySelectedMods,
-				acadYear,
-				semester,
-				timetable_id,
-				timetable_name,
-				mod.moduleCode
-			)
+			checkModAlreadyAdded($currentlySelectedMods, acadYear, semester, timetable_id, mod.moduleCode)
 		)
 			return;
 		currentlySelectedMods.set(
@@ -37,7 +29,6 @@
 				acadYear,
 				semester,
 				timetable_id,
-				timetable_name,
 				modFullInfo.moduleCode,
 				timeTable
 			)
