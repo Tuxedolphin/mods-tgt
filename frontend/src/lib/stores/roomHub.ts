@@ -12,7 +12,7 @@ const createRoomHub = function () {
 
 	const connect = async function (token: string) {
 		connection = new signalR.HubConnectionBuilder()
-			.withUrl(`${PUBLIC_DB_LINK}/hubs/room`, {
+			.withUrl(`${PUBLIC_DB_LINK}hubs/room`, {
 				accessTokenFactory: () => token
 			})
 			.configureLogging(signalR.LogLevel.Error)
