@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-app-artifacts
-          path: ./publish/
+          path: ./backend/bin/Release/net10.0/publish/
           retention-days: 7 # Optional: Auto-delete after 7 days
   deploy-frontend:
     runs-on: ubuntu-latest
