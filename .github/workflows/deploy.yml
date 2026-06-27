@@ -15,7 +15,25 @@ jobs:
   frontend-checks:
     uses: ./.github/workflows/build-test-sveltekit.yml
 
-  on-success:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore dependencies
+        run: dotnet restore backend/Backend.csproj && dotnet restore backend.tests/Backend.Tests.csproj
+      - name: Build
+        run: dotnet build --no-restore backend/Backend.csproj && dotnet build --no-restore backend.tests/Backend.Tests.csproj
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-app-artifacts
+          path: ./publish/
+          retention-days: 7 # Optional: Auto-delete after 7 days
+  deploy-frontend:
     runs-on: ubuntu-latest
     needs:
       - backend-checks
