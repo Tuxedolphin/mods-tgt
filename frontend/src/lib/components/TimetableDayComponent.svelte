@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { currentlySelectedMods, chooseModState } from '$lib/shared/shared.svelte';
+	import {
+		currentlySelectedMods,
+		chooseModState,
+		currentUserInformation
+	} from '$lib/shared/shared.svelte';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import { modifyModEntry } from '$lib/utils/format_db_information';
 
@@ -30,6 +34,11 @@
 	const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
 
 	async function changeTimetable() {
+		if (
+			$currentUserInformation.userId !== timeTableDayInfo.timetableOwner?.userId &&
+			!timeTableDayInfo.isAChoiceSelection
+		)
+			return;
 		if ($chooseModState.lessonType === '') {
 			$chooseModState = {
 				lessonType: timeTableDayInfo.lessonSchedule.lessonType,
@@ -68,10 +77,10 @@
 	const pixel_conversion = 12 * height_of_one_hour_lesson;
 
 	function calculateHeight(): string {
-		return `h-${
+		return `h-${Math.floor(
 			timeTableDayInfo.normalisedEndDuration * pixel_conversion -
-			timeTableDayInfo.normalisedStartDuration * pixel_conversion
-		}`;
+				timeTableDayInfo.normalisedStartDuration * pixel_conversion
+		)}`;
 	}
 	function calculateTopMargin(): string {
 		return `mt-${timeTableDayInfo.normalisedStartDuration * pixel_conversion}`;
@@ -99,13 +108,22 @@
 	<div class="font-semibold">
 		{timeTableDayInfo.moduleCode}
 		{showModName ? timeTableDayInfo.moduleName : ''}
-		{timetable_id}
 	</div>
 
-	<div class="truncate">
-		{timeTableDayInfo.lessonSchedule.lessonType}
+	<div class="flex gap-1">
+		<div class="truncate">
+			{timeTableDayInfo.lessonSchedule.lessonType}
+		</div>
+		<div class="opacity-50">
+			[{timeTableDayInfo.lessonSchedule.classNo}]
+		</div>
 	</div>
-	<div class="opacity-50">
-		[{timeTableDayInfo.lessonSchedule.classNo}]
+
+	<div class="text-[10px] italic">
+		{#if timeTableDayInfo.timetableOwner?.userId === $currentUserInformation.userId}
+			{timeTableDayInfo.timetableOwner?.username} (You)
+		{:else}
+			{timeTableDayInfo.timetableOwner?.username}
+		{/if}
 	</div>
 </div>

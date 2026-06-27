@@ -77,7 +77,6 @@
 						timetable.academicYear,
 						timetable.semester,
 						timetable.id,
-						timetable.name,
 						selectedLessonGroup[0].moduleCode,
 						colour
 					)

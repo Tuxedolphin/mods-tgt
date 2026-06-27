@@ -54,7 +54,8 @@ export async function queryAvailableLessons(
 				outerGroupIndex: -1,
 				outerGroupLength: -1,
 				timetableColour: userState.colour,
-				timetableId: userState.selectedTimetableId
+				timetableId: userState.selectedTimetableId,
+				timetableOwner: undefined
 			});
 		}
 	}
@@ -64,7 +65,7 @@ export async function queryAvailableLessons(
 
 export async function filterTimetableByDay(
 	day: number,
-	timetables: TimetableResponse[]
+	timetables: TimetableDetailedResponse[]
 ): Promise<TimeTableDayInfo[]> {
 	if (timetables.length === 0) return [];
 	const resultingTimetables: TimeTableDayInfo[] = [];
@@ -102,7 +103,8 @@ export async function filterTimetableByDay(
 					moduleCode: lesson.moduleCode,
 					moduleName: modInfo.title,
 					timetableColour: lesson.colour,
-					timetableId: timetable.id
+					timetableId: timetable.id,
+					timetableOwner: timetable.profile
 				});
 			}
 		}

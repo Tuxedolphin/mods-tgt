@@ -10,6 +10,6 @@
 
 @source inline('grid-cols-{1..5}');
 
-@source inline('h-{8..384..4}');
+@source inline('h-{18..384..18}');
 @source inline('mt-{8..384..4}');
 @source inline('w-1/{1..24}');

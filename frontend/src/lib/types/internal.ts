@@ -1,3 +1,4 @@
+import type { Profile } from './db_raw_types';
 import type { RawLesson } from './modules';
 export interface TimeTableDayInfo {
 	lessonSchedule: RawLesson;
@@ -12,4 +13,5 @@ export interface TimeTableDayInfo {
 	innerGroupLength: number;
 	timetableColour: string;
 	timetableId: string;
+	timetableOwner: Profile | undefined;
 }

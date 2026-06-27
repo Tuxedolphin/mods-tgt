@@ -9,7 +9,7 @@
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import type { Unsubscriber } from 'svelte/store';
 
-	const height_of_one_hour_lesson = 12;
+	const height_of_one_hour_lesson = 18;
 
 	interface TimetablesProps {
 		timetables: TimetableResponse[];
