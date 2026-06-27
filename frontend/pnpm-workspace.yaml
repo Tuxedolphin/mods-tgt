@@ -3,3 +3,16 @@ allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
+minimumReleaseAgeExclude:
+  - cookie@0.7.0
+  - esbuild@0.28.1
+  - ws@8.21.0
+  - '@vitest/browser@4.1.8'
+  - undici@7.28.0
+overrides:
+  '@vitest/browser@>=4.0.0 <=4.1.7': ^4.1.8
+  cookie@<0.7.0: ^0.7.0
+  esbuild@>=0.27.3 <0.28.1: ^0.28.1
+  undici@>=7.0.0 <7.28.0: ^7.28.0
+  undici@>=7.23.0 <7.28.0: ^7.28.0
+  ws@>=8.0.0 <8.21.0: ^8.21.0
