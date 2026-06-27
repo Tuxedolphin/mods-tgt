@@ -26,6 +26,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { roomHub } from '$lib/stores/roomHub';
+	import GenericDialog from '../../GenericDialog.svelte';
 
 	let is_timetable_loaded = $state(false);
 	let profiles: Profile[] = $state([]);
@@ -37,7 +38,8 @@
 		name: '',
 		semester: 0
 	});
-
+	let share_tt_dialog: HTMLDialogElement;
+	let copy_text = $state('Copy Link!');
 	let currentTimetableDisplay = $derived(
 		getTimetable(
 			timetable_metadata.academicYear,
@@ -140,15 +142,21 @@
 				)}
 			</h2>
 		</div>
-		<div class="flex">
-			<div>
+		<div class="flex h-8 items-center gap-1">
+			<div class="flex gap-1">
 				{#each profiles as profile (profile.userId)}
-					<p>
-						{profile.username}
-						{profile.userId === $currentUserInformation.userId ? '(You)' : ''}
-					</p>
+					{#if profile.userId !== $currentUserInformation.userId}
+						<div class="avatar avatar-placeholder">
+							<div class="w-8 rounded-full bg-neutral text-neutral-content">
+								<span class="text-xs">{profile.username?.charAt(0)}</span>
+							</div>
+						</div>
+					{/if}
 				{/each}
 			</div>
+			<button class="btn btn-accent" onclick={() => share_tt_dialog.show()}>
+				Share Timetable
+			</button>
 			<CircleX
 				class="min-w-6"
 				size={32}
@@ -182,3 +190,15 @@
 
 	<ModListGroup acadYear={timetable_metadata.academicYear}></ModListGroup>
 {/if}
+
+<GenericDialog bind:dialog={share_tt_dialog} closeHandler={() => (copy_text = 'Copy Link!')}>
+	<h3 class="pb-2 text-lg font-bold">Share this timetable!</h3>
+
+	<button
+		class="btn w-full btn-primary"
+		onclick={async () => {
+			copy_text = 'Link Copied!';
+			await navigator.clipboard.writeText(window.location.href);
+		}}>{copy_text}</button
+	>
+</GenericDialog>
