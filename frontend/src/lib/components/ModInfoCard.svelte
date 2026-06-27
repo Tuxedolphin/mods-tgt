@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { currentlySelectedMods, currentUserInformation } from '$lib/shared/shared.svelte';
-	import type {
-		TimetableDetailedResponse,
-		TimetableModule,
-		TimetableResponse
-	} from '$lib/types/db_raw_types';
+	import type { TimetableDetailedResponse, TimetableModule } from '$lib/types/db_raw_types';
 	import { getFullModInfo } from '$lib/utils/fetch_from_cache';
 	import { modifyModColour, removeModEntry } from '$lib/utils/format_db_information';
 	import { X } from '@lucide/svelte';
@@ -18,6 +14,7 @@
 	}
 	let { lesson_groups, acadYear, lesson_header, timetable }: ModInfoCardProps = $props();
 	let selectedLessonGroup: TimetableModule[] = $state([]);
+	// svelte-ignore non_reactive_update
 	let dialog: HTMLDialogElement;
 </script>
 
@@ -63,7 +60,7 @@
 			</div>
 		</summary>
 		<div class="collapse-content text-sm">
-			{#each lesson_groups[lesson_header] as lesson_metadata}
+			{#each lesson_groups[lesson_header] as lesson_metadata (lesson_metadata)}
 				<div>
 					{lesson_metadata.lessonType}: {lesson_metadata.lessonNo}
 				</div>
@@ -72,9 +69,10 @@
 	</details>
 </div>
 
-<GenericDialog bind:dialog>
+<GenericDialog bind:dialog closeHandler={() => {}}>
 	<h3 class="text-lg font-bold">Change Colour</h3>
 	{#each colours as colour (colour)}
+		<!-- svelte-ignore a11y_consider_explicit_label -->
 		<button
 			onclick={() => {
 				currentlySelectedMods.set(

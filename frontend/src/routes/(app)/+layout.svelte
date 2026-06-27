@@ -2,11 +2,10 @@
 	import NavigationBar from './NavigationBar.svelte';
 	import mods_tgt_header from '$lib/assets/mods_tgt_header.png?enhanced';
 	import type { LayoutProps } from './$types';
-	import { HouseHeart, Settings, UsersRound } from '@lucide/svelte';
+	import { HouseHeart } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let { data, children, params }: LayoutProps = $props();
 </script>
 

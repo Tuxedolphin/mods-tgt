@@ -7,7 +7,7 @@
 	import { currentUserInformation } from '$lib/shared/shared.svelte';
 
 	onMount(() => {
-		if ($currentUserInformation.displayName) {
+		if ($currentUserInformation.username) {
 			goto(resolve('/home'));
 		}
 	});

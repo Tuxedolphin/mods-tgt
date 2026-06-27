@@ -2,7 +2,7 @@
 	import BackgroundTiles from './BackgroundTiles.svelte';
 
 	import { chooseModState } from '$lib/shared/shared.svelte';
-	import type { TimetableResponse } from '$lib/types/db_raw_types';
+	import type { TimetableDetailedResponse } from '$lib/types/db_raw_types';
 	import { filterTimetableByDay, queryAvailableLessons } from '$lib/utils/format_db_information';
 	import { onDestroy, onMount } from 'svelte';
 	import TimetableWeekComponent from './TimetableWeekComponent.svelte';
@@ -12,7 +12,7 @@
 	const height_of_one_hour_lesson = 18;
 
 	interface TimetablesProps {
-		timetables: TimetableResponse[];
+		timetables: TimetableDetailedResponse[];
 		acadYear: string;
 		semester: number;
 	}

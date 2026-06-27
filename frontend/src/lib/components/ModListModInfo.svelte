@@ -11,6 +11,6 @@
 	let lesson_headers = $derived(Object.keys(lesson_groups));
 </script>
 
-{#each lesson_headers as lesson}
+{#each lesson_headers as lesson (lesson)}
 	<ModInfoCard {lesson_groups} lesson_header={lesson} {acadYear} {timetable}></ModInfoCard>
 {/each}

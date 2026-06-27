@@ -1,16 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-
-	interface DialogProps {
-		dialog: HTMLDialogElement;
-		closeHandler: (() => void) | never;
-		children: Snippet;
-	}
-	let {
-		dialog = $bindable<HTMLDialogElement>(),
-		closeHandler = () => {},
-		children
-	} = $props() as DialogProps;
+	let { dialog = $bindable<HTMLDialogElement>(), closeHandler, children } = $props();
 </script>
 
 <dialog bind:this={dialog} class="modal">

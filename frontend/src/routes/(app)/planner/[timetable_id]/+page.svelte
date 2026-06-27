@@ -38,6 +38,7 @@
 		name: '',
 		semester: 0
 	});
+	// svelte-ignore non_reactive_update
 	let share_tt_dialog: HTMLDialogElement;
 	let copy_text = $state('Copy Link!');
 	let currentTimetableDisplay = $derived(
@@ -50,6 +51,7 @@
 
 	let { params }: PageProps = $props();
 	let unsubscribe_from_mods_list: Unsubscriber;
+	// svelte-ignore non_reactive_update
 	let user_tt: TimetableDetailedResponse | undefined;
 	onMount(async () => {
 		// SignalR Related Actions
@@ -183,7 +185,6 @@
 
 	<SearchBar
 		timetable_id={user_tt?.id as string}
-		timetable_name={timetable_metadata.name}
 		acadYear={timetable_metadata.academicYear}
 		semester={timetable_metadata.semester}
 	></SearchBar>

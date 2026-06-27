@@ -6,7 +6,7 @@
 
 	let nameInput = $state('');
 	onMount(() => {
-		if ($currentUserInformation.displayName) {
+		if ($currentUserInformation.username) {
 			goto(resolve('/home'));
 		}
 	});
@@ -20,7 +20,7 @@
 <button
 	class="btn {nameInput.length === 0 ? 'btn-disabled' : ''} btn-primary"
 	onclick={() => {
-		$currentUserInformation.displayName = nameInput;
+		$currentUserInformation.username = nameInput;
 		$token_information.b = true;
 		$token_information.a = '';
 		goto(resolve('/home'));

@@ -6,9 +6,8 @@
 	import { format_semester_name } from '$lib/utils/formatting_utils';
 	import { CirclePlus } from '@lucide/svelte';
 	import GenericDialog from '../GenericDialog.svelte';
-	import { roomHub } from '$lib/stores/roomHub';
-	import type { TimetablePostTemplate } from '$lib/types/db_raw_types';
 
+	// svelte-ignore non_reactive_update
 	let dialog: HTMLDialogElement;
 	let timetable_name = $state('');
 	let semester_number = $state(1);
@@ -32,7 +31,7 @@
 <CirclePlus size={32} class="cursor-pointer" onclick={() => dialog.show()}></CirclePlus>
 <!-- Open the modal using ID.showModal() method -->
 
-<GenericDialog bind:dialog>
+<GenericDialog bind:dialog closeHandler={() => {}}>
 	<h3 class="text-lg font-bold">Create new timetable</h3>
 	<p class="py-4">Name your timetable:</p>
 	<input class="input" bind:value={timetable_name} />

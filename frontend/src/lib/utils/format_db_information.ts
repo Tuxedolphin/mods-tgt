@@ -1,9 +1,5 @@
 import type { LessonInfo } from '$lib/shared/shared.svelte';
-import type {
-	TimetableDetailedResponse,
-	TimetableModule,
-	TimetableResponse
-} from '$lib/types/db_raw_types';
+import type { TimetableDetailedResponse, TimetableModule } from '$lib/types/db_raw_types';
 import type { TimeTableDayInfo } from '$lib/types/internal';
 import type { RawLesson } from '$lib/types/modules';
 
@@ -17,8 +13,8 @@ const endOfDayTime = '2000';
 export function getTimetable(
 	acadYear: string,
 	semesterNo: number,
-	timetables: TimetableResponse[]
-): TimetableResponse[] {
+	timetables: TimetableDetailedResponse[]
+): TimetableDetailedResponse[] {
 	const timetable = timetables.filter(
 		(x) => x.academicYear == acadYear && x.semester == semesterNo
 	);

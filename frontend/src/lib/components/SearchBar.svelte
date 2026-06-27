@@ -13,9 +13,8 @@
 		acadYear: string;
 		semester: number;
 		timetable_id: string;
-		timetable_name: string;
 	}
-	const { acadYear, semester, timetable_id, timetable_name }: SearchBarProps = $props();
+	const { acadYear, semester, timetable_id }: SearchBarProps = $props();
 	let modData = $state([]) as ModSummary[];
 	const modSearch = new Search('moduleCode');
 
@@ -50,7 +49,7 @@
 
 <div class="max-h-36 overflow-auto scroll-auto">
 	{#each results as res (res.moduleCode)}
-		<ModuleCodeSuggestionMini {timetable_id} {timetable_name} mod={res} {semester} {acadYear}
+		<ModuleCodeSuggestionMini {timetable_id} mod={res} {semester} {acadYear}
 		></ModuleCodeSuggestionMini>
 	{/each}
 </div>

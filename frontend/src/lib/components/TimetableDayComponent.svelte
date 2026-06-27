@@ -74,6 +74,7 @@
 		return timeTableDayInfo.isAChoiceSelection ? 'opacity-30' : 'opacity-100';
 	}
 
+	// svelte-ignore state_referenced_locally
 	const pixel_conversion = 12 * height_of_one_hour_lesson;
 
 	function calculateHeight(): string {

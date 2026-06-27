@@ -3,7 +3,7 @@
 
 	import { onMount } from 'svelte';
 	import GreetingComponent from '$lib/components/GreetingComponent.svelte';
-	import { token_information, currentUserInformation } from '$lib/shared/shared.svelte';
+	import { token_information } from '$lib/shared/shared.svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import AvailableTimetableGrid from '$lib/components/AvailableTimetableGrid.svelte';

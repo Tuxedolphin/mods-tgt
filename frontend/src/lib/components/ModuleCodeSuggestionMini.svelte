@@ -38,6 +38,8 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="flex h-12 w-full items-center gap-2 p-4" onclick={addMod}>
 	{#if !mod.semesters.includes(semester)}
 		<p class="font-semibold">{mod.moduleCode}</p>

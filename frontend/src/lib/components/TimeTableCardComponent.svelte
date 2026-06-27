@@ -16,9 +16,9 @@
 		timetable: TimetableSummaryResponse;
 		access_token: string;
 	}
+	// svelte-ignore non_reactive_update
 	let dialog: HTMLDialogElement;
 	let selected_timetable_name = $state('');
-	let selected_timetable_id = $state('');
 	const { timetable, access_token }: TimeTableCardComponentProps = $props();
 </script>
 
@@ -64,17 +64,19 @@
 	style="position-anchor:--option-{timetable.id}"
 >
 	<li>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_missing_attribute -->
 		<a
 			onclick={async () => {
 				selected_timetable_name = timetable.name;
-				selected_timetable_id = timetable.id;
 				dialog.show();
 			}}>Delete</a
 		>
 	</li>
 </ul>
 
-<GenericDialog bind:dialog>
+<GenericDialog bind:dialog closeHandler={() => {}}>
 	<h3 class="text-lg font-bold">Confirm?</h3>
 	<p class="py-4">
 		Delete the timetable: '{selected_timetable_name}' (this action is irreversible!)
