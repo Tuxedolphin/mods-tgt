@@ -20,7 +20,7 @@ public class HealthController(AppDbContext _context) : BaseController
             await conn.CloseAsync();
             return Ok(new { status = "Healthy!", database = "Connected" });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return StatusCode(503, new { status = "Unhealthy", database = "Not Connected" });
         }
