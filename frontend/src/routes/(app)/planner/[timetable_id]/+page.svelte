@@ -67,7 +67,7 @@
 		profiles = info!.users;
 		$currentlySelectedMods = info!.timetables;
 
-		$roomHub?.on('ReceiveMessage', (msg) => console.log(msg));
+		// $roomHub?.on('ReceiveMessage', (msg) => console.log(msg));
 		$roomHub?.on('ReceiveTimetableUpdate', (msg: TimetableDetailedResponse[]) => {
 			update_from_room = true;
 			$currentlySelectedMods = msg;

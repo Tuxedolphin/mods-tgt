@@ -231,6 +231,7 @@ export function findOverlappingTimeInfo(allTime: TimeTableDayInfo[]): TimeTableD
 	allTime.sort((a, b) => a.normalisedStartDuration - b.normalisedStartDuration);
 
 	const groupTimes = Object.groupBy(allTime, (x) => x.normalisedStartDuration);
+
 	const MAX_ITER = 10_000;
 	let iterIdx = 0;
 	const processedTimings: string[] = [];

@@ -28,7 +28,7 @@
 
 <p>Your Mod List:</p>
 {#if user_own_modlist}
-	<div class="grid grid-cols-3 gap-4 p-1">
+	<div class="grid gap-4 p-1 lg:grid-cols-3">
 		<ModListModInfo timetable={user_own_modlist} {acadYear}></ModListModInfo>
 	</div>
 {:else}
@@ -37,7 +37,7 @@
 
 {#each other_mod_list as tt (tt.id)}
 	<p>{tt.profile.username}'s Mod List:</p>
-	<div class="grid grid-cols-3 gap-4 p-1">
+	<div class="grid gap-4 p-1 lg:grid-cols-3">
 		<ModListModInfo timetable={tt} {acadYear}></ModListModInfo>
 	</div>
 {/each}

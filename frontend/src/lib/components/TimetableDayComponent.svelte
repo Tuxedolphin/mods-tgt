@@ -78,13 +78,17 @@
 	const pixel_conversion = 12 * height_of_one_hour_lesson;
 
 	function calculateHeight(): string {
-		return `h-${Math.floor(
+		const rounded_height = Math.round(
 			timeTableDayInfo.normalisedEndDuration * pixel_conversion -
 				timeTableDayInfo.normalisedStartDuration * pixel_conversion
-		)}`;
+		);
+		return `h-${rounded_height}`;
 	}
 	function calculateTopMargin(): string {
-		return `mt-${timeTableDayInfo.normalisedStartDuration * pixel_conversion}`;
+		const rounded_top_margin = Math.round(
+			timeTableDayInfo.normalisedStartDuration * pixel_conversion
+		);
+		return `mt-${rounded_top_margin}`;
 	}
 </script>
 
