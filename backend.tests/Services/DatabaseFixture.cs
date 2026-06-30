@@ -1,5 +1,6 @@
 using Backend.Data;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Respawn;
 using Testcontainers.PostgreSql;
 
@@ -20,13 +21,47 @@ public class DatabaseFixture : IAsyncLifetime
                 .Options
         );
 
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
-        throw new NotImplementedException();
+        await _postgres.DisposeAsync();
     }
 
-    public Task InitializeAsync()
+    public async Task ResetAsync()
     {
-        throw new NotImplementedException();
+        await using var conn = new NpgsqlConnection(_postgres.GetConnectionString());
+        await conn.OpenAsync();
+        await _respawner.ResetAsync(conn);
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _postgres.StartAsync();
+
+        await using var setupConn = new NpgsqlConnection(_postgres.GetConnectionString());
+        await setupConn.OpenAsync();
+
+        // This has to be manually added since it the profiles table is excluded from migrations
+
+        // This is the same as the original sql command, except all the parts
+        // referencing Supabase.auth.users have been removed
+        await using var cmd = setupConn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS public."Profiles" (
+                "Id" uuid PRIMARY KEY,
+                "Username" text
+            );
+            """;
+        await cmd.ExecuteNonQueryAsync();
+
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        await using var conn = new NpgsqlConnection(_postgres.GetConnectionString());
+        await conn.OpenAsync();
+
+        _respawner = await Respawner.CreateAsync(
+            conn,
+            new RespawnerOptions { DbAdapter = DbAdapter.Postgres, SchemasToInclude = ["public"] }
+        );
     }
 }

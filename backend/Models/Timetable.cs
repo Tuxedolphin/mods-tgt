@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models;
 
-public class TimetableModule
+public record TimetableModule
 {
     [Required]
     public required string ModuleCode { get; set; } = string.Empty;
