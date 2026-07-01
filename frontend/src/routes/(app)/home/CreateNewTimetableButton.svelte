@@ -11,7 +11,7 @@
 	let dialog: HTMLDialogElement;
 	let timetable_name = $state('');
 	let semester_number = $state(1);
-	let academic_year = $state('2025-2026');
+	let academic_year = $state('2026-2027');
 
 	async function create_new_empty_timetable() {
 		const timetable_info = await create_empty_timetable(
@@ -38,6 +38,7 @@
 
 	<p class="py-4">Choose AY:</p>
 	<select class="select" bind:value={academic_year}>
+		<option>2026-2027</option>
 		<option>2025-2026</option>
 		<option>2024-2025</option>
 	</select>
