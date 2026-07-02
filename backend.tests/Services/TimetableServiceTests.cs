@@ -3,7 +3,6 @@ using Backend.DTOs;
 using Backend.DTOs.Mappings;
 using Backend.Exceptions;
 using Backend.Models;
-using Backend.Services.Rooms;
 using Backend.Services.Timetables;
 using Shouldly;
 
@@ -34,7 +33,7 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task CreateTimetableAsync_NewTimetable_CreatesTimetableRow()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
         var request = CreateRequest(metaData);
 
@@ -55,7 +54,7 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task CreateTimetableAsync_NewTimetable_CreatesRoomRowWithSameId()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var timetable = await _service.CreateTimetableAsync(CreateRequest(), userId);
 
         _context.ChangeTracker.Clear();
@@ -69,7 +68,7 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task CreateTimetableAsync_NewTimetable_ReturnsCorrectResponse()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
         var request = CreateRequest(metaData);
 
@@ -88,9 +87,9 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task DeleteTimetableAsync_ExistingTimetable_RemovesTimetableRow()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
-        var timetable = await SeedTimetableAsync(userId, metaData);
+        var timetable = await _context.SeedTimetableAsync(userId, metaData);
 
         await _service.DeleteTimetableAsync(timetable.Id, userId);
 
@@ -104,8 +103,8 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task DeleteTimetableAsync_MainTimetable_AlsoRemovesRoom()
     {
-        var userId = await SeedProfileAsync();
-        var timetable = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var timetable = await _context.SeedTimetableAsync(userId);
 
         await _service.DeleteTimetableAsync(timetable.Id, userId);
 
@@ -118,11 +117,11 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task DeleteTimetableAsync_NonMainTimetable_DoesNotRemoveRoom()
     {
-        var userId = await SeedProfileAsync();
-        var mainTimetable = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var mainTimetable = await _context.SeedTimetableAsync(userId);
 
         var nonMainId = Guid.NewGuid();
-        var nonMainTimetable = await SeedTimetableAsync(
+        var nonMainTimetable = await _context.SeedTimetableAsync(
             userId,
             timetableId: nonMainId,
             roomId: mainTimetable.RoomId
@@ -139,9 +138,9 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task DeleteTimetableAsync_NonExistingTimetable_ThrowsNotFoundException()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
-        await SeedTimetableAsync(userId, metaData);
+        await _context.SeedTimetableAsync(userId, metaData);
 
         await Should.ThrowAsync<NotFoundException>(() =>
             _service.DeleteTimetableAsync(Guid.NewGuid(), userId)
@@ -151,9 +150,9 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task DeleteTimetableAsync_WrongUser_ThrowsNotFoundException()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
-        var timetable = await SeedTimetableAsync(userId, metaData);
+        var timetable = await _context.SeedTimetableAsync(userId, metaData);
 
         await Should.ThrowAsync<NotFoundException>(() =>
             _service.DeleteTimetableAsync(timetable.Id, Guid.NewGuid())
@@ -165,10 +164,15 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task FlushDeleteTimetableAsync_ExistingTimetable_DeletesRow()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
 
-        var timetable = await SeedTimetableAsync(userId, metaData, Guid.NewGuid(), Guid.NewGuid());
+        var timetable = await _context.SeedTimetableAsync(
+            userId,
+            metaData,
+            Guid.NewGuid(),
+            Guid.NewGuid()
+        );
 
         await _service.FlushDeleteTimetableAsync(timetable.Id);
 
@@ -181,9 +185,9 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task FlushDeleteTimetableAsync_NonExistingTimetable_DoesNothing()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
-        var existingTimetable = await SeedTimetableAsync(userId, metaData, Guid.NewGuid());
+        var existingTimetable = await _context.SeedTimetableAsync(userId, metaData, Guid.NewGuid());
 
         var nonExistentId = Guid.NewGuid();
 
@@ -198,10 +202,10 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task FlushDeleteTimetableAsync_DeleteMainTimetable_ThrowsInvalidOperationException()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
 
-        var timetable = await SeedTimetableAsync(userId, metaData, Guid.NewGuid());
+        var timetable = await _context.SeedTimetableAsync(userId, metaData, Guid.NewGuid());
 
         await Should.ThrowAsync<InvalidOperationException>(() =>
             _service.FlushDeleteTimetableAsync(timetable.Id)
@@ -213,9 +217,9 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task GetTimetableByIdAsync_GetExistingTimetable_ReturnsCorrectResponse()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
-        var timetable = await SeedTimetableAsync(userId, metaData);
+        var timetable = await _context.SeedTimetableAsync(userId, metaData);
 
         var response = await _service.GetTimetableByIdAsync(timetable.Id, userId);
 
@@ -235,9 +239,9 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task GetTimetableByIdAsync_GetDifferentUserTimetable_ThrowsNotFoundException()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var metaData = CreateMetaData();
-        var timetable = await SeedTimetableAsync(userId, metaData);
+        var timetable = await _context.SeedTimetableAsync(userId, metaData);
 
         await Should.ThrowAsync<NotFoundException>(() =>
             _service.GetTimetableByIdAsync(timetable.Id, Guid.NewGuid())
@@ -249,9 +253,9 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task GetTimetablesAsync_ReturnsAllUserMainTimetables()
     {
-        var userId = await SeedProfileAsync();
-        var first = await SeedTimetableAsync(userId);
-        var second = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var first = await _context.SeedTimetableAsync(userId);
+        var second = await _context.SeedTimetableAsync(userId);
 
         var result = await _service.GetTimetablesAsync(userId);
 
@@ -263,7 +267,7 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task GetTimetablesAsync_NoTimetables_ReturnsEmptyList()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
 
         var result = await _service.GetTimetablesAsync(userId);
         result.ShouldBeEmpty();
@@ -272,10 +276,10 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task GetTimetablesAsync_WithOtherUserTimetables_DoesNotReturnThem()
     {
-        var userId = await SeedProfileAsync();
-        var otherUserId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
+        var otherUserId = await _context.SeedProfileAsync();
 
-        await SeedTimetableAsync(otherUserId);
+        await _context.SeedTimetableAsync(otherUserId);
 
         var result = await _service.GetTimetablesAsync(userId);
 
@@ -285,10 +289,12 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task GetTimetablesAsync_WithNonMainTimetable_DoesNotReturnIt()
     {
-        var userId = await SeedProfileAsync();
-        var mainTimetable = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var mainTimetable = await _context.SeedTimetableAsync(userId);
 
-        _context.Timetables.Add(CreateTimetable(roomId: mainTimetable.RoomId, userId: userId, name: "Non-main"));
+        _context.Timetables.Add(
+            CreateTimetable(roomId: mainTimetable.RoomId, userId: userId, name: "Non-main")
+        );
         await _context.SaveChangesAsync();
 
         _context.ChangeTracker.Clear();
@@ -304,8 +310,8 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task UpdateTimetableAsync_ExistingTimetable_UpdatesNameAndMetaData()
     {
-        var userId = await SeedProfileAsync();
-        var timetable = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var timetable = await _context.SeedTimetableAsync(userId);
         var newMetaData = CreateMetaData(2, "CS2030", "TUT", "#00FF00");
 
         var request = new UpdateTimetableRequest { Name = "Updated", MetaData = newMetaData };
@@ -323,7 +329,7 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task UpdateTimetableAsync_NonExistingTimetable_ThrowsNotFoundException()
     {
-        var userId = await SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
         var request = new UpdateTimetableRequest { Name = "X", MetaData = [] };
 
         await Should.ThrowAsync<NotFoundException>(() =>
@@ -334,8 +340,8 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task UpdateTimetableAsync_WrongUser_ThrowsNotFoundException()
     {
-        var userId = await SeedProfileAsync();
-        var timetable = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var timetable = await _context.SeedTimetableAsync(userId);
         var request = new UpdateTimetableRequest { Name = "X", MetaData = [] };
 
         await Should.ThrowAsync<NotFoundException>(() =>
@@ -348,10 +354,14 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task UpsertTimetableAsync_NewTimetable_InsertsRow()
     {
-        var userId = await SeedProfileAsync();
-        var mainTimetable = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var mainTimetable = await _context.SeedTimetableAsync(userId);
 
-        var newTimetable = CreateTimetable(roomId: mainTimetable.RoomId, userId: userId, name: "Upserted");
+        var newTimetable = CreateTimetable(
+            roomId: mainTimetable.RoomId,
+            userId: userId,
+            name: "Upserted"
+        );
         var roomTimetable = newTimetable.ToRoomTimetable();
 
         await _service.UpsertTimetableAsync(roomTimetable);
@@ -367,8 +377,8 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task UpsertTimetableAsync_ExistingTimetable_UpdatesFields()
     {
-        var userId = await SeedProfileAsync();
-        var timetable = await SeedTimetableAsync(userId);
+        var userId = await _context.SeedProfileAsync();
+        var timetable = await _context.SeedTimetableAsync(userId);
 
         var updatedMetaData = CreateMetaData(1, "CS3230", "LEC", "#0000FF");
 
@@ -395,56 +405,14 @@ public class TimetableServiceTests : IAsyncLifetime
     [Fact]
     public async Task UpsertTimetableAsync_ReturnsTrue()
     {
-        var userId = await SeedProfileAsync();
-        var mainTimetable = await SeedTimetableAsync(userId);
-        var roomTimetable = CreateTimetable(roomId: mainTimetable.RoomId, userId: userId).ToRoomTimetable();
+        var userId = await _context.SeedProfileAsync();
+        var mainTimetable = await _context.SeedTimetableAsync(userId);
+        var roomTimetable = CreateTimetable(roomId: mainTimetable.RoomId, userId: userId)
+            .ToRoomTimetable();
 
         var result = await _service.UpsertTimetableAsync(roomTimetable);
 
         result.ShouldBeTrue();
-    }
-
-    private async Task<Guid> SeedProfileAsync()
-    {
-        var userId = Guid.NewGuid();
-
-        _context.Profiles.Add(new Profile { Id = userId });
-        await _context.SaveChangesAsync();
-
-        _context.ChangeTracker.Clear();
-        return userId;
-    }
-
-    private async Task<Timetable> SeedTimetableAsync(
-        Guid userId,
-        List<TimetableModule>? metaData = null,
-        Guid? timetableId = null,
-        Guid? roomId = null
-    )
-    {
-        var id = timetableId ?? Guid.NewGuid();
-        var actualRoomId = roomId ?? id;
-        if (await _context.Rooms.FindAsync(actualRoomId) is null)
-            _context.Rooms.Add(new Room { Id = actualRoomId });
-
-        var timetable = new Timetable
-        {
-            Id = id,
-            Name = "Test",
-            RoomId = actualRoomId,
-            UserId = userId,
-            Semester = 1,
-            AcademicYear = "2024-2025",
-            CreatedAt = DateTime.UtcNow,
-            MetaData = metaData ?? [],
-        };
-
-        _context.Timetables.Add(timetable);
-        await _context.SaveChangesAsync();
-
-        _context.ChangeTracker.Clear();
-
-        return timetable;
     }
 
     private static CreateTimetableRequest CreateRequest(List<TimetableModule>? metaData = null) =>
