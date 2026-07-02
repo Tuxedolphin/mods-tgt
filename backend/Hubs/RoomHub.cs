@@ -69,20 +69,27 @@ public class RoomHub(
     {
         // TODO: Check if the user is allowed to join the room before adding them to the group
 
-        var userId = GetUserId();
-        await _roomService.CreateOrJoinRoom(userId, roomId);
+        try
+        {
+            var userId = GetUserId();
+            await _roomService.CreateOrJoinRoom(userId, roomId);
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
-        RoomHubLogs.LogUserJoinedRoom(_logger, userId, roomId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
+            RoomHubLogs.LogUserJoinedRoom(_logger, userId, roomId);
 
-        var roomInformation =
-            await _roomService.GetRoomInformationAsync(roomId)
-            ?? throw new HubException("Failed to retrieve room information");
+            var roomInformation =
+                await _roomService.GetRoomInformationAsync(roomId)
+                ?? throw new HubException("Failed to retrieve room information");
 
-        await Clients.Group(roomId.ToString()).ReceiveUserUpdate(roomInformation.Users);
-        await Clients.Caller.ReceiveTimetableUpdate(roomInformation.Timetables);
+            await Clients.Group(roomId.ToString()).ReceiveUserUpdate(roomInformation.Users);
+            await Clients.Caller.ReceiveTimetableUpdate(roomInformation.Timetables);
 
-        return roomInformation;
+            return roomInformation;
+        }
+        catch (NotFoundException ex)
+        {
+            throw new HubException(ex.Message);
+        }
     }
 
     public async Task LeaveRoom(Guid roomId)

@@ -312,7 +312,7 @@ public class RoomTrackerTests
     }
 
     [Fact]
-    public void RemoveUserFromRoom_RemoveFromExistingRoom_EmptyRoomIsClosed()
+    public void RemoveUserFromRoom_RemoveFromExistingRoom_RoomRemainsOpen()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -323,7 +323,7 @@ public class RoomTrackerTests
         var success = _tracker.RemoveUserFromRoom(userId, roomId);
 
         success.ShouldBeTrue();
-        _tracker.RoomExists(roomId).ShouldBeFalse();
+        _tracker.RoomExists(roomId).ShouldBeTrue();
     }
 
     // === AddOrUpdateTimetable

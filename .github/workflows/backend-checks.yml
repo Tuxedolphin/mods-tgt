@@ -6,10 +6,10 @@ name: Backend Checks
 on:
   push:
     branches: ["main"]
-    paths: ["backend/**"]
+    paths: ["backend/**", "backend.tests/**"]
   pull_request:
     branches: ["main"]
-    paths: ["backend/**"]
+    paths: ["backend/**", "backend.tests/**"]
 
 jobs:
   dotnet-build-test:
