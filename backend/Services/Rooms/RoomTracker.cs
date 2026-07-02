@@ -74,8 +74,7 @@ public class RoomTracker : IRoomTracker
         if (_rooms.TryGetValue(roomId, out var roomState))
         {
             roomState.Users.Remove(userId);
-            if (roomState.Users.Count == 0)
-                CloseRoom(roomId);
+            _userToRoomMap.TryRemove(userId, out _);
 
             // We don't remove the timetable from here as the timetable should be independent
             // of whether the user is in the room

@@ -8,8 +8,8 @@ public interface IRoomService
 
     public Task<bool> AddProfileAsync(Guid userId);
 
-    public Task<bool> CreateOrJoinRoom(Guid userId, Guid roomId);
-    public Task<bool> HandleLeaveRoom(Guid userId, Guid roomId);
+    public Task CreateOrJoinRoom(Guid userId, Guid roomId);
+    public Task HandleLeaveRoom(Guid userId, Guid roomId);
     public bool HandleDeleteTimetable(Guid roomId, Guid timetableId);
 
     public CreateTimetableResult HandleCreateTimetable(

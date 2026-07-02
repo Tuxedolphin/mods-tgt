@@ -1,7 +1,6 @@
 using Backend.Data;
 using Backend.DTOs;
 using Backend.DTOs.Mappings;
-
 using Backend.Exceptions;
 using Backend.Infrastructure;
 using Backend.Models;
@@ -29,16 +28,17 @@ public class RoomService(
         return _roomTracker.RoomExists(roomId);
     }
 
-    public async Task<bool> CreateOrJoinRoom(Guid userId, Guid roomId)
+    public async Task CreateOrJoinRoom(Guid userId, Guid roomId)
     {
         if (!_roomTracker.RoomExists(roomId))
         {
-            var timetables =
-                await _context
-                    .Timetables.Where(t => t.RoomId == roomId)
-                    .ToListAsync()
-                    .MapAsync(list => list.Select(t => t.ToRoomTimetable()))
-                ?? throw new NotFoundException($"Room with roomId {roomId} not found");
+            if (!await _context.Rooms.AnyAsync(r => r.Id == roomId))
+                throw new NotFoundException($"Room with roomId {roomId} not found");
+
+            var timetables = await _context
+                .Timetables.Where(t => t.RoomId == roomId)
+                .ToListAsync()
+                .MapAsync(list => list.Select(t => t.ToRoomTimetable()));
 
             _roomTracker.SetRoom(roomId, [userId], [.. timetables]);
         }
@@ -55,35 +55,37 @@ public class RoomService(
         if (_roomTracker.GetRoomOfUser(userId, out Guid oldRoomId) && oldRoomId != roomId)
             await HandleLeaveRoom(userId, oldRoomId);
 
-        if (_roomTracker.AddUserToRoom(userId, roomId))
-            return true;
-
-        RoomServiceLogs.LogAttemptedJoinNonExistentRoom(_logger, roomId, userId);
-        return false;
+        if (!_roomTracker.AddUserToRoom(userId, roomId))
+        {
+            RoomServiceLogs.LogAttemptedJoinNonExistentRoom(_logger, roomId, userId);
+            throw new InvalidOperationException(
+                $"Room {roomId} disappeared from tracker before user {userId} could join"
+            );
+        }
     }
 
-    public async Task<bool> HandleLeaveRoom(Guid userId, Guid roomId)
+    public async Task HandleLeaveRoom(Guid userId, Guid roomId)
     {
-        await CommitChangesAsync(roomId);
+        // To ensure that the changed information from room tracker is not lost after they are
+        // removed from the room tracker
+        var committed = await CommitChangesAsync(roomId);
 
-        if (_roomTracker.RemoveUserFromRoom(userId, roomId))
+        if (!_roomTracker.RemoveUserFromRoom(userId, roomId))
         {
-            if (_roomTracker.GetUsersInRoom(roomId, out var users) && users.Count > 0)
-                return true;
-
-            await CloseRoom(roomId);
+            RoomServiceLogs.LogAttemptedLeaveNonExistentRoom(_logger, roomId, userId);
+            return;
         }
 
-        RoomServiceLogs.LogAttemptedLeaveNonExistentRoom(_logger, roomId, userId);
-        return false;
+        // TODO: Add a retry/expiry policy so rooms with permanently failing commits
+        // don't linger forever
+        if (committed && _roomTracker.GetUsersInRoom(roomId, out var users) && users.Count == 0)
+            await CloseRoom(roomId);
     }
 
     public async Task<RoomInformation?> GetRoomInformationAsync(Guid roomId)
     {
         var profilesOfUsers = await GetProfilesInRoomAsync(roomId);
         var timetablesInformation = await GetTimetablesDetailedInRoomAsync(roomId);
-
-        // BUG: Should query database for info
 
         if (profilesOfUsers is null || timetablesInformation is null)
             return null;
@@ -96,7 +98,8 @@ public class RoomService(
         if (!_roomTracker.GetUsersInRoom(roomId, out var users))
             return null;
 
-        return await Task.WhenAll(users.ToList().Select(FindOrAddProfileAsync))
+        return await users
+            .SelectAsync(FindOrAddProfileAsync)
             .MapAsync(p => p.OfType<Profile>().Select(profile => profile.ToResponse()).ToList());
     }
 
@@ -107,14 +110,11 @@ public class RoomService(
         if (!_roomTracker.GetTimetablesInRoom(roomId, out var timetables))
             return null;
 
-        return await Task.WhenAll(
-                timetables
-                    .ToList()
-                    .Select(async t =>
-                    {
-                        var profile = await FindOrAddProfileAsync(t.UserId);
-                        return profile == null ? null : t.ToDetailedResponse(profile);
-                    })
+        return await timetables
+            .SelectAsync(async t =>
+                await FindOrAddProfileAsync(t.UserId) is { } profile
+                    ? t.ToDetailedResponse(profile)
+                    : null
             )
             .MapAsync(t => t.OfType<TimetableDetailedResponse>().ToList());
     }
@@ -197,12 +197,14 @@ public class RoomService(
         return profile;
     }
 
-    public async Task<bool> CloseRoom(Guid roomId)
+    public Task<bool> CloseRoom(Guid roomId)
     {
         if (!_roomTracker.GetUsersInRoom(roomId, out var users))
-            return false;
+            return Task.FromResult(false);
 
-        return _profileTracker.RemoveUsers(users) && _roomTracker.CloseRoom(roomId);
+        return Task.FromResult(
+            _profileTracker.RemoveUsers(users) && _roomTracker.CloseRoom(roomId)
+        );
     }
 
     public bool HandleDeleteTimetable(Guid roomId, Guid timetableId)
