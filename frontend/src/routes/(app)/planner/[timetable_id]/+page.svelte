@@ -54,9 +54,11 @@
 	// svelte-ignore non_reactive_update
 	let user_tt: TimetableDetailedResponse | undefined;
 	onMount(async () => {
-		// SignalR Related Actions
-		await roomHub.connect($token_information.a);
+		let first_time_subscribe = true;
+		let update_from_room = false;
 
+		$currentWorkingTimetable.timetable_id = params.timetable_id;
+		await roomHub.connect($token_information.a);
 		const info: RoomInformation | undefined = await $roomHub?.invoke(
 			'CreateOrJoinRoom',
 			params.timetable_id
@@ -67,9 +69,16 @@
 		profiles = info!.users;
 		$currentlySelectedMods = info!.timetables;
 
-		// $roomHub?.on('ReceiveMessage', (msg) => console.log(msg));
 		$roomHub?.on('ReceiveTimetableUpdate', (msg: TimetableDetailedResponse[]) => {
 			update_from_room = true;
+
+			// If a new timetable is created: update local userid:
+			if (!user_tt) {
+				user_tt = msg.find((x) => x.profile.userId === $currentUserInformation.userId);
+				// Force update:
+				update_from_room = false;
+			}
+
 			$currentlySelectedMods = msg;
 		});
 		$roomHub?.on('ReceiveUserUpdate', (msg: Profile[]) => {
@@ -87,16 +96,8 @@
 				semester: timetable_metadata.semester
 			};
 			await $roomHub?.invoke('CreateTimetable', info_to_post);
-
-			roomHub.disconnect();
-
-			window.location.reload();
 		}
 
-		$currentWorkingTimetable = user_tt?.id as string;
-
-		let first_time_subscribe = true;
-		let update_from_room = false;
 		unsubscribe_from_mods_list = currentlySelectedMods.subscribe(async (updated_timetable) => {
 			if (first_time_subscribe) {
 				first_time_subscribe = false;

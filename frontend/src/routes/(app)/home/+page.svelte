@@ -20,11 +20,11 @@
 
 {#if token}
 	<div class="mx-0.5 flex items-center justify-between pt-2 pb-4">
-		<GreetingComponent access_token={token}></GreetingComponent>
+		<GreetingComponent></GreetingComponent>
 		<div class="flex gap-2">
 			<CreateNewTimetableButton></CreateNewTimetableButton>
 		</div>
 	</div>
 
-	<AvailableTimetableGrid access_token={token}></AvailableTimetableGrid>
+	<AvailableTimetableGrid></AvailableTimetableGrid>
 {/if}

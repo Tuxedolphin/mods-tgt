@@ -25,9 +25,15 @@ export const currentUserInformation = persisted('clrsnus', {
 	username: ''
 } as Profile);
 
-export const currentWorkingTimetable = persisted('erixnus', '', {
-	storage: 'session'
-});
+export const currentWorkingTimetable = persisted(
+	'erixnus',
+	{
+		timetable_id: ''
+	},
+	{
+		storage: 'session'
+	}
+);
 
 export const chooseModState = writable({
 	moduleCode: '',

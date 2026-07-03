@@ -11,20 +11,28 @@
 	let errorMessage = $state('');
 	onMount(() => {
 		for (const [key, value] of new URLSearchParams(window.location.hash)) {
-			if (key.includes('error_description')) {
-				errorMessage = value;
-			}
-
 			if (key.includes('access_token')) {
 				$token_information.a = value;
 				goto(resolve('/home'));
 			}
+
+			if (key.includes('error_description')) {
+				errorMessage = value;
+			}
 		}
+
+		for (const [key, value] of new URLSearchParams(window.location.search)) {
+			if (key.includes('error_description')) {
+				errorMessage = value;
+			}
+		}
+
 		registered.set(false);
 
-		if ($token_information.a !== '' || $token_information.b) {
-			goto(resolve('/home'));
-		}
+		// if ($token_information.a !== '' || $token_information.b) {
+		// 	console.log($token_information);
+		// 	goto(resolve('/home'));
+		// }
 	});
 </script>
 
@@ -56,7 +64,7 @@
 		<span class="validator-hint hidden">Required</span>
 	</label>
 
-	<LoginButton email={emailInput} password={passwordInput}></LoginButton>
+	<LoginButton email={emailInput} password={passwordInput} bind:errorMessage></LoginButton>
 </form>
 <div>
 	Don't have an account yet? Register <button

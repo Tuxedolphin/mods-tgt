@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { currentUserInformation, token_information } from '$lib/shared/shared.svelte';
+	import {
+		token_information,
+		currentUserInformation,
+		currentWorkingTimetable
+	} from '$lib/shared/shared.svelte';
 	import GenericDialog from './GenericDialog.svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -21,10 +25,15 @@
 	<button
 		class="btn btn-error"
 		onclick={async () => {
-			token_information.reset();
+			$token_information.a = '';
+			$token_information.b = false;
 			currentUserInformation.reset();
+			currentWorkingTimetable.reset();
 			const message = 'Logout Successful';
-			goto(resolve(`/login#error_description=${message}`));
+
+			// setTimeout(() => {}, 1000);
+
+			await goto(resolve(`/login?error_description=${message}`));
 		}}>Logout</button
 	>
 </GenericDialog>

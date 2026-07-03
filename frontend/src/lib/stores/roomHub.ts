@@ -1,9 +1,14 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import * as signalR from '@microsoft/signalr';
-import { currentUserInformation, token_information } from '$lib/shared/shared.svelte';
+import {
+	currentUserInformation,
+	currentWorkingTimetable,
+	token_information
+} from '$lib/shared/shared.svelte';
 import { resolve } from '$app/paths';
 import { goto } from '$app/navigation';
 import { PUBLIC_DB_LINK } from '$env/static/public';
+import { FailedToNegotiateWithServerError } from '@microsoft/signalr/dist/esm/Errors';
 
 const createRoomHub = function () {
 	const { subscribe, set } = writable<signalR.HubConnection | null>(null);
@@ -21,11 +26,18 @@ const createRoomHub = function () {
 
 		try {
 			await connection.start();
-		} catch {
-			token_information.reset();
-			currentUserInformation.reset();
-			const message = 'Login expired, please login in again';
-			goto(resolve(`/login#error_description=${message}`));
+		} catch (e: unknown) {
+			// This is a 401:
+			if (e instanceof FailedToNegotiateWithServerError) {
+				token_information.reset();
+				currentUserInformation.reset();
+				const tt_id = get(currentWorkingTimetable).timetable_id;
+				console.log(tt_id);
+				const message = 'Login expired, please login in again';
+				goto(resolve(`/login?error_description=${message}&action=redirect&tt_id=${tt_id}`));
+			}
+
+			throw e;
 		}
 
 		set(connection);
