@@ -56,6 +56,15 @@ export function format_created_time(time_string: string): string {
 	return date.toLocaleString();
 }
 
+export function get_random_colour(): string {
+	let colour = '';
+	const colour_array_iter = colours.values();
+	for (let index = -1; index < Math.floor(Math.random() * colours.size); index++) {
+		colour = colour_array_iter.next().value!;
+	}
+	return colour;
+}
+
 export function get_randomised_colour(timetable_info: TimetableResponse[]): string {
 	const currentSelectedColours = new Set<string>();
 

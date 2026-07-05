@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CreateNewTimetableButton from './CreateNewTimetableButton.svelte';
+	import CreateNewTimetableButton from '../../../lib/components/CreateNewTimetableButton.svelte';
 
 	import { onMount } from 'svelte';
 	import GreetingComponent from '$lib/components/GreetingComponent.svelte';
@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import AvailableTimetableGrid from '$lib/components/AvailableTimetableGrid.svelte';
+	import ImportFromNUSMods from '$lib/components/ImportFromNUSMods.svelte';
 
 	let token = $state('');
 	onMount(() => {
@@ -23,6 +24,7 @@
 		<GreetingComponent></GreetingComponent>
 		<div class="flex gap-2">
 			<CreateNewTimetableButton></CreateNewTimetableButton>
+			<ImportFromNUSMods></ImportFromNUSMods>
 		</div>
 	</div>
 

@@ -5,7 +5,7 @@
 	import { create_empty_timetable } from '$lib/utils/db_operations';
 	import { format_semester_name } from '$lib/utils/formatting_utils';
 	import { CirclePlus } from '@lucide/svelte';
-	import GenericDialog from '../GenericDialog.svelte';
+	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 
 	// svelte-ignore non_reactive_update
 	let dialog: HTMLDialogElement;
