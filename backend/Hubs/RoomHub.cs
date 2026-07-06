@@ -128,24 +128,25 @@ public class RoomHub(
         await SendUpdatedTimetableToGroupAsync(roomId);
     }
 
-    public async Task CreateCopyOfTimetable(Guid timetableId)
+    public async Task CreateCopyOfTimetable(Guid timetableId, Guid timetableIdToCopyTo)
     {
         try
         {
             var userId = GetUserId();
+            var timetableToCopyTo = await _timetableService
+                .GetTimetableByIdAsync(timetableIdToCopyTo, userId); 
             var timetable = await _timetableService
                 .GetTimetableByIdAsync(timetableId, userId)
-                .MapAsync(t => new CreateTimetableRequest()
+                .MapAsync(t => new UpdateTimetableRequest()
                 {
-                    Name = t.Name,
+                    Name = timetableToCopyTo.Name,
                     MetaData = t.MetaData,
                 });
 
-            _roomService.HandleCreateTimetable(
+            await _roomService.HandleUpdateTimetableAsync(
                 GetCurrentRoomId(userId),
-                userId,
-                timetable,
-                timetableId
+                timetableIdToCopyTo,
+                timetable
             );
 
             await SendUpdatedTimetableToGroupAsync(GetCurrentRoomId(userId));
