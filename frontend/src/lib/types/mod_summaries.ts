@@ -1,12 +1,12 @@
 export interface ModSummary {
-	moduleCode: string;
-	title: string;
-	semesters: number[];
+	moduleCode: string
+	title: string
+	semesters: number[]
 }
 
 export type SavedModInfo = {
-	[lessonType: string]: string;
-};
+	[lessonType: string]: string
+}
 
 // export type TimeTable = {
 // 	Owner: string;

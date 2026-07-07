@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
-		currentlySelectedMods,
 		chooseModState,
+		currentlySelectedMods,
 		currentUserInformation
 	} from '$lib/shared/shared.svelte';
 	import type { TimeTableDayInfo } from '$lib/types/internal';

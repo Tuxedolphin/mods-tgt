@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EllipsisVertical } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { timetable_list_should_be_refreshed } from '$lib/shared/shared.svelte';
@@ -9,7 +10,6 @@
 		format_created_time,
 		format_semester_name
 	} from '$lib/utils/formatting_utils';
-	import { EllipsisVertical } from '@lucide/svelte';
 	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 
 	interface TimeTableCardComponentProps {
@@ -76,7 +76,9 @@
 	</li>
 </ul>
 
-<GenericDialog bind:dialog closeHandler={() => {}}>
+<GenericDialog bind:dialog closeHandler={() => {
+	/* Intentionally Left Empty */
+}}>
 	<h3 class="text-lg font-bold">Confirm?</h3>
 	<p class="py-4">
 		Delete the timetable: '{selected_timetable_name}' (this action is irreversible!)

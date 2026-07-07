@@ -1,7 +1,8 @@
 <script lang="ts">
-	import ModInfoCard from './ModInfoCard.svelte';
 
 	import type { TimetableDetailedResponse } from '$lib/types/db_raw_types';
+	import ModInfoCard from './ModInfoCard.svelte';
+
 	interface ModListModInfoProps {
 		timetable: TimetableDetailedResponse;
 		acadYear: string;

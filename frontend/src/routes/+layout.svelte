@@ -1,9 +1,10 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon_svg from '$lib/assets/favicons/favicon.svg';
-	import favicon_ico from '$lib/assets/favicons/favicon.ico';
-	import favicon96 from '$lib/assets/favicons/favicon-96x96.png';
 	import favicon_apple from '$lib/assets/favicons/apple-touch-icon.png';
+	import favicon_ico from '$lib/assets/favicons/favicon.ico';
+	import favicon_svg from '$lib/assets/favicons/favicon.svg';
+	import favicon96 from '$lib/assets/favicons/favicon-96x96.png';
+
 	let { children } = $props();
 </script>
 

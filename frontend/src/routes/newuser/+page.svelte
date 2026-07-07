@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import ModTogetherHero from '$lib/components/LoginPage/ModTogetherHero.svelte';
 	import { token_information } from '$lib/shared/shared.svelte';
 	import { put_user_info } from '$lib/utils/db_operations';
-	import { resolve } from '$app/paths';
 
 	let nameInput = $state('');
 	let loading = $state(false);

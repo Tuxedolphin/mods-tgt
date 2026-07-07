@@ -1,14 +1,14 @@
 export function parse24HourTimeToMin(time24Hour: string): number {
-	const startHour = Number.parseInt(time24Hour.substring(0, 2));
-	const startMin = Number.parseInt(time24Hour.substring(2, 4));
+	const startHour = Number.parseInt(time24Hour.substring(0, 2))
+	const startMin = Number.parseInt(time24Hour.substring(2, 4))
 
-	return startHour * 60 + startMin;
+	return startHour * 60 + startMin
 }
 
 export function parseDiffDuration(startTime24Hour: string, endTime24Hour: string): number {
-	const startMins = parse24HourTimeToMin(startTime24Hour);
-	const endMins = parse24HourTimeToMin(endTime24Hour);
-	return endMins - startMins;
+	const startMins = parse24HourTimeToMin(startTime24Hour)
+	const endMins = parse24HourTimeToMin(endTime24Hour)
+	return endMins - startMins
 }
 
 export function calculateHeightOfClass(
@@ -16,8 +16,8 @@ export function calculateHeightOfClass(
 	endTime24Hour: string,
 	fullHourUnitsInPx: number
 ): number {
-	const diff = parseDiffDuration(startTime24Hour, endTime24Hour);
-	return (diff / 60.0) * fullHourUnitsInPx;
+	const diff = parseDiffDuration(startTime24Hour, endTime24Hour)
+	return (diff / 60.0) * fullHourUnitsInPx
 }
 
 // Takes a start and end time, returns 0-1
@@ -29,8 +29,8 @@ export function normaliseDuration(
 	endTime24Hour: string,
 	timeToNormalise: string
 ): number {
-	const fullDiff = parseDiffDuration(startTime24Hour, endTime24Hour);
-	const diff = parseDiffDuration(startTime24Hour, timeToNormalise);
+	const fullDiff = parseDiffDuration(startTime24Hour, endTime24Hour)
+	const diff = parseDiffDuration(startTime24Hour, timeToNormalise)
 
-	return diff / fullDiff;
+	return diff / fullDiff
 }

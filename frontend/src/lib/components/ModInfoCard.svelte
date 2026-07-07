@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { X } from '@lucide/svelte';
 	import { currentlySelectedMods, currentUserInformation } from '$lib/shared/shared.svelte';
 	import type { TimetableDetailedResponse, TimetableModule } from '$lib/types/db_raw_types';
 	import { getFullModInfo } from '$lib/utils/fetch_from_cache';
 	import { modifyModColour, removeModEntry } from '$lib/utils/format_db_information';
-	import { X } from '@lucide/svelte';
-	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 	import { colours } from '$lib/utils/formatting_utils';
+	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
+
 	interface ModInfoCardProps {
 		lesson_groups: Partial<Record<string, TimetableModule[]>>;
 		acadYear: string;
@@ -69,7 +70,9 @@
 	</details>
 </div>
 
-<GenericDialog bind:dialog closeHandler={() => {}}>
+<GenericDialog bind:dialog closeHandler={() => {
+	/* Intentionally Left Empty */
+}}>
 	<h3 class="text-lg font-bold">Change Colour</h3>
 	{#each colours as colour (colour)}
 		<!-- svelte-ignore a11y_consider_explicit_label -->

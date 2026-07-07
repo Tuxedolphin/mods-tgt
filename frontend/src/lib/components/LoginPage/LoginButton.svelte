@@ -14,7 +14,7 @@
 		errorMessage: string;
 	}
 	let loading = $state(false);
-	// eslint-disable-next-line no-useless-assignment
+	// biome-ignore lint/correctness/noUnusedVariables: Unable to detect bindable variables
 	let { errorMessage = $bindable<string>(), email, password }: LoginButtonProps = $props();
 
 	async function login() {

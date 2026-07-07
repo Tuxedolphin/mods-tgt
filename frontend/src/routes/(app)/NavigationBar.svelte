@@ -1,11 +1,12 @@
 <script lang="ts">
-	import UserAvatar from './UserAvatar.svelte';
+	import { Menu } from '@lucide/svelte';
 
 	import mods_tgt_header from '$lib/assets/mods_tgt_header.png?enhanced';
-	import { Menu } from '@lucide/svelte';
 	import type { LayoutProps } from '../$types';
+	import UserAvatar from './UserAvatar.svelte';
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	let { children, params }: LayoutProps = $props();
+	let { children }: LayoutProps = $props();
 
 	import { currentUserInformation } from '$lib/shared/shared.svelte';
 </script>

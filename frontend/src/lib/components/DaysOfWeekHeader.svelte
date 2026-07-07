@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { onDestroy, onMount } from 'svelte';
+	import type { Unsubscriber } from 'svelte/store';
 	import { chooseModState } from '$lib/shared/shared.svelte';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
 	import { queryAvailableLessons } from '$lib/utils/format_db_information';
-	import { onDestroy, onMount } from 'svelte';
-	import type { Unsubscriber } from 'svelte/store';
 
 	// const currentDay = new Date().getDay();
 	// Get Localised Sunday to Sat:

@@ -1,13 +1,14 @@
 <script lang="ts">
+	import { CirclePlus } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { token_information } from '$lib/shared/shared.svelte';
 	import { create_empty_timetable } from '$lib/utils/db_operations';
 	import { format_semester_name } from '$lib/utils/formatting_utils';
-	import { CirclePlus } from '@lucide/svelte';
-	import GenericDialog from '../GenericDialog.svelte';
+	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
 
 	// svelte-ignore non_reactive_update
+	// biome-ignore lint/suspicious/noUnassignedVariables: Biome unable to detect bind usage
 	let dialog: HTMLDialogElement;
 	let timetable_name = $state('');
 	let semester_number = $state(1);
@@ -31,7 +32,9 @@
 <CirclePlus size={32} class="cursor-pointer" onclick={() => dialog.show()}></CirclePlus>
 <!-- Open the modal using ID.showModal() method -->
 
-<GenericDialog bind:dialog closeHandler={() => {}}>
+<GenericDialog bind:dialog closeHandler={() => {
+	/* Intentionally Left Empty */
+}}>
 	<h3 class="text-lg font-bold">Create new timetable</h3>
 	<p class="py-4">Name your timetable:</p>
 	<input class="input" bind:value={timetable_name} />

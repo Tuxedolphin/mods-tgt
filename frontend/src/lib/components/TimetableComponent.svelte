@@ -1,13 +1,12 @@
 <script lang="ts">
-	import BackgroundTiles from './BackgroundTiles.svelte';
-
+	import { onDestroy, onMount } from 'svelte';
+	import type { Unsubscriber } from 'svelte/store';
 	import { chooseModState } from '$lib/shared/shared.svelte';
 	import type { TimetableDetailedResponse } from '$lib/types/db_raw_types';
-	import { filterTimetableByDay, queryAvailableLessons } from '$lib/utils/format_db_information';
-	import { onDestroy, onMount } from 'svelte';
-	import TimetableWeekComponent from './TimetableWeekComponent.svelte';
 	import type { TimeTableDayInfo } from '$lib/types/internal';
-	import type { Unsubscriber } from 'svelte/store';
+	import { filterTimetableByDay, queryAvailableLessons } from '$lib/utils/format_db_information';
+	import BackgroundTiles from './BackgroundTiles.svelte';
+	import TimetableWeekComponent from './TimetableWeekComponent.svelte';
 
 	const height_of_one_hour_lesson = 18;
 
@@ -21,7 +20,6 @@
 	const max_days_displayed = 5;
 
 	const { timetables, acadYear, semester }: TimetablesProps = $props();
-
 	onDestroy(() => {
 		$chooseModState = {
 			classNo: '',

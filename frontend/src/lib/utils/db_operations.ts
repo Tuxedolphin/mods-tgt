@@ -1,31 +1,31 @@
-import { PUBLIC_DB_LINK } from '$env/static/public';
-import ky, { HTTPError } from 'ky';
+import ky, { HTTPError } from 'ky'
+import { get } from 'svelte/store'
+import { Err, Ok, type Result } from 'ts-results-es'
+import { goto } from '$app/navigation'
+import { resolve } from '$app/paths'
+import { PUBLIC_DB_LINK } from '$env/static/public'
+import { currentUserInformation, token_information } from '$lib/shared/shared.svelte'
 import type {
 	AuthResponse,
 	AuthSucessResponse,
 	ErrorInformation,
 	ErrorResponse,
-	TimetableSummaryResponse,
+	Profile,
 	TimetableInfos,
 	TimetablePostTemplate,
 	TimetableResponse,
-	Profile
-} from '../types/db_raw_types';
-import { Err, Ok, type Result } from 'ts-results-es';
-import { goto } from '$app/navigation';
-import { resolve } from '$app/paths';
-import { token_information, currentUserInformation } from '$lib/shared/shared.svelte';
-import { get } from 'svelte/store';
+	TimetableSummaryResponse
+} from '../types/db_raw_types'
 
 const apiCalls = ky.create({
 	baseUrl: PUBLIC_DB_LINK
-});
+})
 
 type CustomOptions = {
-	authorised?: boolean;
-	unauthorizedCheck?: boolean;
-	auth_token?: string;
-};
+	authorised?: boolean
+	unauthorizedCheck?: boolean
+	auth_token?: string
+}
 
 function create_ky_instance(custom_options: CustomOptions) {
 	return apiCalls.extend({
@@ -33,22 +33,22 @@ function create_ky_instance(custom_options: CustomOptions) {
 			beforeRequest: [
 				({ request }) => {
 					if (custom_options.authorised) {
-						request.headers.set('Authorization', `Bearer ${custom_options.auth_token}`);
+						request.headers.set('Authorization', `Bearer ${custom_options.auth_token}`)
 					}
 				}
 			],
 			afterResponse: [
 				async ({ response }) => {
 					if (custom_options.unauthorizedCheck && response.status === 401) {
-						token_information.reset();
-						currentUserInformation.reset();
-						const message = 'Login expired, please login in again';
-						goto(resolve(`/login#error_description=${message}`));
+						token_information.reset()
+						currentUserInformation.reset()
+						const message = 'Login expired, please login in again'
+						goto(resolve(`/login#error_description=${message}`))
 					}
 				}
 			]
 		}
-	});
+	})
 }
 
 export async function register_db(
@@ -61,22 +61,22 @@ export async function register_db(
 				email: username,
 				password: password
 			}
-		});
-		const register_json = await register.post('auth/register').json<AuthSucessResponse>();
+		})
+		const register_json = await register.post('auth/register').json<AuthSucessResponse>()
 
-		return new Ok(register_json);
+		return new Ok(register_json)
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
-				const errorResponse = error.data as ErrorResponse;
-				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
-				return new Err(errorMessage.msg);
+				const errorResponse = error.data as ErrorResponse
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation
+				return new Err(errorMessage.msg)
 			}
 		} catch {
-			return new Err('Error Registering. Please try again');
+			return new Err('Error Registering. Please try again')
 		}
 
-		return new Err('Error Registering. Please try again.');
+		return new Err('Error Registering. Please try again.')
 	}
 }
 
@@ -90,21 +90,21 @@ export async function login_to_db(
 				email: username,
 				password: password
 			}
-		});
-		const login_json = await login_db.post('auth/login').json<AuthResponse>();
-		return new Ok(login_json);
+		})
+		const login_json = await login_db.post('auth/login').json<AuthResponse>()
+		return new Ok(login_json)
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
-				const errorResponse = error.data as ErrorResponse;
-				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
-				return new Err(errorMessage.msg);
+				const errorResponse = error.data as ErrorResponse
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation
+				return new Err(errorMessage.msg)
 			}
 		} catch {
-			return new Err('Wrong username or password');
+			return new Err('Wrong username or password')
 		}
 
-		return new Err('Wrong username or password');
+		return new Err('Wrong username or password')
 	}
 }
 
@@ -121,53 +121,53 @@ export async function put_user_info(
 			json: {
 				username: username
 			}
-		});
-		await put_user_db.put('profile/me');
-		return Ok(username);
+		})
+		await put_user_db.put('profile/me')
+		return Ok(username)
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
-				const errorResponse = error.data as ErrorResponse;
-				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
-				return new Err(errorMessage.msg);
+				const errorResponse = error.data as ErrorResponse
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation
+				return new Err(errorMessage.msg)
 			}
 		} catch {
-			return new Err('Wrong username or password');
+			return new Err('Wrong username or password')
 		}
 
-		return new Err('Wrong username or password');
+		return new Err('Wrong username or password')
 	}
 }
 
 export async function get_user_info(access_token: string): Promise<Result<Profile, string>> {
 	//const name = currentUserInformation
-	const user_info = get(currentUserInformation);
+	const user_info = get(currentUserInformation)
 
 	if (user_info.username) {
-		return Ok(user_info);
+		return Ok(user_info)
 	}
 	try {
 		const get_user_info_db = create_ky_instance({
 			authorised: true,
 			unauthorizedCheck: true,
 			auth_token: access_token
-		});
-		const timetables = await get_user_info_db.get('profile/me').json<Profile>();
+		})
+		const timetables = await get_user_info_db.get('profile/me').json<Profile>()
 
-		currentUserInformation.set(timetables);
-		return Ok(timetables);
+		currentUserInformation.set(timetables)
+		return Ok(timetables)
 	} catch (error) {
 		try {
 			if (error instanceof HTTPError) {
-				const errorResponse = error.data as ErrorResponse;
-				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation;
-				return new Err(errorMessage.msg);
+				const errorResponse = error.data as ErrorResponse
+				const errorMessage = JSON.parse(errorResponse.title) as ErrorInformation
+				return new Err(errorMessage.msg)
 			}
 		} catch {
-			return new Err('Wrong username or password');
+			return new Err('Wrong username or password')
 		}
 
-		return new Err('Wrong username or password');
+		return new Err('Wrong username or password')
 	}
 }
 
@@ -179,11 +179,11 @@ export async function get_timetables(
 			authorised: true,
 			unauthorizedCheck: true,
 			auth_token: access_token
-		});
-		const timetables = await get_timetables_db.get('/timetable').json<TimetableInfos>();
-		return Ok(timetables);
+		})
+		const timetables = await get_timetables_db.get('/timetable').json<TimetableInfos>()
+		return Ok(timetables)
 	} catch (error) {
-		return Err('Something went wrong ' + error);
+		return Err('Something went wrong ' + error)
 	}
 }
 
@@ -196,13 +196,13 @@ export async function get_timetable_by_id(
 			authorised: true,
 			unauthorizedCheck: true,
 			auth_token: access_token
-		});
+		})
 		const timetables = await get_timetables_id_db
 			.get(`/timetable/${timetable_id}`)
-			.json<TimetableResponse>();
-		return Ok(timetables);
+			.json<TimetableResponse>()
+		return Ok(timetables)
 	} catch (error) {
-		return Err('Something went wrong ' + error);
+		return Err('Something went wrong ' + error)
 	}
 }
 
@@ -218,11 +218,11 @@ export async function put_timetable_by_id(
 			auth_token: access_token
 		}).extend({
 			json: timetable_data
-		});
-		await put_timetable_id_db.put(`/timetable/${timetable_id}`);
-		return Ok('');
+		})
+		await put_timetable_id_db.put(`/timetable/${timetable_id}`)
+		return Ok('')
 	} catch (error) {
-		return Err('Something went wrong ' + error);
+		return Err('Something went wrong ' + error)
 	}
 }
 
@@ -235,11 +235,11 @@ export async function delete_timetable_by_id(
 			authorised: true,
 			unauthorizedCheck: true,
 			auth_token: access_token
-		});
-		await delete_timetable_id_db.delete(`/timetable/${timetable_id}`);
-		return Ok('');
+		})
+		await delete_timetable_id_db.delete(`/timetable/${timetable_id}`)
+		return Ok('')
 	} catch (error) {
-		return Err('Something went wrong ' + error);
+		return Err('Something went wrong ' + error)
 	}
 }
 
@@ -254,7 +254,7 @@ export async function create_empty_timetable(
 		metaData: [],
 		name: timetable_name,
 		semester: semester
-	};
+	}
 	try {
 		const create_empty_timetable_db = create_ky_instance({
 			authorised: true,
@@ -262,12 +262,12 @@ export async function create_empty_timetable(
 			auth_token: access_token
 		}).extend({
 			json: timetable_post_template
-		});
+		})
 		const timetable_info = await create_empty_timetable_db
 			.post('/timetable')
-			.json<TimetableSummaryResponse>();
-		return Ok(timetable_info);
+			.json<TimetableSummaryResponse>()
+		return Ok(timetable_info)
 	} catch (error) {
-		return Err('Something went wrong ' + error);
+		return Err('Something went wrong ' + error)
 	}
 }

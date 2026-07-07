@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { roomHub } from '$lib/stores/roomHub';
 	import { onDestroy, onMount } from 'svelte';
+	import { roomHub } from '$lib/stores/roomHub';
 
 	// Return type/interface of a bunch of SignalR calls.
 	interface RoomInformation {

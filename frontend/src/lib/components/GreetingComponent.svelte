@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { currentUserInformation } from '$lib/shared/shared.svelte';
 	import { onMount } from 'svelte';
+	import { currentUserInformation } from '$lib/shared/shared.svelte';
 
 	let username = $state('');
 	onMount(async () => {

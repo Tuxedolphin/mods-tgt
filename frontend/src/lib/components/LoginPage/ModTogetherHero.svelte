@@ -1,5 +1,6 @@
 <script lang="ts">
 	let { children } = $props();
+
 	import mods_tgt_logo from '$lib/assets/mods_tgt_logo.png?enhanced';
 </script>
 

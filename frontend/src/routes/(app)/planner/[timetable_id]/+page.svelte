@@ -1,5 +1,11 @@
 <script lang="ts">
+	import { CircleX } from '@lucide/svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import type { Unsubscriber } from 'svelte/store';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import DaysOfWeekHeader from '$lib/components/DaysOfWeekHeader.svelte';
+	import ModListGroup from '$lib/components/ModListGroup.svelte';
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import Timeline from '$lib/components/Timeline.svelte';
 	import TimetableComponent from '$lib/components/TimetableComponent.svelte';
@@ -9,9 +15,7 @@
 		currentWorkingTimetable,
 		token_information
 	} from '$lib/shared/shared.svelte';
-	import { getTimetable } from '$lib/utils/format_db_information';
-	import { onDestroy, onMount } from 'svelte';
-	import type { PageProps } from './$types';
+	import { roomHub } from '$lib/stores/roomHub';
 	import type {
 		Profile,
 		RoomInformation,
@@ -19,14 +23,10 @@
 		TimetablePostTemplate,
 		TimetableResponse
 	} from '$lib/types/db_raw_types';
-	import type { Unsubscriber } from 'svelte/store';
+	import { getTimetable } from '$lib/utils/format_db_information';
 	import { format_AY_name, format_semester_name } from '$lib/utils/formatting_utils';
-	import ModListGroup from '$lib/components/ModListGroup.svelte';
-	import { CircleX } from '@lucide/svelte';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
-	import { roomHub } from '$lib/stores/roomHub';
 	import GenericDialog from '../../GenericDialog.svelte';
+	import type { PageProps } from './$types';
 
 	let is_timetable_loaded = $state(false);
 	let profiles: Profile[] = $state([]);

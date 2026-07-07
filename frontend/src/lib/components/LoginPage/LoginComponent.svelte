@@ -1,10 +1,10 @@
 <script lang="ts">
-	import LoginButton from './LoginButton.svelte';
+	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { onMount } from 'svelte';
 	import { registered, token_information } from '$lib/shared/shared.svelte';
+	import LoginButton from './LoginButton.svelte';
 
 	let emailInput = $state('');
 	let passwordInput = $state('');

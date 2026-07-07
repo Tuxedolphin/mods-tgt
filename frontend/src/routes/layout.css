@@ -1,15 +1,15 @@
-@import 'tailwindcss';
-@plugin 'daisyui' {
+@import "tailwindcss";
+@plugin "daisyui" {
 	logs: false;
 }
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
 
-@source inline('col-start-{1..6}');
-@source inline('row-start-{1..12}');
+@source inline("col-start-{1..6}");
+@source inline("row-start-{1..12}");
 
-@source inline('grid-cols-{1..5}');
+@source inline("grid-cols-{1..5}");
 
-@source inline('h-{18..384..18}');
-@source inline('mt-{18..384..18}');
-@source inline('w-1/{1..24}');
+@source inline("h-{18..384..18}");
+@source inline("mt-{18..384..18}");
+@source inline("w-1/{1..24}");

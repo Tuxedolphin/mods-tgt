@@ -1,12 +1,12 @@
 <script lang="ts">
-	import {
-		token_information,
-		currentUserInformation,
-		currentWorkingTimetable
-	} from '$lib/shared/shared.svelte';
-	import GenericDialog from './GenericDialog.svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import {
+		currentUserInformation,
+		currentWorkingTimetable, 
+		token_information
+	} from '$lib/shared/shared.svelte';
+	import GenericDialog from './GenericDialog.svelte';
 
 	let dialog: HTMLDialogElement;
 </script>
@@ -19,7 +19,9 @@
 	</div>
 </div>
 
-<GenericDialog bind:dialog closeHandler={() => {}}>
+<GenericDialog bind:dialog closeHandler={() => {
+	/* Intentionally Empty */
+}}>
 	<h3 class="text-lg font-bold">Hi, {$currentUserInformation.username}</h3>
 
 	<button

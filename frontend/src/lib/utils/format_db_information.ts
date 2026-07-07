@@ -1,25 +1,23 @@
-import type { LessonInfo } from '$lib/shared/shared.svelte';
-import type { TimetableDetailedResponse, TimetableModule } from '$lib/types/db_raw_types';
-import type { TimeTableDayInfo } from '$lib/types/internal';
-import type { RawLesson } from '$lib/types/modules';
+import type { LessonInfo } from '$lib/shared/shared.svelte'
+import type { TimetableDetailedResponse, TimetableModule } from '$lib/types/db_raw_types'
+import type { TimeTableDayInfo } from '$lib/types/internal'
+import type { RawLesson } from '$lib/types/modules'
 
-import { normaliseDuration } from './calculations_for_ui';
-import { getFullModInfo } from './fetch_from_cache';
-import { get_randomised_colour } from './formatting_utils';
+import { normaliseDuration } from './calculations_for_ui'
+import { getFullModInfo } from './fetch_from_cache'
+import { get_randomised_colour } from './formatting_utils'
 
-const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-const startOfDayTime = '0800';
-const endOfDayTime = '2000';
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+const startOfDayTime = '0800'
+const endOfDayTime = '2000'
 export function getTimetable(
 	acadYear: string,
 	semesterNo: number,
 	timetables: TimetableDetailedResponse[]
 ): TimetableDetailedResponse[] {
-	const timetable = timetables.filter(
-		(x) => x.academicYear == acadYear && x.semester == semesterNo
-	);
+	const timetable = timetables.filter((x) => x.academicYear == acadYear && x.semester == semesterNo)
 
-	return timetable.length === 0 ? [] : timetable;
+	return timetable.length === 0 ? [] : timetable
 }
 
 export async function queryAvailableLessons(
@@ -28,16 +26,16 @@ export async function queryAvailableLessons(
 	acadYear: string,
 	userState: LessonInfo
 ): Promise<TimeTableDayInfo[]> {
-	const resultingTimetables: TimeTableDayInfo[] = [];
+	const resultingTimetables: TimeTableDayInfo[] = []
 
-	if (userState.moduleCode === '') return resultingTimetables;
-	const modInfo = await getFullModInfo(userState.moduleCode, acadYear);
-	const weekData = modInfo?.semesterData.find((semNo) => semNo.semester == semester);
-	const ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day]);
-	const lessonTypeToMatch = ttData?.filter((x) => x.lessonType == userState.lessonType);
+	if (userState.moduleCode === '') return resultingTimetables
+	const modInfo = await getFullModInfo(userState.moduleCode, acadYear)
+	const weekData = modInfo?.semesterData.find((semNo) => semNo.semester == semester)
+	const ttData = weekData?.timetable.filter((x) => x.day == daysOfWeek[day])
+	const lessonTypeToMatch = ttData?.filter((x) => x.lessonType == userState.lessonType)
 	if (lessonTypeToMatch) {
 		for (const lesson of lessonTypeToMatch!) {
-			if (lesson.classNo == userState.classNo) continue;
+			if (lesson.classNo == userState.classNo) continue
 			resultingTimetables.push({
 				lessonSchedule: lesson,
 				moduleCode: userState.moduleCode,
@@ -52,31 +50,31 @@ export async function queryAvailableLessons(
 				timetableColour: userState.colour,
 				timetableId: userState.selectedTimetableId,
 				timetableOwner: undefined
-			});
+			})
 		}
 	}
 
-	return resultingTimetables;
+	return resultingTimetables
 }
 
 export async function filterTimetableByDay(
 	day: number,
 	timetables: TimetableDetailedResponse[]
 ): Promise<TimeTableDayInfo[]> {
-	if (timetables.length === 0) return [];
-	const resultingTimetables: TimeTableDayInfo[] = [];
+	if (timetables.length === 0) return []
+	const resultingTimetables: TimeTableDayInfo[] = []
 
 	for (const timetable of timetables) {
 		for (const lesson of timetable.metaData) {
-			const modInfo = await getFullModInfo(lesson.moduleCode, timetable.academicYear);
+			const modInfo = await getFullModInfo(lesson.moduleCode, timetable.academicYear)
 
-			const weekData = modInfo.semesterData.find((x) => x.semester == timetable.semester)!;
+			const weekData = modInfo.semesterData.find((x) => x.semester == timetable.semester)!
 			const lessonForDay = weekData.timetable.filter(
 				(x) =>
 					x.day == daysOfWeek[day] &&
 					x.lessonType == lesson.lessonType &&
 					x.classNo == lesson.lessonNo
-			);
+			)
 
 			for (const lessonDayInfo of lessonForDay) {
 				resultingTimetables.push({
@@ -101,11 +99,11 @@ export async function filterTimetableByDay(
 					timetableColour: lesson.colour,
 					timetableId: timetable.id,
 					timetableOwner: timetable.profile
-				});
+				})
 			}
 		}
 	}
-	return resultingTimetables;
+	return resultingTimetables
 }
 
 export function removeModEntry(
@@ -117,15 +115,15 @@ export function removeModEntry(
 ): TimetableDetailedResponse[] {
 	const findTimetableCopy = timetable.filter(
 		(x) => x.id == id && x.academicYear == acadYear && x.semester == semesterNo
-	)[0];
+	)[0]
 	for (let index = findTimetableCopy.metaData.length - 1; index >= 0; index--) {
-		const element = findTimetableCopy.metaData[index];
+		const element = findTimetableCopy.metaData[index]
 		if (element.moduleCode == moduleCode) {
-			findTimetableCopy.metaData.splice(index, 1);
+			findTimetableCopy.metaData.splice(index, 1)
 		}
 	}
 
-	return timetable;
+	return timetable
 }
 
 export function modifyModColour(
@@ -138,16 +136,16 @@ export function modifyModColour(
 ): TimetableDetailedResponse[] {
 	const findTimetableCopy = timetable.filter(
 		(x) => x.id == id && x.academicYear == acadYear && x.semester == semesterNo
-	)[0];
+	)[0]
 
-	const lessonRef = findTimetableCopy.metaData.filter((x) => x.moduleCode == moduleCode)!;
+	const lessonRef = findTimetableCopy.metaData.filter((x) => x.moduleCode == moduleCode)!
 
 	for (let i = 0; i < lessonRef.length; i++) {
-		const element = lessonRef[i];
-		element.colour = newColor;
+		const element = lessonRef[i]
+		element.colour = newColor
 	}
 
-	return timetable;
+	return timetable
 }
 export function modifyModEntry(
 	timetable: TimetableDetailedResponse[],
@@ -160,21 +158,21 @@ export function modifyModEntry(
 	userState: LessonInfo
 ): TimetableDetailedResponse[] {
 	if (moduleCode != userState.moduleCode || lessonType != userState.lessonType) {
-		return timetable;
+		return timetable
 	}
 	const findTimetableCopy = timetable.filter(
 		(x) => x.id == id && x.academicYear == acadYear && x.semester == semesterNo
-	)[0];
+	)[0]
 	const lessonRef = findTimetableCopy.metaData.find(
 		(x) =>
 			x.lessonType == userState.lessonType &&
 			x.moduleCode == userState.moduleCode &&
 			x.lessonNo == userState.classNo
-	)!;
+	)!
 
-	lessonRef.lessonNo = newlessonNo;
+	lessonRef.lessonNo = newlessonNo
 
-	return timetable;
+	return timetable
 }
 
 export function checkModAlreadyAdded(
@@ -186,11 +184,11 @@ export function checkModAlreadyAdded(
 ): boolean {
 	const findTimetableCopy = timetable.filter(
 		(x) => x.id == id && x.academicYear == acadYear && x.semester == semesterNo
-	);
+	)
 
-	if (findTimetableCopy.length == 0) return false;
+	if (findTimetableCopy.length == 0) return false
 
-	return findTimetableCopy[0].metaData.findIndex((x) => x.moduleCode == moduleCode) !== -1;
+	return findTimetableCopy[0].metaData.findIndex((x) => x.moduleCode == moduleCode) !== -1
 }
 
 export async function createModEntry(
@@ -203,103 +201,103 @@ export async function createModEntry(
 ): Promise<TimetableDetailedResponse[]> {
 	const findTimetableCopy = timetable.filter(
 		(x) => x.id == id && x.academicYear == acadYear && x.semester == semesterNo
-	);
-	const lessonDataRef: TimetableModule[] = [];
+	)
+	const lessonDataRef: TimetableModule[] = []
 
-	const lessonTypes = Object.groupBy(rawLesson, (x) => x.lessonType);
-	const assigned_color = get_randomised_colour(timetable);
+	const lessonTypes = Object.groupBy(rawLesson, (x) => x.lessonType)
+	const assigned_color = get_randomised_colour(timetable)
 	for (const lessonType in lessonTypes) {
-		const lesson = lessonTypes[lessonType]![0];
+		const lesson = lessonTypes[lessonType]![0]
 		lessonDataRef.push({
 			lessonNo: lesson.classNo,
 			lessonType: lesson.lessonType,
 			moduleCode: moduleCode,
 			colour: assigned_color
-		});
+		})
 	}
 
 	if (findTimetableCopy.length == 0) {
 		// timetable[0].LessonData = lessonDataRef;
 	} else {
-		findTimetableCopy[0].metaData.push(...lessonDataRef);
+		findTimetableCopy[0].metaData.push(...lessonDataRef)
 	}
 
-	return timetable;
+	return timetable
 }
 
 export function findOverlappingTimeInfo(allTime: TimeTableDayInfo[]): TimeTableDayInfo[] {
-	allTime.sort((a, b) => a.normalisedStartDuration - b.normalisedStartDuration);
+	allTime.sort((a, b) => a.normalisedStartDuration - b.normalisedStartDuration)
 
-	const groupTimes = Object.groupBy(allTime, (x) => x.normalisedStartDuration);
+	const groupTimes = Object.groupBy(allTime, (x) => x.normalisedStartDuration)
 
-	const MAX_ITER = 10_000;
-	let iterIdx = 0;
-	const processedTimings: string[] = [];
+	const MAX_ITER = 10_000
+	let iterIdx = 0
+	const processedTimings: string[] = []
 	const processedGroups: {
-		[key: number]: TimeTableDayInfo[][];
-	} = {};
-	let lengthOfGroups = 0;
+		[key: number]: TimeTableDayInfo[][]
+	} = {}
+	let lengthOfGroups = 0
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	for (const _len in groupTimes) lengthOfGroups++;
-	let groupId = 0;
+	for (const _len in groupTimes) lengthOfGroups++
+	let groupId = 0
 	while (processedTimings.length != lengthOfGroups && iterIdx != MAX_ITER) {
-		iterIdx++;
-		let firstGroup: TimeTableDayInfo[] = [];
-		let firstGroupProcess: string = '';
+		iterIdx++
+		let firstGroup: TimeTableDayInfo[] = []
+		let firstGroupProcess: string = ''
 		for (const i in groupTimes) {
-			if (processedTimings.includes(i)) continue;
-			firstGroup = groupTimes[i]!;
-			firstGroupProcess = i;
+			if (processedTimings.includes(i)) continue
+			firstGroup = groupTimes[i]!
+			firstGroupProcess = i
 			firstGroup.sort(
 				(a, b) =>
 					b.normalisedEndDuration -
 					b.normalisedStartDuration -
 					(a.normalisedEndDuration - a.normalisedStartDuration)
-			);
+			)
 
-			processedTimings.push(i);
+			processedTimings.push(i)
 
-			if (!processedGroups[groupId]) processedGroups[groupId] = [];
-			processedGroups[groupId].push(firstGroup);
-			break;
+			if (!processedGroups[groupId]) processedGroups[groupId] = []
+			processedGroups[groupId].push(firstGroup)
+			break
 		}
-		if (firstGroup.length === 0) break;
+		if (firstGroup.length === 0) break
 
-		let endTime = firstGroup[0].normalisedEndDuration;
+		let endTime = firstGroup[0].normalisedEndDuration
 
 		// Find groups:
 		for (const i in groupTimes) {
-			if (i == firstGroupProcess) continue;
-			const group = groupTimes[i]![0];
+			if (i == firstGroupProcess) continue
+			const group = groupTimes[i]![0]
 			if (group.normalisedStartDuration >= endTime) {
-				endTime = group.normalisedEndDuration;
-				processedTimings.push(i);
-				processedGroups[groupId].push(groupTimes[i]!);
+				endTime = group.normalisedEndDuration
+				processedTimings.push(i)
+				processedGroups[groupId].push(groupTimes[i]!)
 			}
 		}
-		groupId++;
+		groupId++
 	}
 
-	const outerGroupLength = Object.keys(processedGroups).length;
+	const outerGroupLength = Object.keys(processedGroups).length
 
 	for (const group in processedGroups) {
-		const outerGroupIdx = Number.parseInt(group);
+		const outerGroupIdx = Number.parseInt(group)
 
 		for (const lessonGrouping of processedGroups[group]) {
-			const innerGroupLength = lessonGrouping.length;
+			const innerGroupLength = lessonGrouping.length
 			for (let i = 0; i < lessonGrouping.length; i++) {
-				const lesson = lessonGrouping[i];
-				lesson.outerGroupIndex = outerGroupIdx;
-				lesson.outerGroupLength = outerGroupLength;
-				lesson.innerGroupLength = innerGroupLength;
-				lesson.innerGroupIndex = i;
+				const lesson = lessonGrouping[i]
+				lesson.outerGroupIndex = outerGroupIdx
+				lesson.outerGroupLength = outerGroupLength
+				lesson.innerGroupLength = innerGroupLength
+				lesson.innerGroupIndex = i
 			}
 		}
 	}
 
 	if (iterIdx == MAX_ITER) {
-		console.log('Unable to find pairings');
+		console.log('Unable to find pairings')
 	}
 
-	return allTime;
+	return allTime
 }

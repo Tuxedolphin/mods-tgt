@@ -1,19 +1,19 @@
-import { get, writable } from 'svelte/store';
-import * as signalR from '@microsoft/signalr';
+import * as signalR from '@microsoft/signalr'
+import { FailedToNegotiateWithServerError } from '@microsoft/signalr/dist/esm/Errors'
+import { get, writable } from 'svelte/store'
+import { goto } from '$app/navigation'
+import { resolve } from '$app/paths'
+import { PUBLIC_DB_LINK } from '$env/static/public'
 import {
 	currentUserInformation,
 	currentWorkingTimetable,
 	token_information
-} from '$lib/shared/shared.svelte';
-import { resolve } from '$app/paths';
-import { goto } from '$app/navigation';
-import { PUBLIC_DB_LINK } from '$env/static/public';
-import { FailedToNegotiateWithServerError } from '@microsoft/signalr/dist/esm/Errors';
+} from '$lib/shared/shared.svelte'
 
 const createRoomHub = function () {
-	const { subscribe, set } = writable<signalR.HubConnection | null>(null);
+	const { subscribe, set } = writable<signalR.HubConnection | null>(null)
 
-	let connection: signalR.HubConnection | null = null;
+	let connection: signalR.HubConnection | null = null
 
 	const connect = async function (token: string) {
 		connection = new signalR.HubConnectionBuilder()
@@ -22,33 +22,33 @@ const createRoomHub = function () {
 			})
 			.configureLogging(signalR.LogLevel.Error)
 			.withAutomaticReconnect()
-			.build();
+			.build()
 
 		try {
-			await connection.start();
+			await connection.start()
 		} catch (e: unknown) {
 			// This is a 401:
 			if (e instanceof FailedToNegotiateWithServerError) {
-				token_information.reset();
-				currentUserInformation.reset();
-				const tt_id = get(currentWorkingTimetable).timetable_id;
-				console.log(tt_id);
-				const message = 'Login expired, please login in again';
-				goto(resolve(`/login?error_description=${message}&action=redirect&tt_id=${tt_id}`));
+				token_information.reset()
+				currentUserInformation.reset()
+				const tt_id = get(currentWorkingTimetable).timetable_id
+				console.log(tt_id)
+				const message = 'Login expired, please login in again'
+				goto(resolve(`/login?error_description=${message}&action=redirect&tt_id=${tt_id}`))
 			}
 
-			throw e;
+			throw e
 		}
 
-		set(connection);
-	};
+		set(connection)
+	}
 
 	const disconnect = async function () {
-		await connection?.stop();
-		set(null);
-	};
+		await connection?.stop()
+		set(null)
+	}
 
-	return { subscribe, connect, disconnect };
-};
+	return { subscribe, connect, disconnect }
+}
 
-export const roomHub = createRoomHub();
+export const roomHub = createRoomHub()
