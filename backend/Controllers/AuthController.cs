@@ -70,4 +70,22 @@ public class AuthController(IAuthService authService) : BaseController
         await _authService.ResetPasswordAsync(request);
         return Ok();
     }
+
+    [HttpPost("update-password")]
+    [Authorize]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request)
+    {
+        string token = GetBearerToken(HttpContext) ?? throw new UnauthorizedAccessException();
+
+        await _authService.UpdatePasswordAsync(request, token);
+        return Ok();
+    }
+
+    private static string? GetBearerToken(HttpContext ctx)
+    {
+        var header = ctx.Request.Headers.Authorization.ToString();
+        return header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+            ? header["Bearer ".Length..].Trim()
+            : null;
+    }
 }

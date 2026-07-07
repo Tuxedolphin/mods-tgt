@@ -171,6 +171,30 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
         }
     }
 
+    public async Task UpdatePasswordAsync(UpdatePasswordRequest request, string accessToken)
+    {
+        using var http = new HttpClient();
+
+        http.DefaultRequestHeaders.Add("apikey", _supabaseKey);
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            accessToken
+        );
+
+        var response = await http.PutAsJsonAsync(
+            $"{_supabaseUrl}/auth/v1/user",
+            new { password = request.NewPassword, current_password = request.OldPassword }
+        );
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new ExternalServiceException(
+                $"Failed to update password. Status: {(int)response.StatusCode} {response.StatusCode} Error: {error} "
+            );
+        }
+    }
+
     private static AuthResponse ExtractTokens(Supabase.Gotrue.Session? response)
     {
         if (response == null)
