@@ -4,6 +4,7 @@
 	import { currentlySelectedMods, currentUserInformation } from '$lib/shared/shared.svelte';
 	import type { TimetableDetailedResponse } from '$lib/types/db_raw_types';
   import AddFromOtherTimetablesButton from './Buttons/AddFromOtherTimetablesButton.svelte';
+  import ImportFromNusModsButton from './Buttons/ImportFromNusModsButton.svelte';
 	import ModListModInfo from './ModListModInfo.svelte';
 
 	let current_selected_mods_unsubsriber: Unsubscriber;
@@ -44,7 +45,7 @@
 				<div class="flex items-center justify-center">
 					<AddFromOtherTimetablesButton acad_year={acadYear} semester={user_own_modlist.semester} current_timetable_id={user_own_modlist.id}></AddFromOtherTimetablesButton>
 					 <div class="divider divider-horizontal">OR</div>
-					<button class="btn btn-accent">Import from NUS Mods (Beta)</button>
+					<ImportFromNusModsButton acad_year={acadYear} semester={user_own_modlist.semester} current_timetable_id={user_own_modlist.id} timetable_name={user_own_modlist.name}></ImportFromNusModsButton>
 				</div>
 		</div>
 		

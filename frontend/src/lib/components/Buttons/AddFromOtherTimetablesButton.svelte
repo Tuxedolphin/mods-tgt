@@ -80,8 +80,6 @@
                 current_timetable_id,
               )
               .catch((e) => console.error(e));
-
-            dialog.close();
           }}>Copy!</button
         >
       </div>

@@ -82,6 +82,8 @@
 	}}
 >
 	<h3 class="text-lg font-bold">Import from NUSMods! (Beta)</h3>
+
+	<h3 class="text-error">Importing from NUSMods Share Link is currently work in progress, please check any errors after the import is complete!</h3>
 	<p class="py-4">Name your timetable:</p>
 	<input class="input" bind:value={timetable_name} />
 
