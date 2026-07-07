@@ -134,16 +134,16 @@ public class AuthService(Client supabase, IOptions<SupabaseSettings> settings) :
             session.AccessToken
         );
 
-        var updateResponse = await updateHttp.PostAsJsonAsync(
+        var updateResponse = await updateHttp.PutAsJsonAsync(
             $"{_supabaseUrl}/auth/v1/user",
             new { password = request.Password }
         );
 
         if (!updateResponse.IsSuccessStatusCode)
         {
-            string error = await verifyResponse.Content.ReadAsStringAsync();
+            string error = await updateResponse.Content.ReadAsStringAsync();
             throw new ExternalServiceException(
-                $"Password update failed. Status: {(int)verifyResponse.StatusCode}. Details: {error}"
+                $"Password update failed. Status: {(int)updateResponse.StatusCode}. Details: {error}"
             );
         }
 
