@@ -124,7 +124,7 @@ public class AuthService(Client supabase, IHttpClientFactory httpClientFactory, 
             Console.WriteLine($"Recovery email failed, with status {(int)response.StatusCode} {response.StatusCode}. Details: {error} ");
 
             throw new ExternalServiceException(
-                error  
+                error
             );
         }
     }
