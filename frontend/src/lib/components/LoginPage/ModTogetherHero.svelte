@@ -6,7 +6,7 @@
 
 <div class="hero min-h-screen bg-base-200">
   <div class="hero-content text-center">
-    <div class="max-w-md">
+    <div class="max-w-xs">
       <div class="flex items-center justify-center w-full">
         <enhanced:img
           class="w-56"

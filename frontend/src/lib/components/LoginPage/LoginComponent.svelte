@@ -58,7 +58,7 @@
 <div>
   <button
     class="cursor-pointer underline"
-    onclick={() => goto(resolve("/register"))}>Forgot Password?</button
+    onclick={() => goto(resolve("/forgot-password"))}>Forgot Password?</button
   >
 </div>
 

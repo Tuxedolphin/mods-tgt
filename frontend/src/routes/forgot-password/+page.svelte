@@ -1,17 +1,21 @@
 <script lang="ts">
   import ModTogetherHero from "$lib/components/LoginPage/ModTogetherHero.svelte";
-  import type { PageProps } from "./$types";
+  import { forgot_password } from "$lib/utils/db_operations";
 
   let emailInput = $state("");
   let loading = $state(false);
   let error = $state("");
+  let success = $state("");
 </script>
 
 <ModTogetherHero>
-  <p class="text-error">{error}</p>
   <fieldset
     class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
   >
+    <p class="text-error text-wrap break-all">
+      {error}
+    </p>
+    <p class="text-success text-wrap break-all">{success}</p>
     <legend class="fieldset-legend">Reset Password!</legend>
 
     <label class="label">Email</label>
@@ -24,9 +28,22 @@
 
     <button
       class="btn btn-neutral mt-4 {loading ? 'btn-disabled' : ''}"
-      onclick={() => {
+      onclick={async () => {
         loading = true;
+        error = success = "";
+        if (emailInput === "") {
+          loading = false;
+          error = "Please input email";
+          return;
+        }
+        const result = await forgot_password(emailInput);
 
+        if (result.isOk()) {
+          success =
+            "Reset Email request sent. If you have an account with us you will recieve an email within 5 minutes. Please check your spam as well.";
+        } else {
+          error = result.error;
+        }
         loading = false;
       }}
     >
