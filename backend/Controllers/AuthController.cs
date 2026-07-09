@@ -50,22 +50,14 @@ public class AuthController(IAuthService authService) : BaseController
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
-        try
-        {
-            await _authService.ForgotPasswordAsync(request);
-        }
-        catch (ExternalServiceException ex)
-        {
-            // TODO: Add proper logging here, print statement for temporary measure
-
-            Console.WriteLine($"ForgotPassword external service exception: ${ex.Message}");
-        }
-
+        // Exceptions were swallowed here. Returns the exception to client-side to show
+        // user.
+        await _authService.ForgotPasswordAsync(request);
         return Ok();
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassowrd([FromBody] ResetPasswordRequest request)
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
         await _authService.ResetPasswordAsync(request);
         return Ok();
