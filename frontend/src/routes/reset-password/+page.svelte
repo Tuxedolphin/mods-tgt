@@ -33,10 +33,10 @@
 </script>
 
 <ModTogetherHero>
-  <p class="text-error text-wrap break-all">
+  <p class="text-error text-wrap break-after-all">
     {error}
   </p>
-  <p class="text-success text-wrap break-all">{success}</p>
+  <p class="text-success text-wrap break-after-all">{success}</p>
   <fieldset
     class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
   >
@@ -59,7 +59,7 @@
     />
 
     <button
-      class="btn btn-neutral mt-4 {loading ? 'btn-disabled' : ''}"
+      class="btn btn-primary mt-4 {loading ? 'btn-disabled' : ''}"
       onclick={async () => {
         loading = true;
         error = success = "";
@@ -89,6 +89,13 @@
       }}
     >
       Reset Password!</button
+    >
+
+    <button
+      class="btn btn-secondary"
+      onclick={() => {
+        goto(resolve("/login"));
+      }}>Back to login</button
     >
   </fieldset>
 </ModTogetherHero>

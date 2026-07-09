@@ -59,7 +59,7 @@ function create_ky_instance(custom_options: CustomOptions) {
 }
 
 export async function register_db(
-  username: string,
+  email: string,
   password: string,
 ): Promise<Result<AuthSucessResponse, string>> {
   try {
@@ -68,7 +68,7 @@ export async function register_db(
       unauthorizedCheck: false,
     }).extend({
       json: {
-        email: username,
+        email: email,
         password: password,
       },
     });

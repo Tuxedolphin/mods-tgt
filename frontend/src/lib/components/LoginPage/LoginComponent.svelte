@@ -3,7 +3,7 @@
 
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
-  import { registered, token_information } from "$lib/shared/shared.svelte";
+  import { token_information } from "$lib/shared/shared.svelte";
   import LoginButton from "./LoginButton.svelte";
 
   let emailInput = $state("");
@@ -26,8 +26,6 @@
         errorMessage = value;
       }
     }
-
-    registered.set(false);
   });
 </script>
 
