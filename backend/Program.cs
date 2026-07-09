@@ -43,6 +43,16 @@ await supabase.InitializeAsync();
 
 builder.Services.AddSingleton(supabase);
 
+builder
+    .Services.AddHttpClient(
+        "Gotrue",
+        client =>
+        {
+            client.BaseAddress = new Uri($"{supabaseSettings.Url}/auth/v1/");
+            client.DefaultRequestHeaders.Add("apikey", supabaseSettings.PublishableKey);
+        }
+    );
+
 // Supabase JWT Configuration
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

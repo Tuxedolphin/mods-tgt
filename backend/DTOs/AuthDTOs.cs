@@ -81,3 +81,13 @@ public record ResetPasswordRequest
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
     public required string Password { get; init; }
 }
+
+public record UpdatePasswordRequest
+{
+    [Required]
+    public required string OldPassword { get; init; }
+
+    [Required]
+    [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
+    public required string NewPassword { get; init; }
+}

@@ -1,0 +1,30 @@
+info:
+  name: post /auth/logout-all
+  type: http
+  seq: 9
+  tags:
+    - Auth
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/logout-all"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 204 Response
+    description: No Content
+    request:
+      url: "{{baseUrl}}/auth/logout-all"
+      method: POST
+    response:
+      status: 204
+      statusText: No Content
+      body:
+        type: text
+        data: ""

@@ -54,10 +54,10 @@ examples:
         type: text
         data: |-
           {
-            "access_token": "",
-            "refresh_token": "",
-            "expires_in": "",
-            "token_type": ""
+            "accessToken": "",
+            "refreshToken": "",
+            "expiresIn": "",
+            "tokenType": ""
           }
   - name: 200 Response
     description: OK
@@ -80,10 +80,10 @@ examples:
         type: json
         data: |-
           {
-            "access_token": "",
-            "refresh_token": "",
-            "expires_in": "",
-            "token_type": ""
+            "accessToken": "",
+            "refreshToken": "",
+            "expiresIn": "",
+            "tokenType": ""
           }
   - name: 200 Response
     description: OK
@@ -106,8 +106,8 @@ examples:
         type: json
         data: |-
           {
-            "access_token": "",
-            "refresh_token": "",
-            "expires_in": "",
-            "token_type": ""
+            "accessToken": "",
+            "refreshToken": "",
+            "expiresIn": "",
+            "tokenType": ""
           }
