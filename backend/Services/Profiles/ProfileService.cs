@@ -91,7 +91,7 @@ public class ProfileService(
                 new Supabase.Storage.FileOptions { Upsert = true, ContentType = "image/webp" }
             );
 
-        profile.AvatarUpdatedAt = DateTime.Now;
+        profile.AvatarUpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
