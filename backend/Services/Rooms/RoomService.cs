@@ -40,7 +40,7 @@ public class RoomService(
                 .ToListAsync()
                 .MapAsync(list => list.Select(t => t.ToRoomTimetable()));
 
-            _roomTracker.SetRoom(roomId, [userId], [.. timetables]);
+            _roomTracker.SetRoom(roomId, new RoomInit([userId], [], [], [.. timetables]));
         }
 
         if (!_profileTracker.GetUserById(userId, out _))
@@ -104,7 +104,7 @@ public class RoomService(
 
         return (await users.SelectAsync(FindOrAddProfileAsync))
             .OfType<Profile>()
-            .Select(p => p.GetRoomMemberResponse(roles.GetValueOrDefault(p.Id, RoomRole.Editor)))
+            .Select(p => p.ToRoomMemberResponse(roles.GetValueOrDefault(p.Id, RoomRole.Editor)))
             .ToList();
     }
 

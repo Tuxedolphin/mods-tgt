@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Backend.Infrastructure;
-using Backend.Models;
 
 namespace Backend.Services.Rooms;
 
@@ -9,6 +8,10 @@ public class RoomTracker : IRoomTracker
     private record RoomState
     {
         public ConcurrentHashSet<Guid> Users { get; init; } = [];
+
+        public ConcurrentHashSet<Guid> Editors { get; init; } = [];
+
+        public ConcurrentHashSet<Guid> Visitors { get; init; } = [];
         public ConcurrentDictionary<Guid, RoomTimetable> Timetables { get; init; } = new();
     }
 
@@ -86,6 +89,46 @@ public class RoomTracker : IRoomTracker
         return false;
     }
 
+    public bool SetEditors(Guid roomId, IReadOnlyCollection<Guid> editors)
+    {
+        if (_rooms.TryGetValue(roomId, out var roomState))
+        {
+            roomState.Editors.Clear();
+            editors.ToList().ForEach(e => roomState.Editors.Add(e));
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool GetEditorsInRoom(Guid roomId, out IReadOnlyCollection<Guid> editors)
+    {
+        var found = _rooms.TryGetValue(roomId, out var roomState);
+        editors = found ? roomState!.Editors.ToArray() : [];
+
+        return found;
+    }
+
+    public bool SetVisitors(Guid roomId, IReadOnlyCollection<Guid> visitors)
+    {
+        if (_rooms.TryGetValue(roomId, out var roomState))
+        {
+            roomState.Visitors.Clear();
+            visitors.ToList().ForEach(v => roomState.Visitors.Add(v));
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool GetVisitorsInRoom(Guid roomId, out IReadOnlyCollection<Guid> visitors)
+    {
+        var found = _rooms.TryGetValue(roomId, out var roomState);
+        visitors = found ? roomState!.Visitors.ToArray() : [];
+
+        return found;
+    }
+
     // This assumes that there is something to be changed about the timetable,
     // be it to create it in the database or to update the entry in the database
     public bool AddOrUpdateTimetable(RoomTimetable timetable)
@@ -115,26 +158,24 @@ public class RoomTracker : IRoomTracker
         return false;
     }
 
-    public bool SetRoom(
-        Guid roomId,
-        IReadOnlyCollection<Guid> users,
-        IReadOnlyCollection<RoomTimetable> timetables
-    )
+    public bool SetRoom(Guid roomId, RoomInit init)
     {
-        var invalidTimetable = timetables.FirstOrDefault(t => t.RoomId != roomId);
+        var invalidTimetable = init.Timetables.FirstOrDefault(t => t.RoomId != roomId);
         if (invalidTimetable is not null)
         {
             throw new ArgumentException(
                 $"Timetable {invalidTimetable.Id} does not belong to room {roomId}.",
-                nameof(timetables)
+                nameof(init)
             );
         }
 
         var roomState = new RoomState
         {
-            Users = [.. users],
+            Users = [.. init.Users],
+            Editors = [.. init.Editors],
+            Visitors = [.. init.Visitors],
             Timetables = new ConcurrentDictionary<Guid, RoomTimetable>(
-                timetables.ToDictionary(t => t.Id, t => t)
+                init.Timetables.ToDictionary(t => t.Id, t => t)
             ),
         };
 

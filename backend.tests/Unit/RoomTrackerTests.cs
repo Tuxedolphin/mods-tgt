@@ -326,6 +326,157 @@ public class RoomTrackerTests
         _tracker.RoomExists(roomId).ShouldBeTrue();
     }
 
+    [Fact]
+    public void SetRoom_WithEditorsAndVisitors_PopulatesBothAtomically()
+    {
+        var roomId = Guid.NewGuid();
+        IReadOnlyCollection<Guid> editors = [Guid.NewGuid(), Guid.NewGuid()];
+        IReadOnlyCollection<Guid> visitors = [Guid.NewGuid()];
+
+        _tracker.SetRoom(roomId, new RoomInit([], editors, visitors, []));
+
+        _tracker.GetEditorsInRoom(roomId, out var editorsRes).ShouldBeTrue();
+        _tracker.GetVisitorsInRoom(roomId, out var visitorsRes).ShouldBeTrue();
+
+        editorsRes.ShouldBe(editors, ignoreOrder: true);
+        visitorsRes.ShouldBe(visitors, ignoreOrder: true);
+    }
+
+    // === SetEditors ===
+
+    [Fact]
+    public void SetEditors_NonExistingRoom_ReturnsFalse()
+    {
+        var result = _tracker.SetEditors(Guid.NewGuid(), [Guid.NewGuid()]);
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void SetEditors_ExistingRoom_ReturnsTrueAndGetReflectsList()
+    {
+        var roomId = Guid.NewGuid();
+        IReadOnlyCollection<Guid> editors = [Guid.NewGuid(), Guid.NewGuid()];
+
+        _tracker.AddRoom(roomId);
+        var result = _tracker.SetEditors(roomId, editors);
+
+        result.ShouldBeTrue();
+        _tracker.GetEditorsInRoom(roomId, out var res).ShouldBeTrue();
+        res.ShouldBe(editors, ignoreOrder: true);
+    }
+
+    [Fact]
+    public void SetEditors_CalledTwice_ReplacesPreviousList()
+    {
+        var roomId = Guid.NewGuid();
+        IReadOnlyCollection<Guid> first = [Guid.NewGuid(), Guid.NewGuid()];
+        IReadOnlyCollection<Guid> second = [Guid.NewGuid()];
+
+        _tracker.AddRoom(roomId);
+        _tracker.SetEditors(roomId, first);
+        _tracker.SetEditors(roomId, second);
+
+        _tracker.GetEditorsInRoom(roomId, out var res);
+        res.ShouldBe(second, ignoreOrder: true);
+    }
+
+    // === GetEditorsInRoom ===
+
+    [Fact]
+    public void GetEditorsInRoom_NonExistingRoom_ReturnsFalse()
+    {
+        var result = _tracker.GetEditorsInRoom(Guid.NewGuid(), out _);
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void GetEditorsInRoom_EmptyRoom_ReturnsTrueAndEmpty()
+    {
+        var roomId = Guid.NewGuid();
+        _tracker.AddRoom(roomId);
+
+        var result = _tracker.GetEditorsInRoom(roomId, out var editors);
+
+        result.ShouldBeTrue();
+        editors.ShouldBeEmpty();
+    }
+
+    // === SetVisitors ===
+
+    [Fact]
+    public void SetVisitors_NonExistingRoom_ReturnsFalse()
+    {
+        var result = _tracker.SetVisitors(Guid.NewGuid(), [Guid.NewGuid()]);
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void SetVisitors_ExistingRoom_ReturnsTrueAndGetReflectsList()
+    {
+        var roomId = Guid.NewGuid();
+        IReadOnlyCollection<Guid> visitors = [Guid.NewGuid(), Guid.NewGuid()];
+
+        _tracker.AddRoom(roomId);
+        var result = _tracker.SetVisitors(roomId, visitors);
+
+        result.ShouldBeTrue();
+        _tracker.GetVisitorsInRoom(roomId, out var res).ShouldBeTrue();
+        res.ShouldBe(visitors, ignoreOrder: true);
+    }
+
+    [Fact]
+    public void SetVisitors_CalledTwice_ReplacesPreviousList()
+    {
+        var roomId = Guid.NewGuid();
+        IReadOnlyCollection<Guid> first = [Guid.NewGuid(), Guid.NewGuid()];
+        IReadOnlyCollection<Guid> second = [Guid.NewGuid()];
+
+        _tracker.AddRoom(roomId);
+        _tracker.SetVisitors(roomId, first);
+        _tracker.SetVisitors(roomId, second);
+
+        _tracker.GetVisitorsInRoom(roomId, out var res);
+        res.ShouldBe(second, ignoreOrder: true);
+    }
+
+    // === GetVisitorsInRoom ===
+
+    [Fact]
+    public void GetVisitorsInRoom_NonExistingRoom_ReturnsFalse()
+    {
+        var result = _tracker.GetVisitorsInRoom(Guid.NewGuid(), out _);
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void GetVisitorsInRoom_EmptyRoom_ReturnsTrueAndEmpty()
+    {
+        var roomId = Guid.NewGuid();
+        _tracker.AddRoom(roomId);
+
+        var result = _tracker.GetVisitorsInRoom(roomId, out var visitors);
+
+        result.ShouldBeTrue();
+        visitors.ShouldBeEmpty();
+    }
+
+    // === CloseRoom clears roles ===
+
+    [Fact]
+    public void CloseRoom_ClearsEditorsAndVisitors()
+    {
+        var roomId = Guid.NewGuid();
+
+        _tracker.AddRoom(roomId);
+        _tracker.SetEditors(roomId, [Guid.NewGuid()]);
+        _tracker.SetVisitors(roomId, [Guid.NewGuid()]);
+
+        _tracker.CloseRoom(roomId);
+
+        _tracker.GetEditorsInRoom(roomId, out _).ShouldBeFalse();
+        _tracker.GetVisitorsInRoom(roomId, out _).ShouldBeFalse();
+    }
+
     // === AddOrUpdateTimetable
 
     [Fact]
@@ -518,7 +669,7 @@ public class RoomTrackerTests
     {
         var roomId = Guid.NewGuid();
 
-        _tracker.SetRoom(roomId, [], []);
+        _tracker.SetRoom(roomId, new RoomInit([], [], [], []));
 
         _tracker.GetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
         _tracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
@@ -535,7 +686,7 @@ public class RoomTrackerTests
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
         IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
-        _tracker.SetRoom(roomId, users, timetables);
+        _tracker.SetRoom(roomId, new RoomInit(users, [], [], timetables));
 
         _tracker.GetTimetablesInRoom(roomId, out var timetablesRes).ShouldBeTrue();
         _tracker.GetUsersInRoom(roomId, out var usersRes).ShouldBeTrue();
@@ -549,8 +700,8 @@ public class RoomTrackerTests
     {
         var roomId = Guid.NewGuid();
 
-        _tracker.SetRoom(roomId, [], []);
-        var res = _tracker.SetRoom(roomId, [], []);
+        _tracker.SetRoom(roomId, new RoomInit([], [], [], []));
+        var res = _tracker.SetRoom(roomId, new RoomInit([], [], [], []));
 
         res.ShouldBeFalse();
     }
@@ -567,7 +718,7 @@ public class RoomTrackerTests
             MakeTimetable(Guid.NewGuid()),
         ];
 
-        Action act = () => _tracker.SetRoom(roomId, users, timetables);
+        Action act = () => _tracker.SetRoom(roomId, new RoomInit(users, [], [], timetables));
 
         act.ShouldThrow<ArgumentException>();
     }
@@ -601,7 +752,7 @@ public class RoomTrackerTests
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
         IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
-        _tracker.SetRoom(roomId, users, timetables);
+        _tracker.SetRoom(roomId, new RoomInit(users, [], [], timetables));
         _tracker.CloseRoom(roomId);
 
         _tracker.GetTimetablesInRoom(roomId, out _).ShouldBeFalse();
@@ -620,7 +771,7 @@ public class RoomTrackerTests
 
         timetables[0].Name = "Changed!";
 
-        _tracker.SetRoom(roomId, users, timetables);
+        _tracker.SetRoom(roomId, new RoomInit(users, [], [], timetables));
         _tracker.AddOrUpdateTimetable(timetables[0]);
 
         _tracker.CloseRoom(roomId);
@@ -659,7 +810,7 @@ public class RoomTrackerTests
         IReadOnlyCollection<Guid> users = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
         List<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
-        _tracker.SetRoom(roomId, users, timetables);
+        _tracker.SetRoom(roomId, new RoomInit(users, [], [], timetables));
 
         var changedTimetable = timetables[0];
         changedTimetable.Name = "Changed!";
@@ -716,7 +867,7 @@ public class RoomTrackerTests
 
         IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
-        _tracker.SetRoom(roomId, [], timetables);
+        _tracker.SetRoom(roomId, new RoomInit([], [], [], timetables));
 
         var changed = timetables.First();
         changed.Name = "This has been changed!";
@@ -781,7 +932,7 @@ public class RoomTrackerTests
 
         IReadOnlyCollection<RoomTimetable> timetables = [MakeTimetable(roomId), MakeTimetable(roomId)];
 
-        _tracker.SetRoom(roomId, [], timetables);
+        _tracker.SetRoom(roomId, new RoomInit([], [], [], timetables));
         _tracker.DeleteTimetable(roomId, timetables.ElementAt(0).Id);
         _tracker.DeleteTimetable(roomId, timetables.ElementAt(1).Id);
 

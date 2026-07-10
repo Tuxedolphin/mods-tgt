@@ -20,6 +20,6 @@ public static class ProfileMappings
         return new(profile.Id, profile.Username, avatarUrl);
     }
 
-    public static RoomMemberResponse GetRoomMemberResponse(this Profile profile, RoomRole role) =>
+    public static RoomMemberResponse ToRoomMemberResponse(this Profile profile, RoomRole role) =>
         new(profile.Id, profile.Username, null, role);
 }

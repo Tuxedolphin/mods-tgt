@@ -75,7 +75,7 @@ public class RoomServiceExceptionTests : IAsyncLifetime
         var userId = Guid.NewGuid();
         var timetable = MakeTimetable(roomId).ToRoomTimetable();
 
-        _roomTracker.SetRoom(roomId, [], [timetable]);
+        _roomTracker.SetRoom(roomId, new RoomInit([], [], [], [timetable]));
         _roomTracker.AddUserToRoom(userId, roomId);
         _roomTracker.AddOrUpdateTimetable(timetable);
 
