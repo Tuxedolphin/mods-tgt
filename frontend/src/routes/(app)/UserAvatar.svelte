@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ProfilePictureChangeComponent from "./ProfilePictureChangeComponent.svelte";
+
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import {
@@ -6,10 +8,13 @@
     currentWorkingTimetable,
     token_information,
   } from "$lib/shared/shared.svelte";
+  import Cropper from "svelte-easy-crop";
   import GenericDialog from "./GenericDialog.svelte";
 
   // svelte-ignore non_reactive_update
   let dialog: HTMLDialogElement;
+
+  let change_image_dialog: HTMLDialogElement;
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -42,4 +47,20 @@
       await goto(resolve(`/login?error_description=${message}`));
     }}>Logout</button
   >
+
+  <button
+    class="btn btn-accent"
+    onclick={() => {
+      change_image_dialog.show();
+    }}>Change Pfp</button
+  >
+</GenericDialog>
+
+<GenericDialog
+  bind:dialog={change_image_dialog}
+  closeHandler={() => {
+    /*Intentially Left Empty*/
+  }}
+>
+  <ProfilePictureChangeComponent></ProfilePictureChangeComponent>
 </GenericDialog>

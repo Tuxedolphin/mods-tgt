@@ -28,6 +28,9 @@ importers:
       ky:
         specifier: ^2.0.2
         version: 2.0.2
+      svelte-easy-crop:
+        specifier: ^5.0.1
+        version: 5.0.1(svelte@5.55.7(@typescript-eslint/types@8.59.3))
       svelte-persisted-store:
         specifier: ^0.12.0
         version: 0.12.0(svelte@5.55.7(@typescript-eslint/types@8.59.3))
@@ -1840,6 +1843,11 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
+  svelte-easy-crop@5.0.1:
+    resolution: {integrity: sha512-Dq2rgmPsSEo+K8k49TFGXZAJwJa537AR6hW1RqKEdYj7QKlc4Ya7l4VlSYWlOV8/uAiQ10VyGRdSVAUcZiMwjg==}
+    peerDependencies:
+      svelte: ^5.0.0
+
   svelte-eslint-parser@1.6.1:
     resolution: {integrity: sha512-hhvSH6kRj46UzrBVO5TaotD+Iuvruj5ccKBcO4wAhVcPTLmIc/c32D8UllBTYO0on4LzYuM0rNzf1lM/gBlkSQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0, pnpm: 10.33.0}
@@ -3560,6 +3568,10 @@ snapshots:
       typescript: 6.0.3
     transitivePeerDependencies:
       - picomatch
+
+  svelte-easy-crop@5.0.1(svelte@5.55.7(@typescript-eslint/types@8.59.3)):
+    dependencies:
+      svelte: 5.55.7(@typescript-eslint/types@8.59.3)
 
   svelte-eslint-parser@1.6.1(svelte@5.55.7(@typescript-eslint/types@8.59.3)):
     dependencies:
