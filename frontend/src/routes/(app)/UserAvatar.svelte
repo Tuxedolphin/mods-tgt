@@ -10,6 +10,7 @@
   } from "$lib/shared/shared.svelte";
   import Cropper from "svelte-easy-crop";
   import GenericDialog from "./GenericDialog.svelte";
+  import { onMount } from "svelte";
 
   // svelte-ignore non_reactive_update
   let dialog: HTMLDialogElement;
@@ -21,7 +22,12 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="avatar avatar-placeholder" onclick={() => dialog.show()}>
   <div class="w-12 rounded-full bg-neutral text-neutral-content">
-    <span class="text-3xl">{$currentUserInformation.username?.charAt(0)}</span>
+    {#if $currentUserInformation.avatarUrl}
+      <img src={$currentUserInformation.avatarUrl} />
+    {:else}
+      <span class="text-3xl">{$currentUserInformation.username?.charAt(0)}</span
+      >
+    {/if}
   </div>
 </div>
 

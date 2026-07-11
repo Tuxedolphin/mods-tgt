@@ -1,6 +1,13 @@
 <script lang="ts">
-  import { token_information } from "$lib/shared/shared.svelte";
-  import { update_user_profile_photo } from "$lib/utils/db_operations";
+  import {
+    currentUserInformation,
+    token_information,
+  } from "$lib/shared/shared.svelte";
+  import {
+    delete_user_profile_photo,
+    get_user_info,
+    update_user_profile_photo,
+  } from "$lib/utils/db_operations";
   import Cropper, { type CropArea } from "svelte-easy-crop";
   // taken from cropper documentation:
   // https://valentinh.github.io/react-easy-crop/docs/examples/output
@@ -8,6 +15,9 @@
   interface ProfilePictureChangeComponentProps {
     parentDialog: HTMLDialogElement;
   }
+
+  let loading = $state(false);
+  let error = $state("");
 
   let { parentDialog }: ProfilePictureChangeComponentProps = $props();
 
@@ -109,52 +119,101 @@
 </script>
 
 <div class="flex flex-col">
-  <p>Change your Photo!</p>
-  <input
-    type="file"
-    accept="image/*"
-    class="file-input"
-    bind:files={image_files}
-    onchange={async () => {
-      if (image_files) {
-        console.log(image_files[0].name);
-        image = URL.createObjectURL(image_files[0]);
-      }
-    }}
-  />
-  {#if image}
-    <div class="relative w-full h-80">
-      <Cropper
-        {image}
-        oncropcomplete={(e) => {
-          crop_area = e.pixels;
-        }}
-        bind:crop
-        bind:zoom
-        aspect={1}
-      ></Cropper>
-    </div>
+  <p class="text-lg font-bold mb-1">Change your Photo!</p>
 
-    <button
-      class="btn btn-accent"
-      onclick={async () => {
-        const cropped_image = await getCroppedImg(image, crop_area);
-        const result = await update_user_profile_photo(
-          cropped_image!,
-          $token_information.a,
-        );
-
-        if (result.isOk()) {
-          image = "";
-          crop_area = {
-            height: 0,
-            width: 0,
-            x: 0,
-            y: 0,
-          };
-          parentDialog.close();
+  <p class="text-error">{error}</p>
+  <div>
+    <input
+      type="file"
+      accept="image/png, image/jpeg, .png, .jpg, .jpeg"
+      class="file-input w-full"
+      bind:files={image_files}
+      onchange={async () => {
+        if (image_files) {
+          console.log(image_files[0].name);
+          image = URL.createObjectURL(image_files[0]);
         }
-      }}>Upload Image</button
-    >
-  {/if}
+      }}
+    />
+    {#if image}
+      <div class="relative w-full h-80 my-1">
+        <Cropper
+          {image}
+          oncropcomplete={(e) => {
+            crop_area = e.pixels;
+          }}
+          bind:crop
+          bind:zoom
+          aspect={1}
+        ></Cropper>
+      </div>
+
+      <button
+        class="btn btn-accent my-1 w-full {loading ? 'btn-disabled' : ''}"
+        onclick={async () => {
+          error = "";
+          loading = true;
+          const cropped_image = await getCroppedImg(image, crop_area);
+          const result = await update_user_profile_photo(
+            cropped_image!,
+            $token_information.a,
+          );
+
+          const new_user_info = await get_user_info($token_information.a);
+
+          if (result.isOk()) {
+            image = "";
+            crop_area = {
+              height: 0,
+              width: 0,
+              x: 0,
+              y: 0,
+            };
+            image_files = undefined;
+          } else {
+            error = result.error;
+            loading = false;
+            return;
+          }
+
+          if (new_user_info.isOk()) {
+            currentUserInformation.set(new_user_info.value);
+          }
+          loading = false;
+          parentDialog.close();
+        }}>{loading ? "Uploading..." : "Upload Image"}</button
+      >
+    {/if}
+  </div>
+
+  <div class="divider"></div>
+
+  <button
+    class="btn btn-error {loading ? 'btn-disabled' : ''}"
+    onclick={async () => {
+      loading = true;
+      error = "";
+      const delete_request = await delete_user_profile_photo(
+        $token_information.a,
+      );
+
+      if (delete_request.isErr()) {
+        loading = false;
+        error = delete_request.error;
+        return;
+      }
+
+      const new_user_info = await get_user_info($token_information.a);
+
+      if (new_user_info.isErr()) {
+        loading = false;
+        error = new_user_info.error;
+        return;
+      }
+
+      currentUserInformation.set(new_user_info.value);
+      loading = false;
+      parentDialog.close();
+    }}>{loading ? "Removing..." : "Remove Profile Picture"}</button
+  >
 </div>
