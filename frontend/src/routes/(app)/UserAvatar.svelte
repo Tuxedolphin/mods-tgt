@@ -11,6 +11,8 @@
   import Cropper from "svelte-easy-crop";
   import GenericDialog from "./GenericDialog.svelte";
   import { onMount } from "svelte";
+  import UserAvatarComponent from "$lib/components/Profile/UserAvatarComponent.svelte";
+  import { Edit, Pencil } from "@lucide/svelte";
 
   // svelte-ignore non_reactive_update
   let dialog: HTMLDialogElement;
@@ -20,15 +22,8 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="avatar avatar-placeholder" onclick={() => dialog.show()}>
-  <div class="w-12 rounded-full bg-neutral text-neutral-content">
-    {#if $currentUserInformation.avatarUrl}
-      <img src={$currentUserInformation.avatarUrl} />
-    {:else}
-      <span class="text-3xl">{$currentUserInformation.username?.charAt(0)}</span
-      >
-    {/if}
-  </div>
+<div onclick={() => dialog.show()}>
+  <UserAvatarComponent size={48}></UserAvatarComponent>
 </div>
 
 <GenericDialog
@@ -37,29 +32,38 @@
     /* Intentionally Empty */
   }}
 >
-  <h3 class="text-lg font-bold">Hi, {$currentUserInformation.username}</h3>
+  <div class="flex flex-col items-center align-middle w-full">
+    <div class="relative">
+      <UserAvatarComponent size={128}></UserAvatarComponent>
+      <div
+        class="absolute bottom-0 right-1 w-10 h-10 bg-red-200 rounded-full flex items-center justify-center"
+      >
+        <Pencil
+          class="w-4 h-4"
+          onclick={() => {
+            change_image_dialog.show();
+          }}
+        ></Pencil>
+      </div>
+    </div>
 
-  <button
-    class="btn btn-error"
-    onclick={async () => {
-      $token_information.a = "";
-      $token_information.b = false;
-      currentUserInformation.reset();
-      currentWorkingTimetable.reset();
-      const message = "Logout Successful";
+    <h3 class="text-lg font-bold">Hi, {$currentUserInformation.username}</h3>
 
-      // setTimeout(() => {}, 1000);
+    <button
+      class="btn btn-error"
+      onclick={async () => {
+        $token_information.a = "";
+        $token_information.b = false;
+        currentUserInformation.reset();
+        currentWorkingTimetable.reset();
+        const message = "Logout Successful";
 
-      await goto(resolve(`/login?error_description=${message}`));
-    }}>Logout</button
-  >
+        // setTimeout(() => {}, 1000);
 
-  <button
-    class="btn btn-accent"
-    onclick={() => {
-      change_image_dialog.show();
-    }}>Change Pfp</button
-  >
+        await goto(resolve(`/login?error_description=${message}`));
+      }}>Logout</button
+    >
+  </div>
 </GenericDialog>
 
 <GenericDialog
