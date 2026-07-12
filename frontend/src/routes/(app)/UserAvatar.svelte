@@ -47,22 +47,25 @@
       </div>
     </div>
 
-    <h3 class="text-lg font-bold">Hi, {$currentUserInformation.username}</h3>
-
-    <button
-      class="btn btn-error"
-      onclick={async () => {
-        $token_information.a = "";
-        $token_information.b = false;
-        currentUserInformation.reset();
-        currentWorkingTimetable.reset();
-        const message = "Logout Successful";
-
-        // setTimeout(() => {}, 1000);
-
-        await goto(resolve(`/login?error_description=${message}`));
-      }}>Logout</button
-    >
+    <h3 class="text-2xl font-bold p-2">
+      Hi, {$currentUserInformation.username}
+    </h3>
+    <div class="flex gap-1 w-full">
+      <button class="btn btn-accent w-1/2" onclick={async () => {}}
+        >Manage Account</button
+      >
+      <button
+        class="btn btn-error w-1/2"
+        onclick={async () => {
+          $token_information.a = "";
+          $token_information.b = false;
+          currentUserInformation.reset();
+          currentWorkingTimetable.reset();
+          const message = "Logout Successful";
+          await goto(resolve(`/login?error_description=${message}`));
+        }}>Logout</button
+      >
+    </div>
   </div>
 </GenericDialog>
 
