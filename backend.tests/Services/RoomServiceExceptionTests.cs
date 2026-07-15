@@ -55,7 +55,7 @@ public class RoomServiceExceptionTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task RegisterConnection_NonExistentUser_ThrowsNotFoundException()
+    public async Task RegisterConnectionAsync_NonExistentUser_ThrowsNotFoundException()
     {
         await Should.ThrowAsync<NotFoundException>(() =>
             _service.RegisterConnectionAsync(Guid.NewGuid(), "connection")

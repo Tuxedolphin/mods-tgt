@@ -61,7 +61,7 @@ public class RoomTrackerTests
     // === Connection room membership ===
 
     [Fact]
-    public void MoveConnectionToRoom_ExistingRoom_ReturnsRoom()
+    public void MoveConnectionToRoom_ExistingRoom_AssociatesConnectionWithRoom()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -89,7 +89,7 @@ public class RoomTrackerTests
     }
 
     [Fact]
-    public void MoveConnectionToRoom_AssociatesConnectionWithRoom()
+    public void MoveConnectionToRoom_RegisteredConnection_AssociatesConnectionWithRoom()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -116,7 +116,7 @@ public class RoomTrackerTests
     }
 
     [Fact]
-    public void MoveConnectionToRoom_ConnectionInDifferentRoom_ReturnsNewRoom()
+    public void MoveConnectionToRoom_ConnectionInDifferentRoom_ReturnsPreviousRoomAndMovesConnection()
     {
         var userId = Guid.NewGuid();
         var initialRoomId = Guid.NewGuid();
@@ -126,14 +126,15 @@ public class RoomTrackerTests
         AddConnectionToRoom(initialRoomId, userId, connectionId);
         _tracker.AddRoom(newRoomId);
         _tracker.SetMemberRole(newRoomId, userId, RoomRole.Viewer);
-        _tracker.MoveConnectionToRoom(connectionId, userId, newRoomId);
+        var move = _tracker.MoveConnectionToRoom(connectionId, userId, newRoomId);
 
+        move.PreviousRoomId.ShouldBe(initialRoomId);
         _tracker.GetRoomOfConnection(connectionId, out var currentRoomId).ShouldBeTrue();
         currentRoomId.ShouldBe(newRoomId);
     }
 
     [Fact]
-    public void MoveConnectionToRoom_ConnectionInDifferentRoom_MovesConnection()
+    public void MoveConnectionToRoom_UserHasAnotherConnection_PreservesPreviousRoomPresence()
     {
         var userId = Guid.NewGuid();
         var initialRoomId = Guid.NewGuid();
@@ -141,6 +142,7 @@ public class RoomTrackerTests
 
         const string connectionId = "connection";
         AddConnectionToRoom(initialRoomId, userId, connectionId);
+        AddConnectionToRoom(initialRoomId, userId, "other-connection");
         _tracker.AddRoom(newRoomId);
         _tracker.SetMemberRole(newRoomId, userId, RoomRole.Viewer);
         _tracker.MoveConnectionToRoom(connectionId, userId, newRoomId);
@@ -148,9 +150,7 @@ public class RoomTrackerTests
         _tracker.GetUsersInRoom(initialRoomId, out var users);
         _tracker.GetRoomOfConnection(connectionId, out var resultRoomId).ShouldBeTrue();
 
-        var userInInitialRoom = users.Contains(userId);
-
-        userInInitialRoom.ShouldBeFalse();
+        users.ShouldBe([userId]);
         resultRoomId.ShouldBe(newRoomId);
     }
 
@@ -264,10 +264,10 @@ public class RoomTrackerTests
         var roomId = Guid.NewGuid();
         _tracker.AddRoom(roomId);
 
-        var result = _tracker.GetUsersInRoom(roomId, out var timetables);
+        var result = _tracker.GetUsersInRoom(roomId, out var users);
 
         result.ShouldBeTrue();
-        timetables.ShouldBe([]);
+        users.ShouldBe([]);
     }
 
     [Fact]
@@ -277,11 +277,12 @@ public class RoomTrackerTests
         var userId = Guid.NewGuid();
 
         AddConnectionToRoom(roomId, userId, "connection");
+        AddConnectionToRoom(roomId, userId, "other-connection");
 
-        var result = _tracker.GetUsersInRoom(roomId, out var timetables);
+        var result = _tracker.GetUsersInRoom(roomId, out var users);
 
         result.ShouldBeTrue();
-        timetables.ShouldBe([userId]);
+        users.ShouldBe([userId]);
     }
 
     // === LeaveConnectionFromRoom ===
@@ -306,20 +307,21 @@ public class RoomTrackerTests
     }
 
     [Fact]
-    public void LeaveConnectionFromRoom_ExistingRoom_RemovesConnectionPresence()
+    public void LeaveConnectionFromRoom_UserHasAnotherConnection_PreservesUserPresence()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
         const string connectionId = "connection";
         AddConnectionToRoom(roomId, userId, connectionId);
-        AddConnectionToRoom(roomId, Guid.NewGuid(), "other-connection");
+        AddConnectionToRoom(roomId, userId, "other-connection");
 
         var departure = _tracker.LeaveConnectionFromRoom(connectionId, roomId);
         _tracker.GetUsersInRoom(roomId, out var users);
 
-        users.Contains(userId).ShouldBeFalse();
+        users.ShouldBe([userId]);
         departure.ShouldNotBeNull();
+        departure.UserId.ShouldBe(userId);
     }
 
     [Fact]
@@ -384,21 +386,24 @@ public class RoomTrackerTests
     }
 
     [Fact]
-    public void RemoveMemberRole_ExistingMember_RemovesEveryRole()
+    public void RemoveMemberRoleAndConnections_ConnectedMember_RemovesRoleAndRoomConnections()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
-        _tracker.AddRoom(roomId);
+        AddConnectionToRoom(roomId, userId, "connection-1");
+        AddConnectionToRoom(roomId, userId, "connection-2");
         _tracker.SetMemberRole(roomId, userId, RoomRole.Editor);
 
         var result = _tracker.RemoveMemberRoleAndConnections(roomId, userId);
 
-        result.ShouldBeEmpty();
+        result.ShouldBe(["connection-1", "connection-2"], ignoreOrder: true);
         _tracker.GetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
         _tracker.GetViewersInRoom(roomId, out var viewers).ShouldBeTrue();
+        _tracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
         editors.ShouldBeEmpty();
         viewers.ShouldBeEmpty();
+        users.ShouldBeEmpty();
     }
 
     // === CloseRoom clears roles ===

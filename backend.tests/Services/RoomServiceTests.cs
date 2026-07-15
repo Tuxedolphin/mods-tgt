@@ -109,7 +109,7 @@ public class RoomServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CreateOrJoinRoom_RemovesUserFromCurrentRoom()
+    public async Task CreateOrJoinRoom_UserHasAnotherConnection_PreservesPreviousRoomPresence()
     {
         var userId = await _context.SeedProfileAsync();
         var roomId = Guid.NewGuid();
@@ -120,16 +120,19 @@ public class RoomServiceTests : IAsyncLifetime
         var oldRoomId = Guid.NewGuid();
         _roomTracker.SetRoom(oldRoomId, new RoomInit([], [userId], []));
         _roomTracker.MoveConnectionToRoom(connectionId, userId, oldRoomId);
+        _roomTracker.RegisterConnection("other-connection", userId);
+        _roomTracker.MoveConnectionToRoom("other-connection", userId, oldRoomId);
 
         await _service.CreateOrJoinRoom(roomId, userId, connectionId);
 
         _roomTracker.GetRoomOfConnection(connectionId, out var resId).ShouldBeTrue();
         resId.ShouldBe(roomId);
-        _roomTracker.GetUsersInRoom(oldRoomId, out _).ShouldBeFalse();
+        _roomTracker.GetUsersInRoom(oldRoomId, out var users).ShouldBeTrue();
+        users.ShouldBe([userId]);
     }
 
     [Fact]
-    public async Task CreateOrJoinRoom_AddsUserToCorrectRoom_WhenJoiningRoom()
+    public async Task CreateOrJoinRoom_AssociatesConnectionWithCorrectRoom_WhenJoiningRoom()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = await _context.SeedProfileAsync();
@@ -163,25 +166,25 @@ public class RoomServiceTests : IAsyncLifetime
     // === HandleLeaveRoom ===
 
     [Fact]
-    public async Task HandleLeaveRoom_RemovesUserFromRoomTracker()
+    public async Task HandleLeaveRoom_UserHasAnotherConnection_PreservesUserPresence()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = await _context.SeedProfileAsync();
-        var otherId = Guid.NewGuid();
         const string connectionId = "connection";
 
-        _roomTracker.SetRoom(roomId, new RoomInit([], [userId, otherId], []));
+        _roomTracker.SetRoom(roomId, new RoomInit([], [userId], []));
         _roomTracker.RegisterConnection(connectionId, userId);
         _roomTracker.MoveConnectionToRoom(connectionId, userId, roomId);
-        _roomTracker.RegisterConnection("other-connection", otherId);
-        _roomTracker.MoveConnectionToRoom("other-connection", otherId, roomId);
+        _roomTracker.RegisterConnection("other-connection", userId);
+        _roomTracker.MoveConnectionToRoom("other-connection", userId, roomId);
 
         await _service.HandleLeaveRoom(roomId, connectionId);
 
         _roomTracker.GetRoomOfConnection(connectionId, out _).ShouldBeFalse();
-        _roomTracker.GetUsersInRoom(roomId, out var users);
-        users.ShouldNotContain(userId);
-        users.ShouldContain(otherId);
+        _roomTracker.GetRoomOfConnection("other-connection", out var currentRoomId).ShouldBeTrue();
+        currentRoomId.ShouldBe(roomId);
+        _roomTracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
+        users.ShouldBe([userId]);
     }
 
     [Fact]
@@ -198,11 +201,11 @@ public class RoomServiceTests : IAsyncLifetime
         await _service.HandleLeaveRoom(roomId, connectionId);
 
         _roomTracker.GetRoomOfConnection(connectionId, out _).ShouldBeFalse();
-        _roomTracker.GetUsersInRoom(roomId, out _).ShouldBeFalse();
+        _roomTracker.RoomExists(roomId).ShouldBeFalse();
     }
 
     [Fact]
-    public async Task HandleLeaveRoom_RemoveNonExistentUser_DoesNothing()
+    public async Task HandleLeaveRoom_MissingConnection_DoesNothing()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = await _context.SeedProfileAsync();
@@ -219,7 +222,7 @@ public class RoomServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task HandleLeaveRoom_RemoveNonExistentRoom_DoesNothing()
+    public async Task HandleLeaveRoom_WrongRoom_DoesNothing()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = Guid.NewGuid();
@@ -321,6 +324,8 @@ public class RoomServiceTests : IAsyncLifetime
         var timetable = timetableModel.ToRoomTimetable();
 
         _roomTracker.SetRoom(roomId, new RoomInit([], [], [timetable]));
+        _roomTracker.RegisterConnection("owner-connection", userId);
+        _roomTracker.MoveConnectionToRoom("owner-connection", userId, roomId);
 
         var roomInformation = await _service.GetRoomInformationAsync(roomId, userId);
 
@@ -418,7 +423,9 @@ public class RoomServiceTests : IAsyncLifetime
         var result = await _service.GetRoomMembersAsync(roomId, userId);
 
         result.ShouldNotBeNull();
-        result.Single().AvatarUrl.ShouldBe(TestAvatarUrlProvider.UrlFor(userId, avatarUpdatedAt));
+        var member = result.Single();
+        member.AvatarUrl.ShouldBe(TestAvatarUrlProvider.UrlFor(userId, avatarUpdatedAt));
+        member.IsInRoom.ShouldBeFalse();
     }
 
     [Fact]
@@ -540,7 +547,6 @@ public class RoomServiceTests : IAsyncLifetime
         await Should.NotThrowAsync(() =>
             _service.RegisterConnectionAsync(userId, "connection")
         );
-
     }
 
     [Fact]
@@ -614,10 +620,14 @@ public class RoomServiceTests : IAsyncLifetime
                 [mainTimetable.ToRoomTimetable()]
             )
         );
-        _roomTracker.RegisterConnection("member-connection", memberId);
-        _roomTracker.MoveConnectionToRoom("member-connection", memberId, roomId);
+        _roomTracker.RegisterConnection("owner-connection", ownerId);
+        _roomTracker.MoveConnectionToRoom("owner-connection", ownerId, roomId);
+        _roomTracker.RegisterConnection("member-connection-1", memberId);
+        _roomTracker.MoveConnectionToRoom("member-connection-1", memberId, roomId);
+        _roomTracker.RegisterConnection("member-connection-2", memberId);
+        _roomTracker.MoveConnectionToRoom("member-connection-2", memberId, roomId);
 
-        await _service.RevokeMemberAccess(roomId, memberId, ownerId);
+        var removedConnectionIds = await _service.RevokeMemberAccess(roomId, memberId, ownerId);
 
         (await _context.RoomMembers.AnyAsync(m =>
             m.RoomId == roomId && m.UserId == memberId
@@ -626,12 +636,17 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
         editors.ShouldNotContain(memberId);
         users.ShouldNotContain(memberId);
+        users.ShouldContain(ownerId);
+        removedConnectionIds.ShouldBe(
+            ["member-connection-1", "member-connection-2"],
+            ignoreOrder: true
+        );
     }
 
     // === CloseRoom ===
 
     [Fact]
-    public async Task CloseRoom_ExistingRoom_RemovesRoomAndProfilesFromTrackers()
+    public async Task CloseRoom_ExistingRoom_RemovesRoomButRetainsConnectionScopedProfile()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -643,7 +658,7 @@ public class RoomServiceTests : IAsyncLifetime
 
         res.ShouldBeTrue();
         _roomTracker.RoomExists(roomId).ShouldBeFalse();
-        _profileTracker.GetUserById(userId, out _).ShouldBeFalse();
+        _profileTracker.GetUserById(userId, out _).ShouldBeTrue();
     }
 
     [Fact]

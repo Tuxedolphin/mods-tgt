@@ -20,7 +20,7 @@ public class RoomHubTests
         var memberId = Guid.NewGuid();
         var roomId = Guid.NewGuid();
         var updatedMembers = new List<RoomMemberResponse>();
-        var (hub, service, roomClient) = CreateHub(callerId, roomId, updatedMembers);
+        var (hub, service, roomClient, _) = CreateHub(callerId, roomId, updatedMembers);
 
         await hub.SetMemberRole(memberId, roomId, RoomRole.Viewer);
 
@@ -29,21 +29,37 @@ public class RoomHubTests
     }
 
     [Fact]
-    public async Task RevokeMemberAccess_BroadcastsMembersWithoutRevokedMember()
+    public async Task RevokeMemberAccess_RemovesConnectionsFromGroupAndBroadcastsUpdatedMembers()
     {
         var callerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var roomId = Guid.NewGuid();
         var updatedMembers = new List<RoomMemberResponse>();
-        var (hub, service, roomClient) = CreateHub(callerId, roomId, updatedMembers);
+        IReadOnlyCollection<string> removedConnectionIds =
+            ["member-connection-1", "member-connection-2"];
+        var (hub, service, roomClient, groups) = CreateHub(callerId, roomId, updatedMembers);
+        service
+            .RevokeMemberAccess(roomId, memberId, callerId)
+            .Returns(removedConnectionIds);
 
         await hub.RevokeMemberAccess(memberId, roomId);
 
         await service.Received(1).RevokeMemberAccess(roomId, memberId, callerId);
+        foreach (var connectionId in removedConnectionIds)
+        {
+            await groups
+                .Received(1)
+                .RemoveFromGroupAsync(connectionId, roomId.ToString());
+        }
         await roomClient.Received(1).ReceiveRoomMembersUpdate(updatedMembers);
     }
 
-    private static (RoomHub Hub, IRoomService Service, IRoomHubClient RoomClient) CreateHub(
+    private static (
+        RoomHub Hub,
+        IRoomService Service,
+        IRoomHubClient RoomClient,
+        IGroupManager Groups
+    ) CreateHub(
         Guid callerId,
         Guid roomId,
         IReadOnlyCollection<RoomMemberResponse> updatedMembers
@@ -68,13 +84,14 @@ public class RoomHubTests
             )
         );
         hub.Context = context;
-        hub.Groups = Substitute.For<IGroupManager>();
+        var groups = Substitute.For<IGroupManager>();
+        hub.Groups = groups;
 
         var clients = Substitute.For<IHubCallerClients<IRoomHubClient>>();
         var roomClient = Substitute.For<IRoomHubClient>();
         clients.Group(roomId.ToString()).Returns(roomClient);
         hub.Clients = clients;
 
-        return (hub, service, roomClient);
+        return (hub, service, roomClient, groups);
     }
 }
