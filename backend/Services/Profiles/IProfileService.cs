@@ -5,6 +5,8 @@ namespace Backend.Services.Profiles;
 public interface IProfileService
 {
     Task<ProfileResponse> GetUserProfileAsync(Guid userId);
+
+    Task<HandleAvailabilityResponse> CheckHandleAvailabilityAsync(Guid userId, string handle);
     Task UpdateUserProfileAsync(Guid userId, UpdateProfileRequest request);
     Task DeleteUserProfileAsync(Guid userId);
 

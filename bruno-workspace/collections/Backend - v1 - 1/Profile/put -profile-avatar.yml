@@ -1,7 +1,7 @@
 info:
   name: put /profile/avatar
   type: http
-  seq: 3
+  seq: 4
   tags:
     - Profile
 
@@ -46,7 +46,8 @@ examples:
         type: json
         data: |-
           {
-            "userId": "",
-            "username": "",
-            "avatarUrl": ""
+            "userId": "00000000-0000-0000-0000-000000000000",
+            "username": "Test User",
+            "handle": "test-user",
+            "avatarUrl": "https://example.supabase.co/storage/v1/object/public/avatars/00000000-0000-0000-0000-000000000000/avatar.webp?v=0"
           }

@@ -3,66 +3,66 @@ using System.Text.Json.Serialization;
 
 namespace Backend.DTOs;
 
-public class RefreshTokenRequest
+public record RefreshTokenRequest
 {
-    public string RefreshToken { get; set; } = string.Empty;
+    public string RefreshToken { get; init; } = string.Empty;
 }
 
-public class LoginRequest
+public record LoginRequest
 {
     [Required]
     [EmailAddress]
-    public string Email { get; set; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
 
     [Required]
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
-    public string Password { get; set; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
 }
 
-public class RegisterRequest
+public record RegisterRequest
 {
     [Required]
     [EmailAddress]
-    public string Email { get; set; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
 
     [Required]
-    public string Password { get; set; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
 }
 
-public class AuthResponse
+public record AuthResponse
 {
-    public required string AccessToken { get; set; }
+    public required string AccessToken { get; init; }
 
-    public required string RefreshToken { get; set; }
-    public required long ExpiresIn { get; set; }
-    public required string TokenType { get; set; }
+    public required string RefreshToken { get; init; }
+    public required long ExpiresIn { get; init; }
+    public required string TokenType { get; init; }
 }
 
-public class SupabaseTokenResponse
+public record SupabaseTokenResponse
 {
     [JsonPropertyName("access_token")]
-    public string AccessToken { get; set; } = string.Empty;
+    public string AccessToken { get; init; } = string.Empty;
 
     [JsonPropertyName("refresh_token")]
-    public string RefreshToken { get; set; } = string.Empty;
+    public string RefreshToken { get; init; } = string.Empty;
 
     [JsonPropertyName("expires_in")]
-    public long ExpiresIn { get; set; }
+    public long ExpiresIn { get; init; }
 
     [JsonPropertyName("token_type")]
-    public string TokenType { get; set; } = string.Empty;
+    public string TokenType { get; init; } = string.Empty;
 }
 
-public class RegisterResponse
+public record RegisterResponse
 {
-    public required bool RequiresEmailConfirmation { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public AuthResponse? Session { get; set; }
+    public required bool RequiresEmailConfirmation { get; init; }
+    public string Message { get; init; } = string.Empty;
+    public AuthResponse? Session { get; init; }
 }
 
-public class MeResponse
+public record MeResponse
 {
-    public string? Username { get; set; }
+    public string? Username { get; init; }
 }
 
 public record ForgotPasswordRequest

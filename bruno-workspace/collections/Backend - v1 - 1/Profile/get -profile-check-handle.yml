@@ -1,0 +1,58 @@
+info:
+  name: get /profile/check-handle
+  type: http
+  seq: 2
+  tags:
+    - Profile
+
+http:
+  method: GET
+  url: "{{baseUrl}}/profile/check-handle?handle={{handle}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Available Response
+    description: Handle is available
+    request:
+      url: "{{baseUrl}}/profile/check-handle?handle=test-user"
+      method: GET
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-store
+      body:
+        type: json
+        data: |-
+          {
+            "available": true
+          }
+  - name: 200 Unavailable Response
+    description: Handle is already taken
+    request:
+      url: "{{baseUrl}}/profile/check-handle?handle=existing-user"
+      method: GET
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-store
+      body:
+        type: json
+        data: |-
+          {
+            "available": false,
+            "reason": "taken"
+          }

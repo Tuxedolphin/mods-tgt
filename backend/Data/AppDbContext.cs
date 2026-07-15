@@ -8,13 +8,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Timetable> Timetables { get; set; } = null!;
     public DbSet<Profile> Profiles { get; set; } = null!;
     public DbSet<Room> Rooms { get; set; } = null!;
+    public DbSet<RoomMember> RoomMembers { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        // ==== Profiles ====
         modelBuilder.Entity<Profile>().ToTable("Profiles", t => t.ExcludeFromMigrations());
 
+        // ==== Timetables ====
         modelBuilder.Entity<Timetable>().ToTable("TimeTables");
         modelBuilder
             .Entity<Timetable>()
@@ -37,6 +40,25 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(t => t.OriginalTimetableId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // ==== Rooms ====
         modelBuilder.Entity<Room>().ToTable("Rooms");
+
+        // ==== RoomMembers ====
+        modelBuilder.Entity<RoomMember>().ToTable("RoomMembers");
+        modelBuilder.Entity<RoomMember>().HasKey(m => new { m.RoomId, m.UserId });
+
+        modelBuilder.Entity<RoomMember>().Property(m => m.Role).HasConversion<string>();
+        modelBuilder
+            .Entity<RoomMember>()
+            .HasOne(m => m.Room)
+            .WithMany()
+            .HasForeignKey(m => m.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder
+            .Entity<RoomMember>()
+            .HasOne<Profile>()
+            .WithMany()
+            .HasForeignKey(m => m.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

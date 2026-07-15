@@ -1,4 +1,8 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Backend.Data;
+using Backend.DTOs.Mappings;
 using Backend.Exceptions;
 using Backend.Hubs;
 using Backend.Services.Auth;
@@ -13,7 +17,17 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+        );
+
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 builder.Services.AddOpenApi();
 builder.Services.AddRouting(options =>
 {
@@ -21,7 +35,42 @@ builder.Services.AddRouting(options =>
     options.LowercaseQueryStrings = true;
 });
 
-builder.Services.AddSignalR();
+builder
+    .Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+        );
+    });
+
+// === Rate Limiter ===
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy(
+        "handle-check",
+        httpContext =>
+        {
+            var key =
+                httpContext.User.FindFirst("sub")?.Value
+                ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                ?? "anonymous";
+
+            return RateLimitPartition.GetFixedWindowLimiter(
+                key,
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 20,
+                    Window = TimeSpan.FromSeconds(10),
+                    QueueLimit = 0,
+                }
+            );
+        }
+    );
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 
 // === Exception Handling ===
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -102,6 +151,8 @@ builder.Services.AddScoped<ITimetableService, TimetableService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddSingleton<IAvatarUrlProvider, AvatarUrlProvider>();
+builder.Services.AddSingleton<IProfileResponseMapper, ProfileResponseMapper>();
 builder.Services.AddSingleton<IRoomTracker, RoomTracker>();
 builder.Services.AddSingleton<IProfileTracker, ProfileTracker>();
 
@@ -126,9 +177,10 @@ else
 }
 
 app.UseExceptionHandler();
-app.UseAuthentication();
 
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 app.MapHub<RoomHub>("/hubs/room");

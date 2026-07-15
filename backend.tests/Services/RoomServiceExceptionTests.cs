@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.DTOs.Mappings;
 using Backend.Exceptions;
+using Backend.Services.Profiles;
 using Backend.Services.Rooms;
 using Backend.Services.Timetables;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ public class RoomServiceExceptionTests : IAsyncLifetime
             _roomTracker,
             Substitute.For<IProfileTracker>(),
             _timetableService,
+            Substitute.For<IProfileResponseMapper>(),
             _context
         );
     }
@@ -44,21 +46,19 @@ public class RoomServiceExceptionTests : IAsyncLifetime
     public async Task CreateOrJoinRoom_NonExistentRoom_ThrowsNotFoundException()
     {
         var userId = await _context.SeedProfileAsync();
+        const string connectionId = "connection";
+        await _service.RegisterConnectionAsync(userId, connectionId);
 
         await Should.ThrowAsync<NotFoundException>(() =>
-            _service.CreateOrJoinRoom(userId, Guid.NewGuid())
+            _service.CreateOrJoinRoom(Guid.NewGuid(), userId, connectionId)
         );
     }
 
     [Fact]
-    public async Task CreateOrJoinRoom_NonExistentUser_ThrowsNotFoundException()
+    public async Task RegisterConnectionAsync_NonExistentUser_ThrowsNotFoundException()
     {
-        var roomId = await _context.SeedRoomAsync();
-
-        _roomTracker.AddRoom(roomId);
-
         await Should.ThrowAsync<NotFoundException>(() =>
-            _service.CreateOrJoinRoom(Guid.NewGuid(), roomId)
+            _service.RegisterConnectionAsync(Guid.NewGuid(), "connection")
         );
     }
 
@@ -73,13 +73,15 @@ public class RoomServiceExceptionTests : IAsyncLifetime
 
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        const string connectionId = "connection";
         var timetable = MakeTimetable(roomId).ToRoomTimetable();
 
-        _roomTracker.SetRoom(roomId, [], [timetable]);
-        _roomTracker.AddUserToRoom(userId, roomId);
+        _roomTracker.SetRoom(roomId, new RoomInit([], [userId], [timetable]));
+        _roomTracker.RegisterConnection(connectionId, userId);
+        _roomTracker.MoveConnectionToRoom(connectionId, userId, roomId);
         _roomTracker.AddOrUpdateTimetable(timetable);
 
-        await _service.HandleLeaveRoom(userId, roomId);
+        await _service.HandleLeaveRoom(roomId, connectionId);
 
         _roomTracker.RoomExists(roomId).ShouldBeTrue();
         _roomTracker.GetChangedTimetables(roomId, out var changed).ShouldBeTrue();

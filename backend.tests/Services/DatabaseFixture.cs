@@ -49,8 +49,11 @@ public class DatabaseFixture : IAsyncLifetime
             CREATE TABLE IF NOT EXISTS public."Profiles" (
                 "Id" uuid PRIMARY KEY,
                 "Username" text,
+                "Handle" text,
                 "AvatarUpdatedAt" timestamp with time zone
             );
+            CREATE UNIQUE INDEX IF NOT EXISTS "IX_Profiles_Handle"
+                ON public."Profiles" ("Handle");
             """;
         await cmd.ExecuteNonQueryAsync();
 
