@@ -66,9 +66,9 @@ public class RoomHub(
                 }
             }
         }
-        catch (Exception cleanupException)
+        catch (Exception cleanUpException)
         {
-            RoomHubLogs.LogDisconnectCleanupFailed(_logger, cleanupException, Context.ConnectionId);
+            RoomHubLogs.LogDisconnectCleanUpFailed(_logger, cleanUpException, Context.ConnectionId);
         }
         finally
         {
@@ -76,8 +76,7 @@ public class RoomHub(
         }
     }
 
-    [HubMethodName("CreateOrJoinRoom")]
-    public async Task<RoomInformation> CreateOrJoinRoomAsync(Guid roomId)
+    public async Task<RoomInformation> CreateOrJoinRoom(Guid roomId)
     {
         try
         {
@@ -122,6 +121,7 @@ public class RoomHub(
             await Clients
                 .Group(roomId.ToString())
                 .ReceiveRoomMembersUpdate(roomInformation.Members);
+
             await Clients.Caller.ReceiveTimetableUpdate(roomInformation.Timetables);
 
             return roomInformation;
@@ -132,8 +132,7 @@ public class RoomHub(
         }
     }
 
-    [HubMethodName("LeaveRoom")]
-    public async Task LeaveRoomAsync(Guid roomId)
+    public async Task LeaveRoom(Guid roomId)
     {
         var departure = await _roomService.HandleLeaveRoomAsync(roomId, Context.ConnectionId);
         if (departure is null)
@@ -145,15 +144,13 @@ public class RoomHub(
         await TrySendUpdatedRoomMembersToGroupAsync(roomId);
     }
 
-    [HubMethodName("GetRoomInformation")]
-    public async Task<RoomInformation> GetRoomInformationAsync(Guid roomId)
+    public async Task<RoomInformation> GetRoomInformation(Guid roomId)
     {
         return await _roomService.GetRoomInformationAsync(roomId, GetUserId())
             ?? throw new HubException($"Room {roomId} not found");
     }
 
-    [HubMethodName("CreateTimetable")]
-    public async Task CreateTimetableAsync(CreateTimetableRequest timetableRequest)
+    public async Task CreateTimetable(CreateTimetableRequest timetableRequest)
     {
         var userId = GetUserId();
         var roomId = GetCurrentRoomId();
@@ -163,8 +160,7 @@ public class RoomHub(
         await SendUpdatedTimetableToGroupAsync(roomId);
     }
 
-    [HubMethodName("CopyTimetableTo")]
-    public async Task CopyTimetableToAsync(Guid timetableId, Guid timetableIdToCopyTo)
+    public async Task CopyTimetableTo(Guid timetableId, Guid timetableIdToCopyTo)
     {
         try
         {
@@ -197,8 +193,7 @@ public class RoomHub(
     }
 
     // Returns null when timetable was not found
-    [HubMethodName("UpdateTimetable")]
-    public async Task<bool> UpdateTimetableAsync(
+    public async Task<bool> UpdateTimetable(
         Guid timetableId,
         UpdateTimetableRequest timetableRequest
     )
@@ -217,8 +212,7 @@ public class RoomHub(
         return success;
     }
 
-    [HubMethodName("DeleteTimetable")]
-    public async Task DeleteTimetableAsync(Guid timetableId)
+    public async Task DeleteTimetable(Guid timetableId)
     {
         var userId = GetUserId();
         var roomId = GetCurrentRoomId();
@@ -233,8 +227,7 @@ public class RoomHub(
         await SendUpdatedTimetableToGroupAsync(roomId);
     }
 
-    [HubMethodName("FindUsersByHandle")]
-    public async Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandleAsync(
+    public async Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandle(
         string handle,
         Guid roomId
     )
@@ -242,8 +235,7 @@ public class RoomHub(
         return await _roomService.FindUsersByHandleAsync(handle, roomId, GetUserId());
     }
 
-    [HubMethodName("SetMemberRole")]
-    public async Task SetMemberRoleAsync(Guid userId, Guid roomId, RoomRole role)
+    public async Task SetMemberRole(Guid userId, Guid roomId, RoomRole role)
     {
         var callerId = GetUserId();
 
@@ -251,8 +243,7 @@ public class RoomHub(
         await SendUpdatedRoomMembersToGroupAsync(roomId);
     }
 
-    [HubMethodName("RevokeMemberAccess")]
-    public async Task RevokeMemberAccessAsync(Guid userId, Guid roomId)
+    public async Task RevokeMemberAccess(Guid userId, Guid roomId)
     {
         var callerId = GetUserId();
 
@@ -303,8 +294,7 @@ public class RoomHub(
 
     // This method is used mainly as a placeholder for testing, but it could be used in the future
     // to send a message as a chat feature
-    [HubMethodName("SendMessageToRoom")]
-    public async Task SendMessageToRoomAsync(string message)
+    public async Task SendMessageToRoom(string message)
     {
         Guid userId = GetUserId();
         var roomId = GetCurrentRoomId();
