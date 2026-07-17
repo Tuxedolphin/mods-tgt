@@ -38,6 +38,7 @@
         } else {
           $currentUserInformation.username = tt.value.username;
           $currentUserInformation.userId = tt.value.userId;
+          $currentUserInformation.handle = tt.value.handle;
         }
       }
 

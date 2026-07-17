@@ -23,7 +23,7 @@
     />
   </div>
   <div class="flex items-center gap-1">
-    <p>{$currentUserInformation.username}</p>
+    <p>@{$currentUserInformation.handle}</p>
     <UserAvatar></UserAvatar>
   </div>
 </div>

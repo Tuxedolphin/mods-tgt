@@ -2,10 +2,10 @@
   import { onMount } from "svelte";
   import { currentUserInformation } from "$lib/shared/shared.svelte";
 
-  let username = $state("");
+  let handle = $state("");
   onMount(async () => {
-    username = $currentUserInformation.username!;
+    handle = $currentUserInformation.username!;
   });
 </script>
 
-<div class="text-xl font-semibold text-ellipsis">Welcome, {username}</div>
+<div class="text-xl font-semibold text-ellipsis">Welcome, {handle}</div>

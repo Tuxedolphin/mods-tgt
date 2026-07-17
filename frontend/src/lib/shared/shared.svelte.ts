@@ -30,6 +30,7 @@ export const currentUserInformation = persisted("clrsnus", {
   userId: "",
   username: null,
   avatarUrl: null,
+  handle: null,
 } as Profile);
 
 export const currentWorkingTimetable = persisted(

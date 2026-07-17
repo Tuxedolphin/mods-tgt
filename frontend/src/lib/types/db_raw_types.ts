@@ -9,6 +9,7 @@ export interface Profile {
   userId: string;
   username: string | null;
   avatarUrl: string | null;
+  handle: string | null;
 }
 
 export interface AuthSucessResponse {
