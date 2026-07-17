@@ -34,4 +34,15 @@ public static partial class RoomHubLogs
         Message = "User {UserId} left room {RoomId} in RoomHub."
     )]
     public static partial void LogUserLeftRoom(ILogger<RoomHub> logger, Guid userId, Guid roomId);
+
+    [LoggerMessage(
+        EventId = 2005,
+        Level = LogLevel.Warning,
+        Message = "Failed to clean up RoomHub connection {ConnectionId} during disconnect."
+    )]
+    public static partial void LogDisconnectCleanupFailed(
+        ILogger logger,
+        Exception exception,
+        string connectionId
+    );
 }

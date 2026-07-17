@@ -1,14 +1,18 @@
 CREATE TABLE IF NOT EXISTS public."Profiles" (
     "Id" uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     "Username" text,
+    "Handle" text,
     "AvatarUpdatedAt" timestamp with time zone
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS "IX_Profiles_Handle"
+    ON public."Profiles" ("Handle");
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-    INSERT INTO public."Profiles" ("Id", "Username")
-    VALUES (NEW.id, NULL);
+    INSERT INTO public."Profiles" ("Id", "Username", "Handle")
+    VALUES (NEW.id, NULL, NULL);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -2,6 +2,7 @@ using Backend.DTOs;
 using Backend.Services.Profiles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Backend.Controllers;
 
@@ -32,6 +33,18 @@ public class ProfileController(IProfileService profileService) : BaseController
         await _profileService.DeleteUserProfileAsync(GetUserId());
 
         return NoContent();
+    }
+
+    [HttpGet("check-handle")]
+    [EnableRateLimiting("handle-check")]
+    public async Task<ActionResult<HandleAvailabilityResponse>> CheckHandle(
+        [FromQuery] string handle
+    )
+    {
+        var result = await _profileService.CheckHandleAvailabilityAsync(GetUserId(), handle);
+
+        Response.Headers.CacheControl = "no-store";
+        return Ok(result);
     }
 
     [HttpPut("avatar")]

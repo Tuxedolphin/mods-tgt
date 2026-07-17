@@ -5,11 +5,24 @@ namespace Backend.Tests.Services;
 
 public static class TestSeeder
 {
-    public static async Task<Guid> SeedProfileAsync(this AppDbContext context, string name = "Test")
+    public static async Task<Guid> SeedProfileAsync(
+        this AppDbContext context,
+        string name = "Test",
+        string? handle = null,
+        DateTime? avatarUpdatedAt = null
+    )
     {
         var id = Guid.NewGuid();
 
-        context.Profiles.Add(new Profile { Id = id, Username = name });
+        context.Profiles.Add(
+            new Profile
+            {
+                Id = id,
+                Username = name,
+                Handle = handle ?? $"user-{id:N}",
+                AvatarUpdatedAt = avatarUpdatedAt,
+            }
+        );
         await context.SaveChangesAsync();
 
         context.ChangeTracker.Clear();

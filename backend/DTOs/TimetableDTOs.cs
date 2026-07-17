@@ -23,27 +23,27 @@ public record TimetableDetailedResponse : TimetableResponse
     public required ProfileResponse Profile { get; init; }
 }
 
-public class CreateTimetableRequest
+public record CreateTimetableRequest
 {
     [Required]
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
     [Required, Range(1, 4, ErrorMessage = "Semester must be between 1 and 4")]
-    public int Semester { get; set; }
+    public int Semester { get; init; }
 
     [Required]
     [RegularExpression(@"^\d{4}-\d{4}$", ErrorMessage = "AcademicYear must be in format YYYY-YYYY")]
-    public string AcademicYear { get; set; } = string.Empty;
+    public string AcademicYear { get; init; } = string.Empty;
 
     [Required]
-    public required List<TimetableModule> MetaData { get; set; }
+    public required List<TimetableModule> MetaData { get; init; }
 }
 
-public class UpdateTimetableRequest
+public record UpdateTimetableRequest
 {
     [Required]
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
     [Required]
-    public IReadOnlyCollection<TimetableModule> MetaData { get; set; } = [];
+    public IReadOnlyCollection<TimetableModule> MetaData { get; init; } = [];
 }

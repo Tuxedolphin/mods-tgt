@@ -1,4 +1,5 @@
 using Backend.DTOs;
+using Backend.Models;
 
 namespace Backend.Services.Rooms;
 
@@ -6,11 +7,20 @@ public interface IRoomService
 {
     public bool RoomExists(Guid roomId);
 
-    public Task<bool> AddProfileAsync(Guid userId);
-
-    public Task CreateOrJoinRoom(Guid userId, Guid roomId);
-    public Task HandleLeaveRoom(Guid userId, Guid roomId);
-    public bool HandleDeleteTimetable(Guid roomId, Guid timetableId);
+    public Task RegisterConnectionAsync(Guid userId, string connectionId);
+    public Task<RoomConnectionMove> CreateOrJoinRoom(
+        Guid roomId,
+        Guid userId,
+        string connectionId
+    );
+    public Task<RoomConnectionDeparture?> HandleLeaveRoom(
+        Guid roomId,
+        string connectionId
+    );
+    public Task<ConnectionRemoval?> HandleDisconnectAsync(string connectionId);
+    public bool GetRoomOfConnection(string connectionId, out Guid roomId);
+    public bool IsConnectionInRoom(string connectionId, Guid roomId);
+    public bool HandleDeleteTimetable(Guid roomId, Guid userId, Guid timetableId);
 
     public CreateTimetableResult HandleCreateTimetable(
         Guid roomId,
@@ -19,20 +29,37 @@ public interface IRoomService
         Guid? CopyOf
     );
 
-    // We do not check for the userId here for auth since all users in the room should be able to update any of the timetables
     // TODO: Maybe add in some auth feature so that some people can "lock" their timetable
     public Task<bool> HandleUpdateTimetableAsync(
         Guid roomId,
+        Guid userId,
         Guid timetableId,
         UpdateTimetableRequest timetableRequest
     );
 
-    public Task<RoomInformation?> GetRoomInformationAsync(Guid roomId);
-    public Task<IReadOnlyCollection<ProfileResponse>?> GetProfilesInRoomAsync(Guid roomId);
+    public Task<RoomInformation?> GetRoomInformationAsync(Guid roomId, Guid userId);
+
+    public Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandle(
+        string handle,
+        Guid roomId,
+        Guid callerId
+    );
+    public Task<IReadOnlyCollection<RoomMemberResponse>?> GetRoomMembersAsync(
+        Guid roomId,
+        Guid userId
+    );
     public Task<IReadOnlyCollection<TimetableDetailedResponse>?> GetTimetablesDetailedInRoomAsync(
-        Guid roomId
+        Guid roomId,
+        Guid userId
     );
 
     public Task<bool> CloseRoom(Guid roomId);
     public Task<bool> CommitChangesAsync(Guid roomId);
+
+    public Task SetMemberRole(Guid roomId, Guid userId, RoomRole role, Guid callerId);
+    public Task<IReadOnlyCollection<string>> RevokeMemberAccess(
+        Guid roomId,
+        Guid userId,
+        Guid callerId
+    );
 }

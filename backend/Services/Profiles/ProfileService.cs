@@ -13,12 +13,14 @@ namespace Backend.Services.Profiles;
 public class ProfileService(
     AppDbContext context,
     SupabaseStorageClient supabase,
-    IGotrueAdminClient<User> adminClient
+    IGotrueAdminClient<User> adminClient,
+    IProfileResponseMapper profileResponseMapper
 ) : IProfileService
 {
     private readonly AppDbContext _context = context;
     private readonly SupabaseStorageClient _supabase = supabase;
     private readonly IGotrueAdminClient<User> _adminClient = adminClient;
+    private readonly IProfileResponseMapper _profileResponseMapper = profileResponseMapper;
 
     public async Task<ProfileResponse> GetUserProfileAsync(Guid userId)
     {
@@ -26,18 +28,43 @@ public class ProfileService(
             await _context.Profiles.FirstOrDefaultAsync(p => p.Id == userId)
             ?? throw new NotFoundException("User not found");
 
-        return profile.ToResponse(
-            profile.AvatarUpdatedAt is null
-                ? null
-                : GetImageUrl(GetAvatarPath(userId), profile.AvatarUpdatedAt.Value)
+        return _profileResponseMapper.ToResponse(profile);
+    }
+
+    public async Task<HandleAvailabilityResponse> CheckHandleAvailabilityAsync(
+        Guid userId,
+        string handle
+    )
+    {
+        var normalizedHandle = ProfileHandleValidator.Normalize(handle);
+        var formatError = ProfileHandleValidator.GetFormatError(normalizedHandle);
+        if (formatError is not null)
+            return new HandleAvailabilityResponse(false, formatError);
+
+        var isTaken = await _context.Profiles.AnyAsync(p =>
+            p.Handle == normalizedHandle && p.Id != userId
+        );
+
+        return new HandleAvailabilityResponse(
+            Available: !isTaken,
+            Reason: isTaken ? HandleUnavailableReason.Taken : null
         );
     }
 
     public async Task UpdateUserProfileAsync(Guid userId, UpdateProfileRequest updatedProfile)
     {
+        var username = updatedProfile.Username.Trim();
+        var handle = ProfileHandleValidator.Normalize(updatedProfile.Handle);
+
+        var availability = await CheckHandleAvailabilityAsync(userId, handle);
+        if (!availability.Available)
+            throw new BadRequestException($"Handle is unavailable: {availability.Reason}");
+
         int rows = await _context
             .Profiles.Where(p => p.Id == userId)
-            .ExecuteUpdateAsync(p => p.SetProperty(p => p.Username, updatedProfile.Username));
+            .ExecuteUpdateAsync(setters =>
+                setters.SetProperty(p => p.Username, username).SetProperty(p => p.Handle, handle)
+            );
 
         if (rows == 0)
             throw new NotFoundException("User not found");
@@ -50,7 +77,11 @@ public class ProfileService(
             ?? throw new NotFoundException("User not found");
 
         if (profile.AvatarUpdatedAt is not null)
-            await _supabase.Client.Storage.From("avatars").Remove([GetAvatarPath(userId)]);
+        {
+            await _supabase
+                .Client.Storage.From("avatars")
+                .Remove([AvatarUrlProvider.GetAvatarPath(userId)]);
+        }
 
         var ownedRoomIds = _context
             .Timetables.Where(t => t.UserId == userId && t.Id == t.RoomId)
@@ -81,7 +112,7 @@ public class ProfileService(
         );
         using var image = SKImage.FromBitmap(resized);
         var data = image.Encode(SKEncodedImageFormat.Webp, 75).ToArray();
-        var path = GetAvatarPath(userId);
+        var path = AvatarUrlProvider.GetAvatarPath(userId);
 
         await _supabase
             .Client.Storage.From("avatars")
@@ -95,7 +126,7 @@ public class ProfileService(
 
         await _context.SaveChangesAsync();
 
-        return profile.ToResponse(GetImageUrl(path, profile.AvatarUpdatedAt.Value));
+        return _profileResponseMapper.ToResponse(profile);
     }
 
     public async Task DeleteUserAvatarAsync(Guid userId)
@@ -110,16 +141,11 @@ public class ProfileService(
             return;
         }
 
-        var path = GetAvatarPath(userId);
+        var path = AvatarUrlProvider.GetAvatarPath(userId);
 
         await _supabase.Client.Storage.From("avatars").Remove([path]);
 
         profile.AvatarUpdatedAt = null;
         await _context.SaveChangesAsync();
     }
-
-    private string GetImageUrl(string path, DateTime updatedAt) =>
-        $"{_supabase.Client.Storage.From("avatars").GetPublicUrl(path)}?v={updatedAt.Ticks}";
-
-    private static string GetAvatarPath(Guid userId) => $"{userId}/avatar.webp";
 }

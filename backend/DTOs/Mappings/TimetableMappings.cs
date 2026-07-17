@@ -29,13 +29,13 @@ public static class TimetableMappings
 
     public static TimetableDetailedResponse ToDetailedResponse(
         this RoomTimetable timetable,
-        Profile profile
+        ProfileResponse profile
     ) =>
         new()
         {
             Id = timetable.Id,
             Name = timetable.Name,
-            Profile = profile.ToResponse(),
+            Profile = profile,
             Semester = timetable.Semester,
             AcademicYear = timetable.AcademicYear,
             CreatedAt = timetable.CreatedAt,

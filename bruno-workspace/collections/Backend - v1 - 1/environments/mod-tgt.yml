@@ -6,3 +6,9 @@ variables:
     name: accessToken
   - secret: true
     name: refreshToken
+  - name: userId
+    value: ""
+  - name: username
+    value: Test User
+  - name: handle
+    value: test-user

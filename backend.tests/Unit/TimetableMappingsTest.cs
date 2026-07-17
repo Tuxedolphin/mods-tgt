@@ -45,7 +45,8 @@ public class TimetableMappingsTests
             RoomId = Guid.NewGuid(),
         };
 
-    private static Profile MakeProfile() => new() { Id = Guid.NewGuid(), Username = "testuser" };
+    private static ProfileResponse MakeProfileResponse() =>
+        new(Guid.NewGuid(), "testuser", "testhandle", "https://avatars.test/avatar.webp");
 
     private static UpdateTimetableRequest MakeUpdateRequest() =>
         new() { Name = "Updated Timetable", MetaData = [MakeModule(), MakeModule()] };
@@ -109,14 +110,15 @@ public class TimetableMappingsTests
     public void ToDetailedResponse_MapsAllFieldsCorrectly()
     {
         var timetable = MakeRoomTimetable();
-        var profile = MakeProfile();
+        var profile = MakeProfileResponse();
 
         var result = timetable.ToDetailedResponse(profile);
 
         result.Id.ShouldBe(timetable.Id);
         result.Name.ShouldBe(timetable.Name);
-        result.Profile.UserId.ShouldBe(profile.Id);
+        result.Profile.UserId.ShouldBe(profile.UserId);
         result.Profile.Username.ShouldBe(profile.Username);
+        result.Profile.AvatarUrl.ShouldBe(profile.AvatarUrl);
         result.Semester.ShouldBe(timetable.Semester);
         result.AcademicYear.ShouldBe(timetable.AcademicYear);
         result.CreatedAt.ShouldBe(timetable.CreatedAt);
@@ -140,11 +142,11 @@ public class TimetableMappingsTests
     public void ToDetailedResponse_ProfileMapsCorrectly()
     {
         var timetable = MakeRoomTimetable();
-        var profile = MakeProfile();
+        var profile = MakeProfileResponse();
 
         var result = timetable.ToDetailedResponse(profile);
 
-        result.Profile.UserId.ShouldBe(profile.Id);
+        result.Profile.UserId.ShouldBe(profile.UserId);
         result.Profile.Username.ShouldBe(profile.Username);
     }
 
