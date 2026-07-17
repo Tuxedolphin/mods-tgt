@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleX } from "@lucide/svelte";
+  import { CircleX, TriangleAlert } from "@lucide/svelte";
   import { onDestroy, onMount } from "svelte";
   import type { Unsubscriber } from "svelte/store";
   import { goto } from "$app/navigation";
@@ -56,81 +56,88 @@
   let unsubscribe_from_mods_list: Unsubscriber;
   // svelte-ignore non_reactive_update
   let user_tt: TimetableDetailedResponse | undefined;
+  let error = $state("");
   onMount(async () => {
     let first_time_subscribe = true;
     let update_from_room = false;
 
     $currentWorkingTimetable.timetable_id = params.timetable_id;
     await roomHub.connect($token_information.a!);
-    const info: RoomInformation | undefined = await $roomHub?.invoke(
-      "CreateOrJoinRoom",
-      params.timetable_id,
-    );
-    is_timetable_loaded = false;
+    try {
+      const info: RoomInformation | undefined = await $roomHub?.invoke(
+        "CreateOrJoinRoom",
+        params.timetable_id,
+      );
 
-    timetable_metadata = info!.timetables[0];
-    profiles = info!.users;
-    $currentlySelectedMods = info!.timetables;
+      is_timetable_loaded = false;
 
-    $roomHub?.on(
-      "ReceiveTimetableUpdate",
-      (msg: TimetableDetailedResponse[]) => {
-        update_from_room = true;
+      timetable_metadata = info!.timetables[0];
+      profiles = info!.users;
+      $currentlySelectedMods = info!.timetables;
 
-        // If a new timetable is created: update local userid:
-        if (!user_tt) {
-          user_tt = msg.find(
-            (x) => x.profile.userId === $currentUserInformation.userId,
-          );
-          // Force update:
-          update_from_room = false;
-        }
+      $roomHub?.on(
+        "ReceiveTimetableUpdate",
+        (msg: TimetableDetailedResponse[]) => {
+          update_from_room = true;
 
-        $currentlySelectedMods = msg;
-      },
-    );
-    $roomHub?.on("ReceiveUserUpdate", (msg: Profile[]) => {
-      profiles = msg;
-    });
-
-    // Find a timetable that belongs to current user:
-    user_tt = info!.timetables.find(
-      (x) => x.profile.userId === $currentUserInformation.userId,
-    );
-
-    if (!user_tt) {
-      const info_to_post: TimetablePostTemplate = {
-        academicYear: timetable_metadata.academicYear,
-        metaData: [],
-        name: timetable_metadata.name,
-        semester: timetable_metadata.semester,
-      };
-      await $roomHub?.invoke("CreateTimetable", info_to_post);
-    }
-
-    unsubscribe_from_mods_list = currentlySelectedMods.subscribe(
-      async (updated_timetable) => {
-        if (first_time_subscribe) {
-          first_time_subscribe = false;
-          return;
-        }
-
-        if (update_from_room) {
-          update_from_room = false;
-          return;
-        }
-
-        for (const timetable of updated_timetable) {
-          if (timetable.id === user_tt?.id) {
-            await $roomHub?.invoke("UpdateTimetable", timetable.id, {
-              Name: timetable.name,
-              MetaData: timetable.metaData,
-            });
+          // If a new timetable is created: update local userid:
+          if (!user_tt) {
+            user_tt = msg.find(
+              (x) => x.profile.userId === $currentUserInformation.userId,
+            );
+            // Force update:
+            update_from_room = false;
           }
-        }
-      },
-    );
-    is_timetable_loaded = true;
+
+          $currentlySelectedMods = msg;
+        },
+      );
+      $roomHub?.on("ReceiveUserUpdate", (msg: Profile[]) => {
+        profiles = msg;
+      });
+
+      // Find a timetable that belongs to current user:
+      user_tt = info!.timetables.find(
+        (x) => x.profile.userId === $currentUserInformation.userId,
+      );
+
+      if (!user_tt) {
+        const info_to_post: TimetablePostTemplate = {
+          academicYear: timetable_metadata.academicYear,
+          metaData: [],
+          name: timetable_metadata.name,
+          semester: timetable_metadata.semester,
+        };
+        await $roomHub?.invoke("CreateTimetable", info_to_post);
+      }
+
+      unsubscribe_from_mods_list = currentlySelectedMods.subscribe(
+        async (updated_timetable) => {
+          if (first_time_subscribe) {
+            first_time_subscribe = false;
+            return;
+          }
+
+          if (update_from_room) {
+            update_from_room = false;
+            return;
+          }
+
+          for (const timetable of updated_timetable) {
+            if (timetable.id === user_tt?.id) {
+              await $roomHub?.invoke("UpdateTimetable", timetable.id, {
+                Name: timetable.name,
+                MetaData: timetable.metaData,
+              });
+            }
+          }
+        },
+      );
+      is_timetable_loaded = true;
+    } catch (err) {
+      error =
+        "You do not have permissions to view this document. Please ask permissions from the owner of this timetable.";
+    }
   });
 
   onDestroy(async () => {
@@ -203,6 +210,13 @@
   ></SearchBar>
 
   <ModListGroup acadYear={timetable_metadata.academicYear}></ModListGroup>
+{/if}
+
+{#if error}
+  <div class="w-full min-h-full text-center flex flex-col items-center">
+    <TriangleAlert />
+    <p>{error}</p>
+  </div>
 {/if}
 
 <GenericDialog
