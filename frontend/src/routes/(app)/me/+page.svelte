@@ -6,6 +6,7 @@
     check_handle,
     delete_user,
     get_user_info,
+    update_user_password,
     update_user_profile,
   } from "$lib/utils/db_operations";
   import {
@@ -24,8 +25,7 @@
 
   let { data }: PageProps = $props();
   let current_user_info = $state({} as Profile);
-  let current_password = $state("");
-  let new_password = $state("");
+
   let loading = $state(false);
   let confirm_delete = $state("");
   let change_image_dialog: HTMLDialogElement;
@@ -83,6 +83,28 @@
     check_handle_state = handle_success = handle_error = "";
     handle_error = result.error;
   }, 500);
+
+  let password_error = $state("");
+  let password_success = $state("");
+  let old_password = $state("");
+  let new_password = $state("");
+  async function update_password() {
+    password_error = password_success = "";
+    loading = true;
+    const result = await update_user_password(
+      old_password,
+      new_password,
+      $token_information.a,
+    );
+
+    if (result.isOk()) {
+      password_success = "Password updated!";
+      old_password = new_password = "";
+    } else {
+      password_error = result.error;
+    }
+    loading = false;
+  }
 
   async function update_account() {
     handle_error = "";
@@ -180,12 +202,23 @@
 
   <fieldset class="fieldset">
     <legend class="fieldset-legend">Current password</legend>
-    <input type="text" class="input" bind:value={current_password} />
+    <input type="password" class="input" bind:value={old_password} />
 
     <legend class="fieldset-legend">New password</legend>
-    <input type="text" class="input" bind:value={new_password} />
+    <input type="password" class="input" bind:value={new_password} />
 
-    <button class="btn btn-primary max-w-xs {loading ? 'btn-disabled' : ''}"
+    {#if password_error}
+      <p class="text-error">{password_error}</p>
+    {/if}
+
+    {#if password_success}
+      <p class="text-success">{password_success}</p>
+    {/if}
+    <button
+      onclick={async () => {
+        await update_password();
+      }}
+      class="btn btn-primary max-w-xs {loading ? 'btn-disabled' : ''}"
       >Change Password</button
     >
   </fieldset>

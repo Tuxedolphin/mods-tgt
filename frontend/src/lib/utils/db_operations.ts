@@ -314,6 +314,66 @@ export async function update_user_profile(
   }
 }
 
+export async function update_user_password(
+  old_password: string,
+  new_password: string,
+  access_token: string,
+): Promise<Result<string, string>> {
+  try {
+    const update_pw_db = create_ky_instance({
+      auth_token: access_token,
+      authorised: true,
+      unauthorizedCheck: true,
+    }).extend({
+      json: {
+        oldPassword: old_password,
+        newPassword: new_password,
+      },
+    });
+
+    const result = await update_pw_db.post("auth/update-password");
+
+    return Ok("");
+  } catch (error) {
+    console.log(error);
+    try {
+      if (error instanceof HTTPError) {
+        const errorResponse = error.data as ErrorResponse;
+        const errorMessage = json_tryparse<ErrorInformation>(
+          errorResponse.title,
+        );
+
+        if (errorMessage.isOk()) {
+          return Err(errorMessage.value.msg);
+        }
+
+        const parse_validation_error =
+          error.data as ProfileValidationErrorResponse;
+
+        if (
+          parse_validation_error.errors.Handle &&
+          parse_validation_error.errors.Handle.length != 0
+        ) {
+          return Err(parse_validation_error.errors.Handle[0]);
+        }
+
+        if (
+          parse_validation_error.errors.Username &&
+          parse_validation_error.errors.Username.length != 0
+        ) {
+          return Err(parse_validation_error.errors.Username[0]);
+        }
+
+        return Err("Error update password. Please try again.");
+      }
+    } catch {
+      return Err("Error update password. Please try again.");
+    }
+
+    return Err("Error update password. Please try again.");
+  }
+}
+
 export async function update_user_profile_photo(
   image_data: Blob,
   access_token: string,
