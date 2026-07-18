@@ -250,6 +250,40 @@ export async function update_user_profile_photo(
   }
 }
 
+export async function delete_user(
+  access_token: string,
+): Promise<Result<string, string>> {
+  try {
+    const get_user_info_db = create_ky_instance({
+      authorised: true,
+      unauthorizedCheck: true,
+      auth_token: access_token,
+    });
+
+    await get_user_info_db.delete("profile/me");
+    return Ok("Deleted");
+  } catch (error) {
+    try {
+      if (error instanceof HTTPError) {
+        const errorResponse = error.data as ErrorResponse;
+        const errorMessage = json_tryparse<ErrorInformation>(
+          errorResponse.title,
+        );
+
+        if (errorMessage.isOk()) {
+          return Err(errorMessage.value.msg);
+        }
+
+        return Err(errorMessage.error);
+      }
+    } catch {
+      return new Err("Error deleting user");
+    }
+
+    return new Err("Error deleting user");
+  }
+}
+
 export async function get_user_info(
   access_token: string,
   force_cache_refresh: boolean = false,

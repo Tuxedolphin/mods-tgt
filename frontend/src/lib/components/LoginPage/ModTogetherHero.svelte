@@ -1,11 +1,14 @@
 <script lang="ts">
-  let { children } = $props();
+  let { attempt_redirect = true, children } = $props();
 
   import mods_tgt_logo from "$lib/assets/mods_tgt_logo.png?enhanced";
   import RedirectToHomeComponent from "../UtilityComponents/RedirectToHomeComponent.svelte";
 </script>
 
-<RedirectToHomeComponent></RedirectToHomeComponent>
+{#if attempt_redirect}
+  <RedirectToHomeComponent></RedirectToHomeComponent>
+{/if}
+
 <div class="hero min-h-screen bg-base-200">
   <div class="hero-content text-center">
     <div class="max-w-xs">

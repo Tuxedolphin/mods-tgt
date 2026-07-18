@@ -36,7 +36,7 @@
     <div class="relative">
       <UserAvatarComponent size={128}></UserAvatarComponent>
       <div
-        class="absolute bottom-0 right-1 w-10 h-10 bg-red-200 rounded-full flex items-center justify-center"
+        class="absolute bottom-0 right-1 w-10 h-10 bg-primary-content rounded-full flex items-center justify-center"
       >
         <Pencil
           class="w-4 h-4"
@@ -47,12 +47,19 @@
       </div>
     </div>
 
-    <h3 class="text-2xl font-bold p-2">
+    <h3 class="text-2xl font-bold">
       Hi, {$currentUserInformation.username}
     </h3>
-    <div class="flex gap-1 w-full">
-      <button class="btn btn-accent w-1/2" onclick={async () => {}}
-        >Manage Account</button
+    <h3 class="italic">
+      @{$currentUserInformation.handle}
+    </h3>
+    <div class="flex gap-1 w-full pt-2">
+      <button
+        class="btn btn-accent w-1/2"
+        onclick={async () => {
+          goto(resolve("/(app)/me"));
+          dialog.close();
+        }}>Manage Account</button
       >
       <button
         class="btn btn-error w-1/2"
