@@ -130,7 +130,6 @@
       bind:files={image_files}
       onchange={async () => {
         if (image_files) {
-          console.log(image_files[0].name);
           image = URL.createObjectURL(image_files[0]);
         }
       }}
@@ -181,7 +180,7 @@
           }
           loading = false;
           parentDialog.close();
-        }}>{loading ? "Uploading..." : "Upload Image"}</button
+        }}>Upload Image</button
       >
     {/if}
   </div>
@@ -214,6 +213,6 @@
       currentUserInformation.set(new_user_info.value);
       loading = false;
       parentDialog.close();
-    }}>{loading ? "Removing..." : "Remove Profile Picture"}</button
+    }}>Remove Profile Picture</button
   >
 </div>

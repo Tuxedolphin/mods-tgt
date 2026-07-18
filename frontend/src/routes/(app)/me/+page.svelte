@@ -14,6 +14,9 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { get } from "svelte/store";
+  import { Pencil } from "@lucide/svelte";
+  import ProfilePictureChangeComponent from "../ProfilePictureChangeComponent.svelte";
+  import GenericDialog from "../GenericDialog.svelte";
 
   let { data }: PageProps = $props();
   let current_user_info = $state({} as Profile);
@@ -21,6 +24,7 @@
   let new_password = $state("");
   let loading = $state(false);
   let confirm_delete = $state("");
+  let change_image_dialog: HTMLDialogElement;
 
   let delete_error = $state("");
   onMount(async () => {
@@ -49,9 +53,20 @@
   <p class="mt-2 text-xl font-semibold">Customise your profile!</p>
   <hr class="my-2 h-px border-0 bg-gray-200" />
 
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend">Profile Picture</legend>
-    <UserAvatarComponent size={128}></UserAvatarComponent>
+  <fieldset class="fieldset flex">
+    <div class="relative">
+      <UserAvatarComponent size={128}></UserAvatarComponent>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="absolute bottom-0 right-1 w-10 h-10 bg-primary rounded-full flex items-center justify-center"
+        onclick={() => {
+          change_image_dialog.show();
+        }}
+      >
+        <Pencil class="w-4 h-4"></Pencil>
+      </div>
+    </div>
   </fieldset>
 
   <fieldset class="fieldset">
@@ -114,3 +129,13 @@
     >
   </fieldset>
 </div>
+
+<GenericDialog
+  bind:dialog={change_image_dialog}
+  closeHandler={() => {
+    /*Intentially Left Empty*/
+  }}
+>
+  <ProfilePictureChangeComponent parentDialog={change_image_dialog}
+  ></ProfilePictureChangeComponent>
+</GenericDialog>

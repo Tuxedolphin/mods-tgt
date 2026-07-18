@@ -36,7 +36,7 @@
     <div class="relative">
       <UserAvatarComponent size={128}></UserAvatarComponent>
       <div
-        class="absolute bottom-0 right-1 w-10 h-10 bg-primary-content rounded-full flex items-center justify-center"
+        class="absolute bottom-0 right-1 w-10 h-10 bg-primary rounded-full flex items-center justify-center"
       >
         <Pencil
           class="w-4 h-4"
