@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import { get } from "svelte/store";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import {
@@ -6,8 +8,6 @@
     token_information,
   } from "$lib/shared/shared.svelte";
   import { get_user_info } from "$lib/utils/db_operations";
-  import { onMount } from "svelte";
-  import { get } from "svelte/store";
 
   // This component just checks if there's any token, attempts to login, and
   // redirects to home if possible.

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Cropper, { type CropArea } from "svelte-easy-crop";
   import {
     currentUserInformation,
     token_information,
@@ -8,7 +9,7 @@
     get_user_info,
     update_user_profile_photo,
   } from "$lib/utils/db_operations";
-  import Cropper, { type CropArea } from "svelte-easy-crop";
+
   // taken from cropper documentation:
   // https://valentinh.github.io/react-easy-crop/docs/examples/output
 

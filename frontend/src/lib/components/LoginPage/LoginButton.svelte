@@ -14,7 +14,7 @@
     errorMessage: string;
   }
   let loading = $state(false);
-  // biome-ignore lint/correctness/noUnusedVariables: Unable to detect bindable variables
+
   let {
     errorMessage = $bindable<string>(),
     email,

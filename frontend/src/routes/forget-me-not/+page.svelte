@@ -1,7 +1,8 @@
 <script lang="ts">
-  import ModTogetherHero from "$lib/components/LoginPage/ModTogetherHero.svelte";
   import { onMount } from "svelte";
+  import ModTogetherHero from "$lib/components/LoginPage/ModTogetherHero.svelte";
   import type { PageProps } from "./$types";
+
   let name = $state("");
   onMount(() => {
     const urlParams = new URLSearchParams(window.location.search);

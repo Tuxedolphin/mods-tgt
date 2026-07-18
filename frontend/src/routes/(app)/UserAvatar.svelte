@@ -1,18 +1,17 @@
 <script lang="ts">
-  import ProfilePictureChangeComponent from "./ProfilePictureChangeComponent.svelte";
-
+  import { Edit, Pencil } from "@lucide/svelte";
+  import { onMount } from "svelte";
+  import Cropper from "svelte-easy-crop";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
+  import UserAvatarComponent from "$lib/components/Profile/UserAvatarComponent.svelte";
   import {
     currentUserInformation,
     currentWorkingTimetable,
     token_information,
   } from "$lib/shared/shared.svelte";
-  import Cropper from "svelte-easy-crop";
   import GenericDialog from "./GenericDialog.svelte";
-  import { onMount } from "svelte";
-  import UserAvatarComponent from "$lib/components/Profile/UserAvatarComponent.svelte";
-  import { Edit, Pencil } from "@lucide/svelte";
+  import ProfilePictureChangeComponent from "./ProfilePictureChangeComponent.svelte";
 
   // svelte-ignore non_reactive_update
   let dialog: HTMLDialogElement;

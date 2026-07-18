@@ -1,29 +1,28 @@
 <script lang="ts">
-  import NavItemLargeScreen from "./NavItemLargeScreen.svelte";
 
   import {
     Calendar1,
     Home,
     House,
+    type LucideIcon,
     Menu,
     Settings,
     Settings2,
     Share,
     Share2,
     UserRound,
-    type LucideIcon,
   } from "@lucide/svelte";
-
   import mods_tgt_header from "$lib/assets/mods_tgt_header.png?enhanced";
   import type { LayoutProps } from "../$types";
+  import NavItemLargeScreen from "./NavItemLargeScreen.svelte";
   import UserAvatar from "./UserAvatar.svelte";
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let { children }: LayoutProps = $props();
 
-  import { currentUserInformation } from "$lib/shared/shared.svelte";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
+  import { currentUserInformation } from "$lib/shared/shared.svelte";
   import type { NavigationItemProp } from "$lib/types/internal";
 
   const navigation_items: NavigationItemProp[] = [

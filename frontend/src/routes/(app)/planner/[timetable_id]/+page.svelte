@@ -1,5 +1,4 @@
 <script lang="ts">
-  import ShareTimetableDialog from "./ShareTimetableDialog.svelte";
 
   import { CircleX, TriangleAlert } from "@lucide/svelte";
   import { onDestroy, onMount } from "svelte";
@@ -33,6 +32,7 @@
   } from "$lib/utils/formatting_utils";
   import GenericDialog from "../../GenericDialog.svelte";
   import type { PageProps } from "./$types";
+  import ShareTimetableDialog from "./ShareTimetableDialog.svelte";
 
   let is_timetable_loaded = $state(false);
   let profiles: RoomProfile[] = $state([]);
@@ -139,7 +139,7 @@
         },
       );
       is_timetable_loaded = true;
-    } catch (err) {
+    } catch {
       error =
         "You do not have permissions to view this document. Please ask permissions from the owner of this timetable.";
     }

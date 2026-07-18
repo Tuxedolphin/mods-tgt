@@ -1,7 +1,16 @@
 <script lang="ts">
-  import UserAvatarComponent from "$lib/components/Profile/UserAvatarComponent.svelte";
+  import { Pencil } from "@lucide/svelte";
+  import { debounce } from "es-toolkit/function";
   import { onMount } from "svelte";
-  import type { PageProps } from "./$types";
+  import { get } from "svelte/store";
+  import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import UserAvatarComponent from "$lib/components/Profile/UserAvatarComponent.svelte";
+  import {
+    currentUserInformation,
+    token_information,
+  } from "$lib/shared/shared.svelte";
+  import type { Profile } from "$lib/types/db_raw_types";
   import {
     check_handle,
     delete_user,
@@ -9,21 +18,10 @@
     update_user_password,
     update_user_profile,
   } from "$lib/utils/db_operations";
-  import {
-    currentUserInformation,
-    token_information,
-  } from "$lib/shared/shared.svelte";
-  import type { Profile } from "$lib/types/db_raw_types";
-
-  import { goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
-  import { get } from "svelte/store";
-  import { Pencil } from "@lucide/svelte";
-  import ProfilePictureChangeComponent from "../ProfilePictureChangeComponent.svelte";
   import GenericDialog from "../GenericDialog.svelte";
-  import { debounce } from "es-toolkit/function";
+  import ProfilePictureChangeComponent from "../ProfilePictureChangeComponent.svelte";
+  import type { PageProps } from "./$types";
 
-  let { data }: PageProps = $props();
   let current_user_info = $state({} as Profile);
 
   let loading = $state(false);
