@@ -60,7 +60,6 @@
   let user_tt: TimetableDetailedResponse | undefined;
   let error = $state("");
   onMount(async () => {
-    share_tt_dialog.show();
     let first_time_subscribe = true;
     let update_from_room = false;
 

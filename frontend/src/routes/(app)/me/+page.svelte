@@ -137,122 +137,120 @@
   }
 </script>
 
-<div class="container mx-auto">
-  <p class="mt-2 text-xl font-semibold">Customise your profile!</p>
-  <hr class="my-2 h-px border-0 bg-gray-200" />
+<p class="mt-2 text-xl font-semibold">Customise your profile!</p>
+<hr class="my-2 h-px border-0 bg-gray-200" />
 
-  <fieldset class="fieldset flex">
-    <div class="relative">
-      <UserAvatarComponent size={128}></UserAvatarComponent>
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        class="absolute bottom-0 right-1 w-10 h-10 bg-primary rounded-full flex items-center justify-center"
-        onclick={() => {
-          change_image_dialog.show();
-        }}
-      >
-        <Pencil class="w-4 h-4"></Pencil>
-      </div>
+<fieldset class="fieldset flex">
+  <div class="relative">
+    <UserAvatarComponent size={128}></UserAvatarComponent>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div
+      class="absolute bottom-0 right-1 w-10 h-10 bg-primary rounded-full flex items-center justify-center"
+      onclick={() => {
+        change_image_dialog.show();
+      }}
+    >
+      <Pencil class="w-4 h-4"></Pencil>
     </div>
-  </fieldset>
+  </div>
+</fieldset>
 
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend">Your name:</legend>
-    <input type="text" class="input" bind:value={current_user_info.username} />
-  </fieldset>
+<fieldset class="fieldset">
+  <legend class="fieldset-legend">Your name:</legend>
+  <input type="text" class="input" bind:value={current_user_info.username} />
+</fieldset>
 
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend">Your Handle</legend>
+<fieldset class="fieldset">
+  <legend class="fieldset-legend">Your Handle</legend>
 
-    <input
-      type="text"
-      class="input"
-      bind:value={current_user_info.handle}
-      oninput={async (new_text) => {
-        check_handle_state = handle_success = handle_error = "";
-        check_handle_state = "Checking Handle availability...";
-        query_available_handle(current_user_info.handle!);
-      }}
-    />
-    {#if handle_error}
-      <p class="text-error">{handle_error}</p>
-    {/if}
+  <input
+    type="text"
+    class="input"
+    bind:value={current_user_info.handle}
+    oninput={async (new_text) => {
+      check_handle_state = handle_success = handle_error = "";
+      check_handle_state = "Checking Handle availability...";
+      query_available_handle(current_user_info.handle!);
+    }}
+  />
+  {#if handle_error}
+    <p class="text-error">{handle_error}</p>
+  {/if}
 
-    {#if check_handle_state}
-      <p class="italic">{check_handle_state}</p>
-    {/if}
+  {#if check_handle_state}
+    <p class="italic">{check_handle_state}</p>
+  {/if}
 
-    {#if handle_success}
-      <p class="text-success">{handle_success}</p>
-    {/if}
-  </fieldset>
-  <fieldset class="fieldset">
-    <button
-      onclick={async () => {
-        await update_account();
-      }}
-      class="btn btn-primary max-w-xs {loading ? 'btn-disabled' : ''}"
-      >Save Changes</button
-    >
-  </fieldset>
+  {#if handle_success}
+    <p class="text-success">{handle_success}</p>
+  {/if}
+</fieldset>
+<fieldset class="fieldset">
+  <button
+    onclick={async () => {
+      await update_account();
+    }}
+    class="btn btn-primary max-w-xs {loading ? 'btn-disabled' : ''}"
+    >Save Changes</button
+  >
+</fieldset>
 
-  <p class="mt-2 text-xl font-semibold">Account Security</p>
-  <hr class="my-2 h-px border-0 bg-gray-200" />
+<p class="mt-2 text-xl font-semibold">Account Security</p>
+<hr class="my-2 h-px border-0 bg-gray-200" />
 
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend">Current password</legend>
-    <input type="password" class="input" bind:value={old_password} />
+<fieldset class="fieldset">
+  <legend class="fieldset-legend">Current password</legend>
+  <input type="password" class="input" bind:value={old_password} />
 
-    <legend class="fieldset-legend">New password</legend>
-    <input type="password" class="input" bind:value={new_password} />
+  <legend class="fieldset-legend">New password</legend>
+  <input type="password" class="input" bind:value={new_password} />
 
-    {#if password_error}
-      <p class="text-error">{password_error}</p>
-    {/if}
+  {#if password_error}
+    <p class="text-error">{password_error}</p>
+  {/if}
 
-    {#if password_success}
-      <p class="text-success">{password_success}</p>
-    {/if}
-    <button
-      onclick={async () => {
-        await update_password();
-      }}
-      class="btn btn-primary max-w-xs {loading ? 'btn-disabled' : ''}"
-      >Change Password</button
-    >
-  </fieldset>
+  {#if password_success}
+    <p class="text-success">{password_success}</p>
+  {/if}
+  <button
+    onclick={async () => {
+      await update_password();
+    }}
+    class="btn btn-primary max-w-xs {loading ? 'btn-disabled' : ''}"
+    >Change Password</button
+  >
+</fieldset>
 
-  <p class="mt-2 text-xl font-semibold text-error">DANGER ZONE!</p>
-  <hr class="my-2 h-px border-0 bg-gray-200" />
+<p class="mt-2 text-xl font-semibold text-error">DANGER ZONE!</p>
+<hr class="my-2 h-px border-0 bg-gray-200" />
 
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend">Confirm your handle:</legend>
-    <input
-      type="text"
-      class="input"
-      placeholder="Type your handle"
-      bind:value={confirm_delete}
-    />
-    <p class="text-error">{delete_error}</p>
-    <p class="label">
-      We're sorry to see you go. To delete your account, type your handle ({$currentUserInformation.handle})
-      and press the delete button
-    </p>
-  </fieldset>
-  <fieldset class="fieldset">
-    <button
-      onclick={async () => {
-        await delete_account();
-      }}
-      class="btn btn-error max-w-xs {loading
-        ? 'btn-disabled'
-        : ''} {confirm_delete !== $currentUserInformation.handle
-        ? 'btn-disabled'
-        : ''}">Delete my account</button
-    >
-  </fieldset>
-</div>
+<fieldset class="fieldset">
+  <legend class="fieldset-legend">Confirm your handle:</legend>
+  <input
+    type="text"
+    class="input"
+    placeholder="Type your handle"
+    bind:value={confirm_delete}
+  />
+  <p class="text-error">{delete_error}</p>
+  <p class="label">
+    We're sorry to see you go. To delete your account, type your handle ({$currentUserInformation.handle})
+    and press the delete button
+  </p>
+</fieldset>
+<fieldset class="fieldset">
+  <button
+    onclick={async () => {
+      await delete_account();
+    }}
+    class="btn btn-error max-w-xs {loading
+      ? 'btn-disabled'
+      : ''} {confirm_delete !== $currentUserInformation.handle
+      ? 'btn-disabled'
+      : ''}">Delete my account</button
+  >
+</fieldset>
 
 <GenericDialog
   bind:dialog={change_image_dialog}
