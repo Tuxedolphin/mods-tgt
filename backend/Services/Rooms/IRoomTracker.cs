@@ -41,6 +41,12 @@ public interface IRoomTracker
         out IReadOnlyCollection<RoomTimetable> timetables
     );
     public RoomTimetable? GetTimetableById(Guid roomId, Guid timetableId);
+
+    public bool UpdateRoomVisibility(
+        Guid roomId,
+        Visibility visibility,
+        out IReadOnlyCollection<string> removedConnectionIds
+    );
     public bool AddOrUpdateTimetable(RoomTimetable timetable);
     public bool DeleteTimetable(Guid roomId, Guid timetableId);
 

@@ -2,6 +2,7 @@ using Backend.DTOs;
 using Backend.Exceptions;
 using Backend.Hubs.Clients;
 using Backend.Infrastructure;
+using Backend.Models;
 using Backend.Services.Rooms;
 using Backend.Services.Timetables;
 using Microsoft.AspNetCore.Authorization;
@@ -192,6 +193,28 @@ public class RoomHub(
         }
     }
 
+    public async Task UpdateRoomVisibility(Guid roomId, Visibility visibility)
+    {
+        try
+        {
+            var removedConnectionIds = await _roomService.UpdateRoomVisibilityAsync(
+                roomId,
+                GetUserId(),
+                visibility
+            );
+            await Task.WhenAll(
+                removedConnectionIds.Select(connectionId =>
+                    Groups.RemoveFromGroupAsync(connectionId, roomId.ToString())
+                )
+            );
+            await SendUpdatedVisibilityToGroupAsync(roomId, visibility);
+        }
+        catch (NotFoundException ex)
+        {
+            throw new HubException(ex.Message);
+        }
+    }
+
     // Returns null when timetable was not found
     public async Task<bool> UpdateTimetable(
         Guid timetableId,
@@ -290,6 +313,11 @@ public class RoomHub(
         {
             // The room may close after its final connection leaves.
         }
+    }
+
+    private async Task SendUpdatedVisibilityToGroupAsync(Guid roomId, Visibility visibility)
+    {
+        await Clients.Group(roomId.ToString()).ReceiveRoomVisibilityUpdate(visibility);
     }
 
     // This method is used mainly as a placeholder for testing, but it could be used in the future

@@ -289,6 +289,71 @@ public class RoomTracker : IRoomTracker
         return found;
     }
 
+    public bool UpdateRoomVisibility(
+        Guid roomId,
+        Visibility visibility,
+        out IReadOnlyCollection<string> removedConnectionIds
+    )
+    {
+        if (!Enum.IsDefined(visibility))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(visibility),
+                visibility,
+                "The room visibility is invalid."
+            );
+        }
+
+        removedConnectionIds = [];
+        if (!_rooms.TryGetValue(roomId, out var roomState))
+            return false;
+
+        lock (roomState)
+        {
+            if (
+                !_rooms.TryGetValue(roomId, out var currentRoomState)
+                || !ReferenceEquals(roomState, currentRoomState)
+            )
+            {
+                return false;
+            }
+
+            roomState.Visibility = visibility;
+            if (visibility != Visibility.Restricted)
+                return true;
+
+            var removedConnections = new List<string>();
+            foreach (var entry in _connections)
+            {
+                var currentConnection = entry.Value;
+                if (
+                    currentConnection.RoomId != roomId
+                    || CanViewRoom(roomId, roomState, currentConnection.UserId)
+                )
+                {
+                    continue;
+                }
+
+                while (
+                    _connections.TryGetValue(entry.Key, out currentConnection)
+                    && currentConnection.RoomId == roomId
+                    && !CanViewRoom(roomId, roomState, currentConnection.UserId)
+                )
+                {
+                    var updatedConnection = currentConnection with { RoomId = null };
+                    if (_connections.TryUpdate(entry.Key, updatedConnection, currentConnection))
+                    {
+                        removedConnections.Add(entry.Key);
+                        break;
+                    }
+                }
+            }
+
+            removedConnectionIds = removedConnections;
+            return true;
+        }
+    }
+
     // This assumes that there is something to be changed about the timetable,
     // be it to create it in the database or to update the entry in the database
     public bool AddOrUpdateTimetable(RoomTimetable timetable)

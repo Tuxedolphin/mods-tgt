@@ -110,9 +110,50 @@ public class RoomService(
     {
         // TODO: Add a retry/expiry policy so rooms with permanently failing commits
         // don't linger forever.
+
         var committed = await CommitChangesAsync(roomId);
+
         if (committed && _roomTracker.TryGetUsersInRoom(roomId, out var users) && users.Count == 0)
             CloseRoom(roomId);
+    }
+
+    public async Task<IReadOnlyCollection<string>> UpdateRoomVisibilityAsync(
+        Guid roomId,
+        Guid callerId,
+        Visibility visibility
+    )
+    {
+        if (!Enum.IsDefined(visibility))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(visibility),
+                visibility,
+                "The room visibility is invalid."
+            );
+        }
+
+        if (!IsOwner(roomId, callerId))
+        {
+            throw new UnauthorizedAccessException(
+                "Only the owner of a room can change the room visibility"
+            );
+        }
+
+        var room =
+            await _context.Rooms.FindAsync(roomId)
+            ?? throw new NotFoundException($"Room with roomId {roomId} was not found");
+
+        room.Visibility = visibility;
+        await _context.SaveChangesAsync();
+
+        if (!_roomTracker.UpdateRoomVisibility(roomId, visibility, out var removedConnectionIds))
+        {
+            throw new InvalidOperationException(
+                "Room needs to be initialised first before editing"
+            );
+        }
+
+        return removedConnectionIds;
     }
 
     public async Task<RoomInformation?> GetRoomInformationAsync(Guid roomId, Guid userId)
@@ -120,10 +161,16 @@ public class RoomService(
         var members = await GetRoomMembersAsync(roomId, userId);
         var timetablesInformation = await GetTimetablesDetailedInRoomAsync(roomId, userId);
 
-        if (members is null || timetablesInformation is null)
+        if (
+            members is null
+            || timetablesInformation is null
+            || !_roomTracker.TryGetVisibilityOfRoom(roomId, out var visibility)
+        )
+        {
             return null;
+        }
 
-        return new RoomInformation(roomId, members, timetablesInformation);
+        return new RoomInformation(roomId, members, timetablesInformation, visibility);
     }
 
     public async Task<IReadOnlyCollection<RoomMemberResponse>?> GetRoomMembersAsync(
@@ -357,12 +404,7 @@ public class RoomService(
         return profiles.ConvertAll(_profileResponseMapper.ToUserSearchResponse);
     }
 
-    public async Task SetMemberRoleAsync(
-        Guid roomId,
-        Guid userId,
-        RoomRole role,
-        Guid callerId
-    )
+    public async Task SetMemberRoleAsync(Guid roomId, Guid userId, RoomRole role, Guid callerId)
     {
         if (role is not RoomRole.Editor and not RoomRole.Viewer)
         {
@@ -389,6 +431,7 @@ public class RoomService(
         var membership = await _context.RoomMembers.SingleOrDefaultAsync(member =>
             member.RoomId == roomId && member.UserId == userId
         );
+
         if (membership?.Role == role)
             return;
 
@@ -414,9 +457,7 @@ public class RoomService(
         await _context.SaveChangesAsync();
 
         if (!_roomTracker.SetMemberRole(roomId, userId, role))
-        {
             throw new InvalidOperationException("The member's cached role could not be updated.");
-        }
     }
 
     public async Task<IReadOnlyCollection<string>> RevokeMemberAccessAsync(
@@ -441,6 +482,7 @@ public class RoomService(
         var membership = await _context.RoomMembers.SingleOrDefaultAsync(member =>
             member.RoomId == roomId && member.UserId == userId
         );
+
         if (membership is not null)
         {
             _context.RoomMembers.Remove(membership);
@@ -529,9 +571,7 @@ public class RoomService(
         var (viewers, editors) = GetRoomRolesOrThrow(roomId);
 
         var hasAccess =
-            IsOwner(roomId, userId)
-            || IsEditor(editors, userId)
-            || viewers.Contains(userId);
+            IsOwner(roomId, userId) || IsEditor(editors, userId) || viewers.Contains(userId);
 
         if (!hasAccess)
         {

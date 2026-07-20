@@ -14,7 +14,7 @@ namespace Backend.Tests.Unit;
 public class RoomHubTests
 {
     [Fact]
-    public async Task SetMemberRoleAsync_BroadcastsUpdatedRoomMembers()
+    public async Task SetMemberRole_BroadcastsUpdatedRoomMembers()
     {
         var callerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
@@ -22,7 +22,7 @@ public class RoomHubTests
         var updatedMembers = new List<RoomMemberResponse>();
         var (hub, service, roomClient, _) = CreateHub(callerId, roomId, updatedMembers);
 
-        await hub.SetMemberRoleAsync(memberId, roomId, RoomRole.Viewer);
+        await hub.SetMemberRole(memberId, roomId, RoomRole.Viewer);
 
         await service
             .Received(1)
@@ -31,7 +31,7 @@ public class RoomHubTests
     }
 
     [Fact]
-    public async Task RevokeMemberAccessAsync_RemovesConnectionsFromGroupAndBroadcastsUpdatedMembers()
+    public async Task RevokeMemberAccess_RemovesConnectionsFromGroupAndBroadcastsUpdatedMembers()
     {
         var callerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
@@ -44,7 +44,7 @@ public class RoomHubTests
             .RevokeMemberAccessAsync(roomId, memberId, callerId)
             .Returns(removedConnectionIds);
 
-        await hub.RevokeMemberAccessAsync(memberId, roomId);
+        await hub.RevokeMemberAccess(memberId, roomId);
 
         await service.Received(1).RevokeMemberAccessAsync(roomId, memberId, callerId);
         foreach (var connectionId in removedConnectionIds)

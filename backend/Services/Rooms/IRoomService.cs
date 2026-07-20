@@ -1,4 +1,5 @@
 using Backend.DTOs;
+using Backend.Models;
 
 namespace Backend.Services.Rooms;
 
@@ -33,6 +34,11 @@ public interface IRoomService
         UpdateTimetableRequest timetableRequest
     );
 
+    public Task<IReadOnlyCollection<string>> UpdateRoomVisibilityAsync(
+        Guid roomId,
+        Guid callerId,
+        Visibility visibility
+    );
     public Task<RoomInformation?> GetRoomInformationAsync(Guid roomId, Guid userId);
 
     public Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandleAsync(

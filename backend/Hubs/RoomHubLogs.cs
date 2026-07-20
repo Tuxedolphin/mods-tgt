@@ -40,7 +40,7 @@ public static partial class RoomHubLogs
         Level = LogLevel.Warning,
         Message = "Failed to clean up RoomHub connection {ConnectionId} during disconnect."
     )]
-    public static partial void LogDisconnectCleanupFailed(
+    public static partial void LogDisconnectCleanUpFailed(
         ILogger logger,
         Exception exception,
         string connectionId
