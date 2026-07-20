@@ -1,3 +1,4 @@
+import type { LucideIcon } from '@lucide/svelte'
 import type { Profile } from './db_raw_types'
 import type { RawLesson } from './modules'
 export interface TimeTableDayInfo {
@@ -14,4 +15,10 @@ export interface TimeTableDayInfo {
 	timetableColour: string
 	timetableId: string
 	timetableOwner: Profile | undefined
+}
+
+export type NavigationItemProp = {
+	icon: LucideIcon
+	title: string
+	path: string
 }

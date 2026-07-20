@@ -7,7 +7,6 @@ export const currentlySelectedMods = persisted('selectedMods', [] as TimetableDe
 	storage: 'session'
 })
 
-export const registered = writable(false)
 export const timetable_list_should_be_refreshed = writable(false)
 
 interface AccessTokenInfo {
@@ -22,7 +21,9 @@ export const token_information = persisted('xhnus', {
 
 export const currentUserInformation = persisted('clrsnus', {
 	userId: '',
-	username: ''
+	username: null,
+	avatarUrl: null,
+	handle: null
 } as Profile)
 
 export const currentWorkingTimetable = persisted(
