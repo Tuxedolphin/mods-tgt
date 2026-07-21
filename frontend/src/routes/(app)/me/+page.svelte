@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pencil } from "@lucide/svelte";
+  import { Check, Pencil } from "@lucide/svelte";
   import { debounce } from "es-toolkit/function";
   import { onMount } from "svelte";
   import { get } from "svelte/store";
@@ -16,11 +16,14 @@
     delete_user,
     get_user_info,
     update_user_password,
+    update_user_preferences,
     update_user_profile,
   } from "$lib/utils/db_operations";
   import GenericDialog from "../GenericDialog.svelte";
   import ProfilePictureChangeComponent from "../ProfilePictureChangeComponent.svelte";
   import type { PageProps } from "./$types";
+  import { query_available_handle } from "$lib/utils/frontend_utils";
+  import { colours } from "$lib/utils/formatting_utils";
 
   let current_user_info = $state({} as Profile);
 
@@ -43,45 +46,6 @@
   let handle_error = $state("");
   let handle_success = $state("");
   let check_handle_state = $state("");
-  const query_available_handle = debounce(async (handle: string) => {
-    const result = await check_handle(handle, $token_information.a);
-
-    if (result.isOk()) {
-      check_handle_state = handle_success = handle_error = "";
-
-      if (!result.value.available) {
-        switch (result.value.reason) {
-          case "invalidFormat":
-            handle_error = "Handle is in an invalid format, please try again";
-            break;
-          case "reserved":
-            handle_error =
-              "Handle has already been reserved. Please try another";
-            break;
-          case "taken":
-            handle_error = "Handle is taken, please try another.";
-            break;
-          case "tooLong":
-            handle_error = "Handle is too long, please try another.";
-            break;
-          case "tooShort":
-            handle_error =
-              "Handle is too short, must be at least 4 characters.";
-            break;
-          default:
-            break;
-        }
-
-        return;
-      }
-
-      handle_success = "Handle is available!";
-      return;
-    }
-
-    check_handle_state = handle_success = handle_error = "";
-    handle_error = result.error;
-  }, 500);
 
   let password_error = $state("");
   let password_success = $state("");
@@ -113,11 +77,24 @@
       $token_information.a,
     );
 
-    if (change.isOk()) {
-      window.location.reload();
-    } else {
-      handle_error = change.error;
+    const change_preferences = await update_user_preferences(
+      current_user_info,
+      $token_information.a,
+    );
+
+    if (!change_preferences.isOk()) {
+      handle_error = change_preferences.error;
+      loading = false;
+      return;
     }
+
+    if (!change.isOk()) {
+      handle_error = change.error;
+      loading = false;
+      return;
+    }
+
+    window.location.reload();
     loading = false;
   }
 
@@ -170,7 +147,18 @@
     oninput={async (new_text) => {
       check_handle_state = handle_success = handle_error = "";
       check_handle_state = "Checking Handle availability...";
-      query_available_handle(current_user_info.handle!);
+      query_available_handle(
+        current_user_info.handle!,
+        $token_information.a,
+        (fail) => {
+          check_handle_state = handle_success = handle_error = "";
+          handle_error = fail;
+        },
+        (success) => {
+          check_handle_state = handle_success = handle_error = "";
+          handle_success = success;
+        },
+      );
     }}
   />
   {#if handle_error}
@@ -184,6 +172,25 @@
   {#if handle_success}
     <p class="text-success">{handle_success}</p>
   {/if}
+</fieldset>
+
+<fieldset class="fieldset">
+  <legend class="fieldset-legend">What's your favorite colour?</legend>
+  <div class="grid grid-cols-8 gap-1 max-w-xs">
+    {#each colours as colour (colour)}
+      <!-- svelte-ignore a11y_consider_explicit_label -->
+      <button
+        onclick={() => {
+          current_user_info.colour = colour;
+        }}
+        class="flex items-center justify-around {colour} w-8 h-8 rounded-4xl text-black"
+      >
+        {#if current_user_info.colour === colour}
+          <Check></Check>
+        {/if}
+      </button>
+    {/each}
+  </div>
 </fieldset>
 <fieldset class="fieldset">
   <button

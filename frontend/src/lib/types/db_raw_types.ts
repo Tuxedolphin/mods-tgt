@@ -21,6 +21,8 @@ export interface Profile {
   username: string | null;
   avatarUrl: string | null;
   handle: string | null;
+  colour: string | null;
+  defaultTheme: string | null;
 }
 
 export interface RoomProfile extends Profile {

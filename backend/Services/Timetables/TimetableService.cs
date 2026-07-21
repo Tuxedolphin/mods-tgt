@@ -20,7 +20,7 @@ public class TimetableService(AppDbContext context) : ITimetableService
         // We explicitly set the roomId as the same as the "main" timetable's Id
         var newId = Guid.NewGuid();
 
-        Room room = new() { Id = newId };
+        Room room = new() { Id = newId, Visibility = Visibility.Restricted };
         _context.Rooms.Add(room);
 
         Timetable timetable = new()
