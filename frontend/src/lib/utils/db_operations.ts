@@ -1,5 +1,4 @@
 import ky, { HTTPError } from "ky";
-import { get } from "svelte/store";
 import { Err, Ok, type Result } from "ts-results-es";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
@@ -271,7 +270,7 @@ export async function update_user_preferences(
       json: user_update_data,
     });
 
-    const result = await update_profile_db.put("profile/me/customisation");
+    await update_profile_db.put("profile/me/customisation");
     return Ok("");
   } catch (error) {
     console.log(error);

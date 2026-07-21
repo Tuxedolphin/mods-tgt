@@ -1,63 +1,71 @@
 <script lang="ts">
-	import { CirclePlus } from '@lucide/svelte';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
-	import { token_information } from '$lib/shared/shared.svelte';
-	import { create_empty_timetable } from '$lib/utils/db_operations';
-	import { format_semester_name } from '$lib/utils/formatting_utils';
-	import GenericDialog from '../../routes/(app)/GenericDialog.svelte';
+  import { CirclePlus } from "@lucide/svelte";
+  import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import { token_information } from "$lib/shared/shared.svelte";
+  import { create_empty_timetable } from "$lib/utils/db_operations";
+  import { format_semester_name } from "$lib/utils/formatting_utils";
+  import GenericDialog from "../../routes/(app)/GenericDialog.svelte";
 
-	// svelte-ignore non_reactive_update
-	// biome-ignore lint/suspicious/noUnassignedVariables: Biome unable to detect bind usage
-	let dialog: HTMLDialogElement;
-	let timetable_name = $state('');
-	let semester_number = $state(1);
-	let academic_year = $state('2026-2027');
+  // svelte-ignore non_reactive_update
+  // oxlint-disable-next-line no-unassigned-vars
+  let dialog: HTMLDialogElement;
+  let timetable_name = $state("");
+  let semester_number = $state(1);
+  let academic_year = $state("2026-2027");
 
-	async function create_new_empty_timetable() {
-		const timetable_info = await create_empty_timetable(
-			$token_information.a,
-			timetable_name,
-			semester_number,
-			academic_year
-		);
+  async function create_new_empty_timetable() {
+    const timetable_info = await create_empty_timetable(
+      $token_information.a,
+      timetable_name,
+      semester_number,
+      academic_year,
+    );
 
-		if (timetable_info.isOk()) {
-			dialog.close();
-			goto(resolve('/(app)/planner/[timetable_id]', { timetable_id: timetable_info.value.id }));
-		}
-	}
+    if (timetable_info.isOk()) {
+      dialog.close();
+      goto(
+        resolve("/(app)/planner/[timetable_id]", {
+          timetable_id: timetable_info.value.id,
+        }),
+      );
+    }
+  }
 </script>
 
-<CirclePlus size={32} class="cursor-pointer" onclick={() => dialog.show()}></CirclePlus>
+<CirclePlus size={32} class="cursor-pointer" onclick={() => dialog.show()}
+></CirclePlus>
 <!-- Open the modal using ID.showModal() method -->
 
-<GenericDialog bind:dialog closeHandler={() => {
-	/* Intentionally Left Empty */
-}}>
-	<h3 class="text-lg font-bold">Create new timetable</h3>
-	<p class="py-4">Name your timetable:</p>
-	<input class="input" bind:value={timetable_name} />
+<GenericDialog
+  bind:dialog
+  closeHandler={() => {
+    /* Intentionally Left Empty */
+  }}
+>
+  <h3 class="text-lg font-bold">Create new timetable</h3>
+  <p class="py-4">Name your timetable:</p>
+  <input class="input" bind:value={timetable_name} />
 
-	<p class="py-4">Choose AY:</p>
-	<select class="select" bind:value={academic_year}>
-		<option>2026-2027</option>
-		<option>2025-2026</option>
-		<option>2024-2025</option>
-	</select>
+  <p class="py-4">Choose AY:</p>
+  <select class="select" bind:value={academic_year}>
+    <option>2026-2027</option>
+    <option>2025-2026</option>
+    <option>2024-2025</option>
+  </select>
 
-	<p class="py-4">Choose Semester:</p>
-	<select class="select" bind:value={semester_number}>
-		{#each { length: 4 }, i}
-			<option value={i + 1}>{format_semester_name(i + 1)}</option>
-		{/each}
-	</select>
+  <p class="py-4">Choose Semester:</p>
+  <select class="select" bind:value={semester_number}>
+    {#each { length: 4 }, i}
+      <option value={i + 1}>{format_semester_name(i + 1)}</option>
+    {/each}
+  </select>
 
-	<div class="modal-action">
-		<!-- if there is a button in form, it will close the modal -->
-		<button class="btn btn-primary" onclick={() => create_new_empty_timetable()}
-			>Create timetable</button
-		>
-		<button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
-	</div>
+  <div class="modal-action">
+    <!-- if there is a button in form, it will close the modal -->
+    <button class="btn btn-primary" onclick={() => create_new_empty_timetable()}
+      >Create timetable</button
+    >
+    <button class="btn btn-error" onclick={() => dialog.close()}>Cancel</button>
+  </div>
 </GenericDialog>

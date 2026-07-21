@@ -11,8 +11,8 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": " wrangler types && wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "pnpx @biomejs/biome lint && pnpx @biomejs/biome check",
-		"format": "pnpx @biomejs/biome lint --write && pnpx @biomejs/biome check --write",
+		"lint": "pnpm oxlint",
+		"format": "pnpm oxlint --fix",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright install && playwright test",
@@ -21,7 +21,6 @@
 		"cf-typegen": "wrangler types"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.2",
 		"@eslint/compat": "^2.1.0",
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.61.1",
@@ -40,6 +39,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.20.0",
 		"globals": "^17.7.0",
+		"oxlint": "^1.74.0",
 		"playwright": "^1.61.1",
 		"prettier-plugin-svelte": "^3.5.2",
 		"prettier-plugin-tailwindcss": "^0.7.4",
