@@ -13,7 +13,9 @@ public class AuthController(IAuthService authService) : BaseController
     private readonly IAuthService _authService = authService;
 
     [HttpPost("register")]
-    public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult<RegisterResponse>> RegisterAsync(
+        [FromBody] RegisterRequest request
+    )
     {
         var response = await _authService.RegisterAsync(request);
 
@@ -24,14 +26,14 @@ public class AuthController(IAuthService authService) : BaseController
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<AuthResponse>> LoginAsync([FromBody] LoginRequest request)
     {
         var response = await _authService.LoginAsync(request);
         return Ok(response);
     }
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<AuthResponse>> RefreshToken(
+    public async Task<ActionResult<AuthResponse>> RefreshTokenAsync(
         [FromBody] RefreshTokenRequest request
     )
     {
@@ -41,7 +43,7 @@ public class AuthController(IAuthService authService) : BaseController
 
     [HttpPost("logout")]
     [Authorize]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> LogoutAsync()
     {
         await _authService.LogoutAsync(GetBearerToken());
         return NoContent();
@@ -49,14 +51,16 @@ public class AuthController(IAuthService authService) : BaseController
 
     [HttpPost("logout-all")]
     [Authorize]
-    public async Task<IActionResult> LogoutAll()
+    public async Task<IActionResult> LogoutAllAsync()
     {
         await _authService.LogoutAllAccountsAsync(GetBearerToken());
         return NoContent();
     }
 
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    public async Task<IActionResult> ForgotPasswordAsync(
+        [FromBody] ForgotPasswordRequest request
+    )
     {
         // Exceptions were swallowed here. Returns the exception to client-side to show
         // user.
@@ -65,7 +69,7 @@ public class AuthController(IAuthService authService) : BaseController
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordRequest request)
     {
         await _authService.ResetPasswordAsync(request);
         return NoContent();
@@ -73,7 +77,7 @@ public class AuthController(IAuthService authService) : BaseController
 
     [HttpPost("update-password")]
     [Authorize]
-    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request)
+    public async Task<IActionResult> UpdatePasswordAsync([FromBody] UpdatePasswordRequest request)
     {
         await _authService.UpdatePasswordAsync(request, GetBearerToken());
         return NoContent();

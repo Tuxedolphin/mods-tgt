@@ -8,17 +8,14 @@ public interface IRoomService
     public bool RoomExists(Guid roomId);
 
     public Task RegisterConnectionAsync(Guid userId, string connectionId);
-    public Task<RoomConnectionMove> CreateOrJoinRoom(
+    public Task<RoomConnectionMove> CreateOrJoinRoomAsync(
         Guid roomId,
         Guid userId,
         string connectionId
     );
-    public Task<RoomConnectionDeparture?> HandleLeaveRoom(
-        Guid roomId,
-        string connectionId
-    );
+    public Task<RoomConnectionDeparture?> HandleLeaveRoomAsync(Guid roomId, string connectionId);
     public Task<ConnectionRemoval?> HandleDisconnectAsync(string connectionId);
-    public bool GetRoomOfConnection(string connectionId, out Guid roomId);
+    public bool TryGetRoomOfConnection(string connectionId, out Guid roomId);
     public bool IsConnectionInRoom(string connectionId, Guid roomId);
     public bool HandleDeleteTimetable(Guid roomId, Guid userId, Guid timetableId);
 
@@ -37,9 +34,14 @@ public interface IRoomService
         UpdateTimetableRequest timetableRequest
     );
 
+    public Task<IReadOnlyCollection<string>> UpdateRoomVisibilityAsync(
+        Guid roomId,
+        Guid callerId,
+        Visibility visibility
+    );
     public Task<RoomInformation?> GetRoomInformationAsync(Guid roomId, Guid userId);
 
-    public Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandle(
+    public Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandleAsync(
         string handle,
         Guid roomId,
         Guid callerId
@@ -53,11 +55,11 @@ public interface IRoomService
         Guid userId
     );
 
-    public Task<bool> CloseRoom(Guid roomId);
+    public bool CloseRoom(Guid roomId);
     public Task<bool> CommitChangesAsync(Guid roomId);
 
-    public Task SetMemberRole(Guid roomId, Guid userId, RoomRole role, Guid callerId);
-    public Task<IReadOnlyCollection<string>> RevokeMemberAccess(
+    public Task SetMemberRoleAsync(Guid roomId, Guid userId, RoomRole role, Guid callerId);
+    public Task<IReadOnlyCollection<string>> RevokeMemberAccessAsync(
         Guid roomId,
         Guid userId,
         Guid callerId

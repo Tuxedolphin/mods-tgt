@@ -31,7 +31,7 @@ public class RoomHub(
 
     private Guid GetCurrentRoomId()
     {
-        if (!_roomService.GetRoomOfConnection(Context.ConnectionId, out var roomId))
+        if (!_roomService.TryGetRoomOfConnection(Context.ConnectionId, out var roomId))
             throw new HubException($"Connection {Context.ConnectionId} has not joined a room.");
 
         return roomId;
@@ -67,13 +67,9 @@ public class RoomHub(
                 }
             }
         }
-        catch (Exception cleanupException)
+        catch (Exception cleanUpException)
         {
-            RoomHubLogs.LogDisconnectCleanupFailed(
-                _logger,
-                cleanupException,
-                Context.ConnectionId
-            );
+            RoomHubLogs.LogDisconnectCleanUpFailed(_logger, cleanUpException, Context.ConnectionId);
         }
         finally
         {
@@ -87,19 +83,14 @@ public class RoomHub(
         {
             var userId = GetUserId();
 
-            var move = await _roomService.CreateOrJoinRoom(
+            var move = await _roomService.CreateOrJoinRoomAsync(
                 roomId,
                 userId,
                 Context.ConnectionId
             );
 
             if (move.PreviousRoomId is { } previousRoomId && previousRoomId != roomId)
-            {
-                await Groups.RemoveFromGroupAsync(
-                    Context.ConnectionId,
-                    previousRoomId.ToString()
-                );
-            }
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, previousRoomId.ToString());
 
             try
             {
@@ -108,7 +99,7 @@ public class RoomHub(
             catch
             {
                 if (move.PreviousRoomId != roomId)
-                    await _roomService.HandleLeaveRoom(roomId, Context.ConnectionId);
+                    await _roomService.HandleLeaveRoomAsync(roomId, Context.ConnectionId);
 
                 throw;
             }
@@ -131,6 +122,7 @@ public class RoomHub(
             await Clients
                 .Group(roomId.ToString())
                 .ReceiveRoomMembersUpdate(roomInformation.Members);
+
             await Clients.Caller.ReceiveTimetableUpdate(roomInformation.Timetables);
 
             return roomInformation;
@@ -143,7 +135,7 @@ public class RoomHub(
 
     public async Task LeaveRoom(Guid roomId)
     {
-        var departure = await _roomService.HandleLeaveRoom(roomId, Context.ConnectionId);
+        var departure = await _roomService.HandleLeaveRoomAsync(roomId, Context.ConnectionId);
         if (departure is null)
             return;
 
@@ -201,6 +193,28 @@ public class RoomHub(
         }
     }
 
+    public async Task UpdateRoomVisibility(Guid roomId, Visibility visibility)
+    {
+        try
+        {
+            var removedConnectionIds = await _roomService.UpdateRoomVisibilityAsync(
+                roomId,
+                GetUserId(),
+                visibility
+            );
+            await Task.WhenAll(
+                removedConnectionIds.Select(connectionId =>
+                    Groups.RemoveFromGroupAsync(connectionId, roomId.ToString())
+                )
+            );
+            await SendUpdatedVisibilityToGroupAsync(roomId, visibility);
+        }
+        catch (NotFoundException ex)
+        {
+            throw new HubException(ex.Message);
+        }
+    }
+
     // Returns null when timetable was not found
     public async Task<bool> UpdateTimetable(
         Guid timetableId,
@@ -241,14 +255,14 @@ public class RoomHub(
         Guid roomId
     )
     {
-        return await _roomService.FindUsersByHandle(handle, roomId, GetUserId());
+        return await _roomService.FindUsersByHandleAsync(handle, roomId, GetUserId());
     }
 
     public async Task SetMemberRole(Guid userId, Guid roomId, RoomRole role)
     {
         var callerId = GetUserId();
 
-        await _roomService.SetMemberRole(roomId, userId, role, callerId);
+        await _roomService.SetMemberRoleAsync(roomId, userId, role, callerId);
         await SendUpdatedRoomMembersToGroupAsync(roomId);
     }
 
@@ -256,7 +270,7 @@ public class RoomHub(
     {
         var callerId = GetUserId();
 
-        var removedConnectionIds = await _roomService.RevokeMemberAccess(
+        var removedConnectionIds = await _roomService.RevokeMemberAccessAsync(
             roomId,
             userId,
             callerId
@@ -285,10 +299,7 @@ public class RoomHub(
         await Clients
             .Group(roomId.ToString())
             .ReceiveRoomMembersUpdate(
-                await _roomService.GetRoomMembersAsync(
-                    roomId,
-                    requestingUserId ?? GetUserId()
-                )
+                await _roomService.GetRoomMembersAsync(roomId, requestingUserId ?? GetUserId())
                     ?? throw new NotFoundException($"Room with id ${roomId} was not found")
             );
 
@@ -302,6 +313,11 @@ public class RoomHub(
         {
             // The room may close after its final connection leaves.
         }
+    }
+
+    private async Task SendUpdatedVisibilityToGroupAsync(Guid roomId, Visibility visibility)
+    {
+        await Clients.Group(roomId.ToString()).ReceiveRoomVisibilityUpdate(visibility);
     }
 
     // This method is used mainly as a placeholder for testing, but it could be used in the future

@@ -14,21 +14,21 @@ public class ProfileController(IProfileService profileService) : BaseController
     private readonly IProfileService _profileService = profileService;
 
     [HttpGet("me")]
-    public async Task<ActionResult<ProfileResponse>> GetUser()
+    public async Task<ActionResult<ProfileResponse>> GetUserAsync()
     {
         var profile = await _profileService.GetUserProfileAsync(GetUserId());
         return Ok(profile);
     }
 
     [HttpPut("me")]
-    public async Task<IActionResult> UpdateUser([FromBody] UpdateProfileRequest request)
+    public async Task<IActionResult> UpdateUserAsync([FromBody] UpdateProfileRequest request)
     {
         await _profileService.UpdateUserProfileAsync(GetUserId(), request);
         return NoContent();
     }
 
     [HttpDelete("me")]
-    public async Task<IActionResult> DeleteUser()
+    public async Task<IActionResult> DeleteUserAsync()
     {
         await _profileService.DeleteUserProfileAsync(GetUserId());
 
@@ -47,7 +47,7 @@ public class ProfileController(IProfileService profileService) : BaseController
 
     [HttpGet("check-handle")]
     [EnableRateLimiting("handle-check")]
-    public async Task<ActionResult<HandleAvailabilityResponse>> CheckHandle(
+    public async Task<ActionResult<HandleAvailabilityResponse>> CheckHandleAsync(
         [FromQuery] string handle
     )
     {
@@ -58,7 +58,9 @@ public class ProfileController(IProfileService profileService) : BaseController
     }
 
     [HttpPut("avatar")]
-    public async Task<ActionResult<ProfileResponse>> UpsertUserAvatar([FromForm] IFormFile file)
+    public async Task<ActionResult<ProfileResponse>> UpsertUserAvatarAsync(
+        [FromForm] IFormFile file
+    )
     {
         ProfileResponse response = await _profileService.UpsertUserAvatarAsync(
             GetUserId(),
@@ -69,7 +71,7 @@ public class ProfileController(IProfileService profileService) : BaseController
     }
 
     [HttpDelete("avatar")]
-    public async Task<IActionResult> DeleteUserAvatar()
+    public async Task<IActionResult> DeleteUserAvatarAsync()
     {
         await _profileService.DeleteUserAvatarAsync(GetUserId());
 

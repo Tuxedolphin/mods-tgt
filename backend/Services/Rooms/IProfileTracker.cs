@@ -6,7 +6,7 @@ public interface IProfileTracker
 {
     public void SetUsers(IReadOnlyCollection<Profile> Profiles);
     public IReadOnlyCollection<Profile> GetAllUsers();
-    public bool GetUserById(Guid userId, out Profile? profile);
+    public bool TryGetUserById(Guid userId, out Profile? profile);
     public void SetUser(Profile profile);
     public bool RemoveUser(Guid userId);
     public bool RemoveUsers(IReadOnlyCollection<Guid> users);

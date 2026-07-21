@@ -11,7 +11,7 @@ public class HealthController(AppDbContext _context) : BaseController
 {
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetAsync()
     {
         try
         {

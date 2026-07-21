@@ -4,7 +4,6 @@ using Backend.DTOs.Mappings;
 using Backend.Exceptions;
 using Backend.Infrastructure;
 using Backend.Models;
-using Backend.Services.Profiles;
 using Backend.Services.Timetables;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +33,11 @@ public class RoomService(
     public async Task RegisterConnectionAsync(Guid userId, string connectionId)
     {
         if (!_roomTracker.RegisterConnection(connectionId, userId))
-            throw new InvalidOperationException($"Connection {connectionId} is already registered.");
+        {
+            throw new InvalidOperationException(
+                $"Connection {connectionId} is already registered."
+            );
+        }
 
         try
         {
@@ -51,25 +54,25 @@ public class RoomService(
         throw new NotFoundException($"User with id {userId} not found");
     }
 
-    public async Task<RoomConnectionMove> CreateOrJoinRoom(
+    public async Task<RoomConnectionMove> CreateOrJoinRoomAsync(
         Guid roomId,
         Guid userId,
         string connectionId
     )
     {
         if (!_roomTracker.RoomExists(roomId))
-            await LoadRoomIntoTracker(roomId);
+            await LoadRoomIntoTrackerAsync(roomId);
 
         var move = _roomTracker.MoveConnectionToRoom(connectionId, userId, roomId);
         if (move.PreviousRoomId is { } previousRoomId && previousRoomId != roomId)
         {
-            await FinalizeRoomDepartureAsync(previousRoomId);
+            await FinaliseRoomDepartureAsync(previousRoomId);
         }
 
         return move;
     }
 
-    public async Task<RoomConnectionDeparture?> HandleLeaveRoom(
+    public async Task<RoomConnectionDeparture?> HandleLeaveRoomAsync(
         Guid roomId,
         string connectionId
     )
@@ -78,7 +81,7 @@ public class RoomService(
         if (departure is null)
             return null;
 
-        await FinalizeRoomDepartureAsync(roomId);
+        await FinaliseRoomDepartureAsync(roomId);
         return departure;
     }
 
@@ -89,7 +92,7 @@ public class RoomService(
             return null;
 
         if (removal.RoomId is { } roomId)
-            await FinalizeRoomDepartureAsync(roomId);
+            await FinaliseRoomDepartureAsync(roomId);
 
         if (removal.WasLastConnectionForUser)
             _profileTracker.RemoveUser(removal.UserId);
@@ -97,19 +100,60 @@ public class RoomService(
         return removal;
     }
 
-    public bool GetRoomOfConnection(string connectionId, out Guid roomId) =>
-        _roomTracker.GetRoomOfConnection(connectionId, out roomId);
+    public bool TryGetRoomOfConnection(string connectionId, out Guid roomId) =>
+        _roomTracker.TryGetRoomOfConnection(connectionId, out roomId);
 
     public bool IsConnectionInRoom(string connectionId, Guid roomId) =>
         _roomTracker.IsConnectionInRoom(connectionId, roomId);
 
-    private async Task FinalizeRoomDepartureAsync(Guid roomId)
+    private async Task FinaliseRoomDepartureAsync(Guid roomId)
     {
         // TODO: Add a retry/expiry policy so rooms with permanently failing commits
         // don't linger forever.
+
         var committed = await CommitChangesAsync(roomId);
-        if (committed && _roomTracker.GetUsersInRoom(roomId, out var users) && users.Count == 0)
-            await CloseRoom(roomId);
+
+        if (committed && _roomTracker.TryGetUsersInRoom(roomId, out var users) && users.Count == 0)
+            CloseRoom(roomId);
+    }
+
+    public async Task<IReadOnlyCollection<string>> UpdateRoomVisibilityAsync(
+        Guid roomId,
+        Guid callerId,
+        Visibility visibility
+    )
+    {
+        if (!Enum.IsDefined(visibility))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(visibility),
+                visibility,
+                "The room visibility is invalid."
+            );
+        }
+
+        if (!IsOwner(roomId, callerId))
+        {
+            throw new UnauthorizedAccessException(
+                "Only the owner of a room can change the room visibility"
+            );
+        }
+
+        var room =
+            await _context.Rooms.FindAsync(roomId)
+            ?? throw new NotFoundException($"Room with roomId {roomId} was not found");
+
+        room.Visibility = visibility;
+        await _context.SaveChangesAsync();
+
+        if (!_roomTracker.UpdateRoomVisibility(roomId, visibility, out var removedConnectionIds))
+        {
+            throw new InvalidOperationException(
+                "Room needs to be initialised first before editing"
+            );
+        }
+
+        return removedConnectionIds;
     }
 
     public async Task<RoomInformation?> GetRoomInformationAsync(Guid roomId, Guid userId)
@@ -117,10 +161,16 @@ public class RoomService(
         var members = await GetRoomMembersAsync(roomId, userId);
         var timetablesInformation = await GetTimetablesDetailedInRoomAsync(roomId, userId);
 
-        if (members is null || timetablesInformation is null)
+        if (
+            members is null
+            || timetablesInformation is null
+            || !_roomTracker.TryGetVisibilityOfRoom(roomId, out var visibility)
+        )
+        {
             return null;
+        }
 
-        return new RoomInformation(roomId, members, timetablesInformation);
+        return new RoomInformation(roomId, members, timetablesInformation, visibility);
     }
 
     public async Task<IReadOnlyCollection<RoomMemberResponse>?> GetRoomMembersAsync(
@@ -128,7 +178,7 @@ public class RoomService(
         Guid userId
     )
     {
-        if (!_roomTracker.GetUsersInRoom(roomId, out var usersInRoom))
+        if (!_roomTracker.TryGetUsersInRoom(roomId, out var usersInRoom))
             return null;
 
         RequireViewPermission(roomId, userId);
@@ -150,20 +200,22 @@ public class RoomService(
             .Where(profile => memberIds.Contains(profile.Id))
             .ToDictionaryAsync(p => p.Id);
 
-        return roles
-            .Select(member =>
-                profilesById.TryGetValue(member.Key, out var profile)
-                    ? _profileResponseMapper.ToRoomMemberResponse(
-                        profile,
-                        member.Value,
-                        usersInRoomSet.Contains(member.Key)
-                    )
-                    : null
-            )
-            .OfType<RoomMemberResponse>()
-            .OrderBy(member => member.Role)
-            .ThenBy(member => member.Handle)
-            .ToList();
+        return
+        [
+            .. roles
+                .Select(member =>
+                    profilesById.TryGetValue(member.Key, out var profile)
+                        ? _profileResponseMapper.ToRoomMemberResponse(
+                            profile,
+                            member.Value,
+                            usersInRoomSet.Contains(member.Key)
+                        )
+                        : null
+                )
+                .OfType<RoomMemberResponse>()
+                .OrderBy(member => member.Role)
+                .ThenBy(member => member.Handle),
+        ];
     }
 
     public async Task<IReadOnlyCollection<TimetableDetailedResponse>?> GetTimetablesDetailedInRoomAsync(
@@ -171,7 +223,7 @@ public class RoomService(
         Guid userId
     )
     {
-        if (!_roomTracker.GetTimetablesInRoom(roomId, out var timetables))
+        if (!_roomTracker.TryGetTimetablesInRoom(roomId, out var timetables))
             return null;
 
         RequireViewPermission(roomId, userId);
@@ -182,14 +234,16 @@ public class RoomService(
             .Where(p => ownerIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id);
 
-        return timetables
-            .Select(t =>
-                profilesById.TryGetValue(t.UserId, out var profile)
-                    ? t.ToDetailedResponse(_profileResponseMapper.ToResponse(profile))
-                    : null
-            )
-            .OfType<TimetableDetailedResponse>()
-            .ToList();
+        return
+        [
+            .. timetables
+                .Select(t =>
+                    profilesById.TryGetValue(t.UserId, out var profile)
+                        ? t.ToDetailedResponse(_profileResponseMapper.ToResponse(profile))
+                        : null
+                )
+                .OfType<TimetableDetailedResponse>(),
+        ];
     }
 
     public CreateTimetableResult HandleCreateTimetable(
@@ -199,7 +253,7 @@ public class RoomService(
         Guid? copyOf
     )
     {
-        if (!_roomTracker.GetTimetablesInRoom(roomId, out var timetables))
+        if (!_roomTracker.TryGetTimetablesInRoom(roomId, out var timetables))
             return CreateTimetableResult.RoomNotFound;
 
         RequireEditPermission(roomId, userId);
@@ -254,7 +308,7 @@ public class RoomService(
     // Will not add/ update existing profiles
     private async Task<bool> AddProfileAsync(Guid userId)
     {
-        if (_profileTracker.GetUserById(userId, out _))
+        if (_profileTracker.TryGetUserById(userId, out _))
             return true;
 
         var profile = await _context.Profiles.FirstOrDefaultAsync(t => t.Id == userId);
@@ -265,10 +319,7 @@ public class RoomService(
         return true;
     }
 
-    public Task<bool> CloseRoom(Guid roomId)
-    {
-        return Task.FromResult(_roomTracker.CloseRoom(roomId));
-    }
+    public bool CloseRoom(Guid roomId) => _roomTracker.CloseRoom(roomId);
 
     public bool HandleDeleteTimetable(Guid roomId, Guid userId, Guid timetableId)
     {
@@ -288,7 +339,7 @@ public class RoomService(
     {
         try
         {
-            if (_roomTracker.GetChangedTimetables(roomId, out var changedTimetables))
+            if (_roomTracker.TryGetChangedTimetables(roomId, out var changedTimetables))
                 await changedTimetables.ForEachAsync(_timetableService.UpsertTimetableAsync);
 
             if (_roomTracker.GetDeletedTimetables(roomId) is { } deletedTimetables)
@@ -314,7 +365,7 @@ public class RoomService(
         }
     }
 
-    public async Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandle(
+    public async Task<IReadOnlyCollection<UserSearchResponse>> FindUsersByHandleAsync(
         string handle,
         Guid roomId,
         Guid callerId
@@ -327,7 +378,7 @@ public class RoomService(
 
         RequireViewPermission(roomId, callerId);
 
-        if (!_roomTracker.GetUsersInRoom(roomId, out var currentMembersInRoom))
+        if (!_roomTracker.TryGetUsersInRoom(roomId, out var currentMembersInRoom))
         {
             throw new InvalidOperationException(
                 "Room should be tracked and cached before operations"
@@ -353,12 +404,7 @@ public class RoomService(
         return profiles.ConvertAll(_profileResponseMapper.ToUserSearchResponse);
     }
 
-    public async Task SetMemberRole(
-        Guid roomId,
-        Guid userId,
-        RoomRole role,
-        Guid callerId
-    )
+    public async Task SetMemberRoleAsync(Guid roomId, Guid userId, RoomRole role, Guid callerId)
     {
         if (role is not RoomRole.Editor and not RoomRole.Viewer)
         {
@@ -379,12 +425,13 @@ public class RoomService(
             );
         }
 
-        if (CheckIsOwner(roomId, userId))
+        if (IsOwner(roomId, userId))
             throw new InvalidOperationException("The room owner's role cannot be changed.");
 
         var membership = await _context.RoomMembers.SingleOrDefaultAsync(member =>
             member.RoomId == roomId && member.UserId == userId
         );
+
         if (membership?.Role == role)
             return;
 
@@ -410,14 +457,10 @@ public class RoomService(
         await _context.SaveChangesAsync();
 
         if (!_roomTracker.SetMemberRole(roomId, userId, role))
-        {
-            throw new InvalidOperationException(
-                "The member's cached role could not be updated."
-            );
-        }
+            throw new InvalidOperationException("The member's cached role could not be updated.");
     }
 
-    public async Task<IReadOnlyCollection<string>> RevokeMemberAccess(
+    public async Task<IReadOnlyCollection<string>> RevokeMemberAccessAsync(
         Guid roomId,
         Guid userId,
         Guid callerId
@@ -433,12 +476,13 @@ public class RoomService(
             );
         }
 
-        if (CheckIsOwner(roomId, userId))
+        if (IsOwner(roomId, userId))
             throw new InvalidOperationException("The room owner's access cannot be revoked.");
 
         var membership = await _context.RoomMembers.SingleOrDefaultAsync(member =>
             member.RoomId == roomId && member.UserId == userId
         );
+
         if (membership is not null)
         {
             _context.RoomMembers.Remove(membership);
@@ -447,7 +491,7 @@ public class RoomService(
 
         var removedConnections = _roomTracker.RemoveMemberRoleAndConnections(roomId, userId);
         if (removedConnections.Count > 0)
-            await FinalizeRoomDepartureAsync(roomId);
+            await FinaliseRoomDepartureAsync(roomId);
 
         return removedConnections;
     }
@@ -458,8 +502,8 @@ public class RoomService(
     ) GetRoomRolesOrThrow(Guid roomId)
     {
         if (
-            !_roomTracker.GetViewersInRoom(roomId, out var viewers)
-            || !_roomTracker.GetEditorsInRoom(roomId, out var editors)
+            !_roomTracker.TryGetViewersInRoom(roomId, out var viewers)
+            || !_roomTracker.TryGetEditorsInRoom(roomId, out var editors)
         )
         {
             throw new InvalidOperationException(
@@ -470,13 +514,27 @@ public class RoomService(
         return (viewers, editors);
     }
 
+    private Visibility GetRoomVisibilityOrThrow(Guid roomId)
+    {
+        if (!_roomTracker.TryGetVisibilityOfRoom(roomId, out var visibility))
+        {
+            throw new InvalidOperationException(
+                $"Room {roomId} is not tracked. Ensure the room is initialised before doing operations to room."
+            );
+        }
+
+        return visibility;
+    }
+
     private void RequireCanManageRoles(
         Guid roomId,
         Guid callerId,
         IReadOnlyCollection<Guid> editors
     )
     {
-        if (!CheckIsOwner(roomId, callerId) && !CheckIsEditor(editors, callerId))
+        var hasAccess = IsOwner(roomId, callerId) || IsEditor(editors, callerId);
+
+        if (!hasAccess)
         {
             throw new UnauthorizedAccessException(
                 "User does not have permission to change other's roles."
@@ -486,9 +544,16 @@ public class RoomService(
 
     private void RequireEditPermission(Guid roomId, Guid userId)
     {
+        Visibility visibility = GetRoomVisibilityOrThrow(roomId);
+
+        if (visibility == Visibility.PublicEdit)
+            return;
+
         var (_, editors) = GetRoomRolesOrThrow(roomId);
 
-        if (!CheckIsOwner(roomId, userId) && !CheckIsEditor(editors, userId))
+        var hasAccess = IsOwner(roomId, userId) || IsEditor(editors, userId);
+
+        if (!hasAccess)
         {
             throw new UnauthorizedAccessException(
                 "User does not have permission to edit the room."
@@ -498,13 +563,17 @@ public class RoomService(
 
     private void RequireViewPermission(Guid roomId, Guid userId)
     {
+        Visibility visibility = GetRoomVisibilityOrThrow(roomId);
+
+        if (visibility is Visibility.PublicView or Visibility.PublicEdit)
+            return;
+
         var (viewers, editors) = GetRoomRolesOrThrow(roomId);
 
-        if (
-            !CheckIsOwner(roomId, userId)
-            && !CheckIsEditor(editors, userId)
-            && !viewers.Contains(userId)
-        )
+        var hasAccess =
+            IsOwner(roomId, userId) || IsEditor(editors, userId) || viewers.Contains(userId);
+
+        if (!hasAccess)
         {
             throw new UnauthorizedAccessException(
                 "User does not have permission to view the room."
@@ -512,15 +581,17 @@ public class RoomService(
         }
     }
 
-    private bool CheckIsOwner(Guid roomId, Guid userId) =>
+    private bool IsOwner(Guid roomId, Guid userId) =>
         _roomTracker.GetTimetableById(roomId, roomId)?.UserId == userId;
 
-    private static bool CheckIsEditor(IReadOnlyCollection<Guid> editors, Guid userId) =>
+    private static bool IsEditor(IReadOnlyCollection<Guid> editors, Guid userId) =>
         editors.Contains(userId);
 
-    private async Task LoadRoomIntoTracker(Guid roomId)
+    private async Task LoadRoomIntoTrackerAsync(Guid roomId)
     {
-        if (!await _context.Rooms.AnyAsync(r => r.Id == roomId))
+        var room = await _context.Rooms.FindAsync(roomId);
+
+        if (room is null)
             throw new NotFoundException($"Room with roomId {roomId} not found");
 
         var timetables = await _context
@@ -533,7 +604,10 @@ public class RoomService(
         var editors = members.Where(m => m.Role == RoomRole.Editor).Select(m => m.UserId).ToList();
         var viewers = members.Where(m => m.Role == RoomRole.Viewer).Select(m => m.UserId).ToList();
 
-        _roomTracker.SetRoom(roomId, new RoomInit(editors, viewers, [.. timetables]));
+        _roomTracker.SetRoom(
+            roomId,
+            new RoomInit(editors, viewers, [.. timetables], room.Visibility)
+        );
     }
 }
 

@@ -12,7 +12,7 @@ namespace Backend.Tests.Unit;
 public class ProfileControllerTests
 {
     [Fact]
-    public async Task CheckHandle_ReturnsStructuredAvailabilityResponse()
+    public async Task CheckHandleAsync_ReturnsStructuredAvailabilityResponse()
     {
         var userId = Guid.NewGuid();
         var service = Substitute.For<IProfileService>();
@@ -35,7 +35,7 @@ public class ProfileControllerTests
             },
         };
 
-        var result = await controller.CheckHandle("existing-handle");
+        var result = await controller.CheckHandleAsync("existing-handle");
 
         var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
         okResult.Value.ShouldBe(expected);

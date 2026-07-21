@@ -19,11 +19,11 @@ public class TimetableController(ITimetableService service) : BaseController
     {
         TimetableResponse timetable = await _service.CreateTimetableAsync(request, GetUserId());
 
-        return CreatedAtAction(nameof(GetTimetableById), new { id = timetable.Id }, timetable);
+        return CreatedAtRoute(nameof(GetTimetableByIdAsync), new { id = timetable.Id }, timetable);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTimetable([FromRoute] Guid id)
+    public async Task<IActionResult> DeleteTimetableAsync([FromRoute] Guid id)
     {
         await _service.DeleteTimetableAsync(id, GetUserId());
 
@@ -37,15 +37,15 @@ public class TimetableController(ITimetableService service) : BaseController
         return Ok(timetables);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<TimetableResponse>> GetTimetableById([FromRoute] Guid id)
+    [HttpGet("{id}", Name = nameof(GetTimetableByIdAsync))]
+    public async Task<ActionResult<TimetableResponse>> GetTimetableByIdAsync([FromRoute] Guid id)
     {
         var timetable = await _service.GetTimetableByIdAsync(id, GetUserId());
         return Ok(timetable);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTimetable(
+    public async Task<IActionResult> UpdateTimetableAsync(
         [FromRoute] Guid id,
         [FromBody] UpdateTimetableRequest request
     )

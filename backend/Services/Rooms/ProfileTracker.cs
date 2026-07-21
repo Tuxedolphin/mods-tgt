@@ -13,7 +13,7 @@ public class ProfileTracker : IProfileTracker
 
     public IReadOnlyCollection<Profile> GetAllUsers() => [.. _profileTracker.Values];
 
-    public bool GetUserById(Guid userId, out Profile? profile) =>
+    public bool TryGetUserById(Guid userId, out Profile? profile) =>
         _profileTracker.TryGetValue(userId, out profile);
 
     public bool RemoveUser(Guid userId) => _profileTracker.TryRemove(userId, out _);

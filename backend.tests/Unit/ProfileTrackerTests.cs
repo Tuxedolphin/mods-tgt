@@ -16,7 +16,7 @@ public class ProfileTrackerTests
         var profile = MakeProfile();
         _tracker.SetUser(profile);
 
-        _tracker.GetUserById(profile.Id, out var user).ShouldBeTrue();
+        _tracker.TryGetUserById(profile.Id, out var user).ShouldBeTrue();
         user.ShouldBe(profile);
     }
 
@@ -30,7 +30,7 @@ public class ProfileTrackerTests
         var newUser = MakeProfile(userId, "other name");
         _tracker.SetUser(newUser);
 
-        _tracker.GetUserById(userId, out var profile).ShouldBeTrue();
+        _tracker.TryGetUserById(userId, out var profile).ShouldBeTrue();
         profile.ShouldBe(newUser);
     }
 

@@ -43,14 +43,14 @@ public class RoomServiceExceptionTests : IAsyncLifetime
     // === CreateOrJoinRoom ===
 
     [Fact]
-    public async Task CreateOrJoinRoom_NonExistentRoom_ThrowsNotFoundException()
+    public async Task CreateOrJoinRoomAsync_NonExistentRoom_ThrowsNotFoundException()
     {
         var userId = await _context.SeedProfileAsync();
         const string connectionId = "connection";
         await _service.RegisterConnectionAsync(userId, connectionId);
 
         await Should.ThrowAsync<NotFoundException>(() =>
-            _service.CreateOrJoinRoom(Guid.NewGuid(), userId, connectionId)
+            _service.CreateOrJoinRoomAsync(Guid.NewGuid(), userId, connectionId)
         );
     }
 
@@ -65,7 +65,7 @@ public class RoomServiceExceptionTests : IAsyncLifetime
     // === HandleLeaveRoom ===
 
     [Fact]
-    public async Task HandleLeaveRoom_CommitFails_LastUserLeaves_RoomStaysOpenWithStagedChanges()
+    public async Task HandleLeaveRoomAsync_CommitFails_LastUserLeaves_RoomStaysOpenWithStagedChanges()
     {
         _timetableService
             .UpsertTimetableAsync(Arg.Any<RoomTimetable>())
@@ -81,10 +81,10 @@ public class RoomServiceExceptionTests : IAsyncLifetime
         _roomTracker.MoveConnectionToRoom(connectionId, userId, roomId);
         _roomTracker.AddOrUpdateTimetable(timetable);
 
-        await _service.HandleLeaveRoom(roomId, connectionId);
+        await _service.HandleLeaveRoomAsync(roomId, connectionId);
 
         _roomTracker.RoomExists(roomId).ShouldBeTrue();
-        _roomTracker.GetChangedTimetables(roomId, out var changed).ShouldBeTrue();
+        _roomTracker.TryGetChangedTimetables(roomId, out var changed).ShouldBeTrue();
         changed.ShouldContain(t => t.Id == timetable.Id);
     }
 
@@ -106,7 +106,7 @@ public class RoomServiceExceptionTests : IAsyncLifetime
         var result = await _service.CommitChangesAsync(roomId);
 
         result.ShouldBeFalse();
-        _roomTracker.GetChangedTimetables(roomId, out var changed).ShouldBeTrue();
+        _roomTracker.TryGetChangedTimetables(roomId, out var changed).ShouldBeTrue();
         changed.ShouldContain(t => t.Id == timetable.Id);
     }
 
@@ -126,7 +126,7 @@ public class RoomServiceExceptionTests : IAsyncLifetime
         var result = await _service.CommitChangesAsync(roomId);
 
         result.ShouldBeFalse();
-        _roomTracker.GetChangedTimetables(roomId, out var changed).ShouldBeTrue();
+        _roomTracker.TryGetChangedTimetables(roomId, out var changed).ShouldBeTrue();
         changed.ShouldContain(t => t.Id == timetable.Id);
     }
 

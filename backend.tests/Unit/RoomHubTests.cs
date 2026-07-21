@@ -24,7 +24,9 @@ public class RoomHubTests
 
         await hub.SetMemberRole(memberId, roomId, RoomRole.Viewer);
 
-        await service.Received(1).SetMemberRole(roomId, memberId, RoomRole.Viewer, callerId);
+        await service
+            .Received(1)
+            .SetMemberRoleAsync(roomId, memberId, RoomRole.Viewer, callerId);
         await roomClient.Received(1).ReceiveRoomMembersUpdate(updatedMembers);
     }
 
@@ -39,12 +41,12 @@ public class RoomHubTests
             ["member-connection-1", "member-connection-2"];
         var (hub, service, roomClient, groups) = CreateHub(callerId, roomId, updatedMembers);
         service
-            .RevokeMemberAccess(roomId, memberId, callerId)
+            .RevokeMemberAccessAsync(roomId, memberId, callerId)
             .Returns(removedConnectionIds);
 
         await hub.RevokeMemberAccess(memberId, roomId);
 
-        await service.Received(1).RevokeMemberAccess(roomId, memberId, callerId);
+        await service.Received(1).RevokeMemberAccessAsync(roomId, memberId, callerId);
         foreach (var connectionId in removedConnectionIds)
         {
             await groups

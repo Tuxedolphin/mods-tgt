@@ -80,7 +80,7 @@ public class RoomServiceTests : IAsyncLifetime
     // === CreateOrJoinRoom ===
 
     [Fact]
-    public async Task CreateOrJoinRoom_PutsRoomInRoomTracker()
+    public async Task CreateOrJoinRoomAsync_PutsRoomInRoomTracker()
     {
         var userId = await _context.SeedProfileAsync();
         var roomId = Guid.NewGuid();
@@ -88,14 +88,14 @@ public class RoomServiceTests : IAsyncLifetime
         await _context.SeedTimetableAsync(userId, timetableId: roomId, roomId: roomId);
         await _service.RegisterConnectionAsync(userId, connectionId);
 
-        await _service.CreateOrJoinRoom(roomId, userId, connectionId);
+        await _service.CreateOrJoinRoomAsync(roomId, userId, connectionId);
 
-        _roomTracker.GetRoomOfConnection(connectionId, out var resId).ShouldBeTrue();
+        _roomTracker.TryGetRoomOfConnection(connectionId, out var resId).ShouldBeTrue();
         resId.ShouldBe(roomId);
     }
 
     [Fact]
-    public async Task CreateOrJoinRoom_PutsProfileInRoomTracker()
+    public async Task CreateOrJoinRoomAsync_PutsProfileInRoomTracker()
     {
         var userId = await _context.SeedProfileAsync();
         var roomId = Guid.NewGuid();
@@ -103,13 +103,13 @@ public class RoomServiceTests : IAsyncLifetime
         await _context.SeedTimetableAsync(userId, timetableId: roomId, roomId: roomId);
         await _service.RegisterConnectionAsync(userId, connectionId);
 
-        await _service.CreateOrJoinRoom(roomId, userId, connectionId);
+        await _service.CreateOrJoinRoomAsync(roomId, userId, connectionId);
 
-        _profileTracker.GetUserById(userId, out _).ShouldBeTrue();
+        _profileTracker.TryGetUserById(userId, out _).ShouldBeTrue();
     }
 
     [Fact]
-    public async Task CreateOrJoinRoom_UserHasAnotherConnection_PreservesPreviousRoomPresence()
+    public async Task CreateOrJoinRoomAsync_UserHasAnotherConnection_PreservesPreviousRoomPresence()
     {
         var userId = await _context.SeedProfileAsync();
         var roomId = Guid.NewGuid();
@@ -123,16 +123,16 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.RegisterConnection("other-connection", userId);
         _roomTracker.MoveConnectionToRoom("other-connection", userId, oldRoomId);
 
-        await _service.CreateOrJoinRoom(roomId, userId, connectionId);
+        await _service.CreateOrJoinRoomAsync(roomId, userId, connectionId);
 
-        _roomTracker.GetRoomOfConnection(connectionId, out var resId).ShouldBeTrue();
+        _roomTracker.TryGetRoomOfConnection(connectionId, out var resId).ShouldBeTrue();
         resId.ShouldBe(roomId);
-        _roomTracker.GetUsersInRoom(oldRoomId, out var users).ShouldBeTrue();
+        _roomTracker.TryGetUsersInRoom(oldRoomId, out var users).ShouldBeTrue();
         users.ShouldBe([userId]);
     }
 
     [Fact]
-    public async Task CreateOrJoinRoom_AssociatesConnectionWithCorrectRoom_WhenJoiningRoom()
+    public async Task CreateOrJoinRoomAsync_AssociatesConnectionWithCorrectRoom_WhenJoiningRoom()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = await _context.SeedProfileAsync();
@@ -141,14 +141,14 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.SetRoom(roomId, new RoomInit([userId], [], []));
         await _service.RegisterConnectionAsync(userId, connectionId);
 
-        await _service.CreateOrJoinRoom(roomId, userId, connectionId);
+        await _service.CreateOrJoinRoomAsync(roomId, userId, connectionId);
 
-        _roomTracker.GetRoomOfConnection(connectionId, out var resId).ShouldBeTrue();
+        _roomTracker.TryGetRoomOfConnection(connectionId, out var resId).ShouldBeTrue();
         resId.ShouldBe(roomId);
     }
 
     [Fact]
-    public async Task CreateOrJoinRoom_ColdRoom_LoadsExistingTimetablesFromDb()
+    public async Task CreateOrJoinRoomAsync_ColdRoom_LoadsExistingTimetablesFromDb()
     {
         var userId = await _context.SeedProfileAsync();
         var roomId = Guid.NewGuid();
@@ -156,9 +156,9 @@ public class RoomServiceTests : IAsyncLifetime
         var seeded = await _context.SeedTimetableAsync(userId, timetableId: roomId, roomId: roomId);
         await _service.RegisterConnectionAsync(userId, connectionId);
 
-        await _service.CreateOrJoinRoom(roomId, userId, connectionId);
+        await _service.CreateOrJoinRoomAsync(roomId, userId, connectionId);
 
-        _roomTracker.GetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
         timetables.Count.ShouldBe(1);
         timetables.Single().ShouldMatch(seeded.ToRoomTimetable());
     }
@@ -166,7 +166,7 @@ public class RoomServiceTests : IAsyncLifetime
     // === HandleLeaveRoom ===
 
     [Fact]
-    public async Task HandleLeaveRoom_UserHasAnotherConnection_PreservesUserPresence()
+    public async Task HandleLeaveRoomAsync_UserHasAnotherConnection_PreservesUserPresence()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = await _context.SeedProfileAsync();
@@ -178,17 +178,17 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.RegisterConnection("other-connection", userId);
         _roomTracker.MoveConnectionToRoom("other-connection", userId, roomId);
 
-        await _service.HandleLeaveRoom(roomId, connectionId);
+        await _service.HandleLeaveRoomAsync(roomId, connectionId);
 
-        _roomTracker.GetRoomOfConnection(connectionId, out _).ShouldBeFalse();
-        _roomTracker.GetRoomOfConnection("other-connection", out var currentRoomId).ShouldBeTrue();
+        _roomTracker.TryGetRoomOfConnection(connectionId, out _).ShouldBeFalse();
+        _roomTracker.TryGetRoomOfConnection("other-connection", out var currentRoomId).ShouldBeTrue();
         currentRoomId.ShouldBe(roomId);
-        _roomTracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
+        _roomTracker.TryGetUsersInRoom(roomId, out var users).ShouldBeTrue();
         users.ShouldBe([userId]);
     }
 
     [Fact]
-    public async Task HandleLeaveRoom_ClosesEmptyRoom()
+    public async Task HandleLeaveRoomAsync_ClosesEmptyRoom()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = await _context.SeedProfileAsync();
@@ -198,14 +198,14 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.RegisterConnection(connectionId, userId);
         _roomTracker.MoveConnectionToRoom(connectionId, userId, roomId);
 
-        await _service.HandleLeaveRoom(roomId, connectionId);
+        await _service.HandleLeaveRoomAsync(roomId, connectionId);
 
-        _roomTracker.GetRoomOfConnection(connectionId, out _).ShouldBeFalse();
+        _roomTracker.TryGetRoomOfConnection(connectionId, out _).ShouldBeFalse();
         _roomTracker.RoomExists(roomId).ShouldBeFalse();
     }
 
     [Fact]
-    public async Task HandleLeaveRoom_MissingConnection_DoesNothing()
+    public async Task HandleLeaveRoomAsync_MissingConnection_DoesNothing()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = await _context.SeedProfileAsync();
@@ -215,14 +215,14 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.RegisterConnection(connectionId, userId);
         _roomTracker.MoveConnectionToRoom(connectionId, userId, roomId);
 
-        await Should.NotThrowAsync(() => _service.HandleLeaveRoom(roomId, "missing"));
+        await Should.NotThrowAsync(() => _service.HandleLeaveRoomAsync(roomId, "missing"));
 
-        _roomTracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
+        _roomTracker.TryGetUsersInRoom(roomId, out var users).ShouldBeTrue();
         users.ShouldContain(userId);
     }
 
     [Fact]
-    public async Task HandleLeaveRoom_WrongRoom_DoesNothing()
+    public async Task HandleLeaveRoomAsync_WrongRoom_DoesNothing()
     {
         var roomId = await _context.SeedRoomAsync();
         var userId = Guid.NewGuid();
@@ -233,10 +233,10 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.MoveConnectionToRoom(connectionId, userId, roomId);
 
         await Should.NotThrowAsync(() =>
-            _service.HandleLeaveRoom(Guid.NewGuid(), connectionId)
+            _service.HandleLeaveRoomAsync(Guid.NewGuid(), connectionId)
         );
 
-        _roomTracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
+        _roomTracker.TryGetUsersInRoom(roomId, out var users).ShouldBeTrue();
         users.ShouldContain(userId);
     }
 
@@ -275,7 +275,7 @@ public class RoomServiceTests : IAsyncLifetime
 
         _service.HandleCreateTimetable(roomId, userId, CreateRequest("Room Timetable"), null);
 
-        _roomTracker.GetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
         timetables.ShouldContain(t => t.Name == "Room Timetable" && t.UserId == userId);
     }
 
@@ -484,7 +484,7 @@ public class RoomServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task FindUsersByHandle_ProfileHasAvatar_ReturnsAvatarUrl()
+    public async Task FindUsersByHandleAsync_ProfileHasAvatar_ReturnsAvatarUrl()
     {
         var roomId = Guid.NewGuid();
         var callerId = await _context.SeedProfileAsync(handle: "caller");
@@ -497,7 +497,7 @@ public class RoomServiceTests : IAsyncLifetime
 
         _roomTracker.SetRoom(roomId, new RoomInit([callerId], [], []));
 
-        var result = await _service.FindUsersByHandle("ali", roomId, callerId);
+        var result = await _service.FindUsersByHandleAsync("ali", roomId, callerId);
 
         result.ShouldBe(
             [
@@ -535,7 +535,7 @@ public class RoomServiceTests : IAsyncLifetime
 
         await _service.RegisterConnectionAsync(userId, "connection");
 
-        _profileTracker.GetUserById(userId, out _).ShouldBeTrue();
+        _profileTracker.TryGetUserById(userId, out _).ShouldBeTrue();
     }
 
     [Fact]
@@ -560,7 +560,7 @@ public class RoomServiceTests : IAsyncLifetime
     // === Room membership ===
 
     [Fact]
-    public async Task SetMemberRole_ViewerToEditor_UpdatesSingleMembershipAndTrackerRole()
+    public async Task SetMemberRoleAsync_ViewerToEditor_UpdatesSingleMembershipAndTrackerRole()
     {
         var ownerId = await _context.SeedProfileAsync();
         var memberId = await _context.SeedProfileAsync();
@@ -584,20 +584,20 @@ public class RoomServiceTests : IAsyncLifetime
             )
         );
 
-        await _service.SetMemberRole(roomId, memberId, RoomRole.Editor, ownerId);
+        await _service.SetMemberRoleAsync(roomId, memberId, RoomRole.Editor, ownerId);
 
         var membership = await _context.RoomMembers.SingleAsync(m =>
             m.RoomId == roomId && m.UserId == memberId
         );
         membership.Role.ShouldBe(RoomRole.Editor);
-        _roomTracker.GetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
-        _roomTracker.GetViewersInRoom(roomId, out var viewers).ShouldBeTrue();
+        _roomTracker.TryGetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
+        _roomTracker.TryGetViewersInRoom(roomId, out var viewers).ShouldBeTrue();
         editors.ShouldContain(memberId);
         viewers.ShouldNotContain(memberId);
     }
 
     [Fact]
-    public async Task RevokeMemberAccess_ConnectedMember_RemovesMembershipRoleAndPresence()
+    public async Task RevokeMemberAccessAsync_ConnectedMember_RemovesMembershipRoleAndPresence()
     {
         var ownerId = await _context.SeedProfileAsync();
         var memberId = await _context.SeedProfileAsync();
@@ -627,13 +627,17 @@ public class RoomServiceTests : IAsyncLifetime
         _roomTracker.RegisterConnection("member-connection-2", memberId);
         _roomTracker.MoveConnectionToRoom("member-connection-2", memberId, roomId);
 
-        var removedConnectionIds = await _service.RevokeMemberAccess(roomId, memberId, ownerId);
+        var removedConnectionIds = await _service.RevokeMemberAccessAsync(
+            roomId,
+            memberId,
+            ownerId
+        );
 
         (await _context.RoomMembers.AnyAsync(m =>
             m.RoomId == roomId && m.UserId == memberId
         )).ShouldBeFalse();
-        _roomTracker.GetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
-        _roomTracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
+        _roomTracker.TryGetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
+        _roomTracker.TryGetUsersInRoom(roomId, out var users).ShouldBeTrue();
         editors.ShouldNotContain(memberId);
         users.ShouldNotContain(memberId);
         users.ShouldContain(ownerId);
@@ -654,17 +658,17 @@ public class RoomServiceTests : IAsyncLifetime
         _profileTracker.SetUser(new Profile { Id = userId, Username = "Test" });
         _roomTracker.SetRoom(roomId, new RoomInit([], [], []));
 
-        var res = await _service.CloseRoom(roomId);
+        var res = _service.CloseRoom(roomId);
 
         res.ShouldBeTrue();
         _roomTracker.RoomExists(roomId).ShouldBeFalse();
-        _profileTracker.GetUserById(userId, out _).ShouldBeTrue();
+        _profileTracker.TryGetUserById(userId, out _).ShouldBeTrue();
     }
 
     [Fact]
     public async Task CloseRoom_NonExistentRoom_ReturnsFalse()
     {
-        var res = await _service.CloseRoom(Guid.NewGuid());
+        var res = _service.CloseRoom(Guid.NewGuid());
 
         res.ShouldBeFalse();
     }
@@ -690,7 +694,7 @@ public class RoomServiceTests : IAsyncLifetime
 
         _service.HandleDeleteTimetable(roomId, userId, timetable.Id).ShouldBeTrue();
 
-        _roomTracker.GetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
         timetables.ShouldBeEmpty();
     }
 
@@ -718,7 +722,7 @@ public class RoomServiceTests : IAsyncLifetime
         );
 
         res.ShouldBeTrue();
-        _roomTracker.GetTimetablesInRoom(timetable.RoomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetTimetablesInRoom(timetable.RoomId, out var timetables).ShouldBeTrue();
 
         timetables.Count.ShouldBe(1);
         timetables.ElementAt(0).ShouldMatch(timetable.ApplyUpdate(update));
@@ -746,7 +750,7 @@ public class RoomServiceTests : IAsyncLifetime
         );
 
         res.ShouldBeTrue();
-        _roomTracker.GetChangedTimetables(timetable.RoomId, out var timetables);
+        _roomTracker.TryGetChangedTimetables(timetable.RoomId, out var timetables);
 
         timetables.Count.ShouldBe(1);
         timetables.ElementAt(0).ShouldMatch(timetable.ApplyUpdate(update));
@@ -770,7 +774,7 @@ public class RoomServiceTests : IAsyncLifetime
         var res = await _service.HandleUpdateTimetableAsync(roomId, userId, timetable.Id, update);
 
         res.ShouldBeTrue();
-        _roomTracker.GetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
 
         timetables.Count.ShouldBe(1);
         timetables.ElementAt(0).ShouldMatch(timetable.ToRoomTimetable().ApplyUpdate(update));
@@ -794,7 +798,7 @@ public class RoomServiceTests : IAsyncLifetime
         var res = await _service.HandleUpdateTimetableAsync(roomId, userId, timetable.Id, update);
 
         res.ShouldBeTrue();
-        _roomTracker.GetChangedTimetables(roomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetChangedTimetables(roomId, out var timetables).ShouldBeTrue();
 
         timetables.Count.ShouldBe(1);
         timetables.ElementAt(0).ShouldMatch(timetable.ToRoomTimetable().ApplyUpdate(update));
@@ -905,7 +909,7 @@ public class RoomServiceTests : IAsyncLifetime
         var success = await _service.CommitChangesAsync(roomId);
         success.ShouldBeTrue();
 
-        _roomTracker.GetChangedTimetables(roomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetChangedTimetables(roomId, out var timetables).ShouldBeTrue();
         timetables.ShouldBeEmpty();
     }
 
@@ -947,7 +951,7 @@ public class RoomServiceTests : IAsyncLifetime
         var success = await _service.CommitChangesAsync(roomId);
         success.ShouldBeTrue();
 
-        _roomTracker.GetChangedTimetables(roomId, out var timetables).ShouldBeTrue();
+        _roomTracker.TryGetChangedTimetables(roomId, out var timetables).ShouldBeTrue();
         timetables.ShouldBeEmpty();
         _roomTracker.GetDeletedTimetables(roomId).ShouldBeEmpty();
     }

@@ -1,4 +1,5 @@
 using Backend.DTOs;
+using Backend.Exceptions;
 using Backend.Models;
 using Backend.Services.Rooms;
 using Shouldly;
@@ -61,6 +62,41 @@ public class RoomTrackerTests
     // === Connection room membership ===
 
     [Fact]
+    public void Visibility_DefinesCurrentVisibilityModes()
+    {
+        Enum.GetValues<Visibility>()
+            .ShouldBe([Visibility.PublicView, Visibility.PublicEdit, Visibility.Restricted]);
+    }
+
+    [Fact]
+    public void MoveConnectionToRoom_PublicRoom_AllowsNonMember()
+    {
+        var roomId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        const string connectionId = "connection";
+
+        _tracker.SetRoom(roomId, new RoomInit([], [], [], Visibility.PublicView));
+        _tracker.RegisterConnection(connectionId, userId);
+
+        Should.NotThrow(() => _tracker.MoveConnectionToRoom(connectionId, userId, roomId));
+    }
+
+    [Fact]
+    public void MoveConnectionToRoom_RestrictedRoom_RejectsNonMember()
+    {
+        var roomId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        const string connectionId = "connection";
+
+        _tracker.SetRoom(roomId, new RoomInit([], [], [], Visibility.Restricted));
+        _tracker.RegisterConnection(connectionId, userId);
+
+        Should.Throw<ForbiddenException>(() =>
+            _tracker.MoveConnectionToRoom(connectionId, userId, roomId)
+        );
+    }
+
+    [Fact]
     public void MoveConnectionToRoom_ExistingRoom_AssociatesConnectionWithRoom()
     {
         var roomId = Guid.NewGuid();
@@ -72,7 +108,7 @@ public class RoomTrackerTests
         _tracker.RegisterConnection(connectionId, userId);
         _tracker.MoveConnectionToRoom(connectionId, userId, roomId);
 
-        _tracker.GetRoomOfConnection(connectionId, out var currentRoomId).ShouldBeTrue();
+        _tracker.TryGetRoomOfConnection(connectionId, out var currentRoomId).ShouldBeTrue();
         currentRoomId.ShouldBe(roomId);
     }
 
@@ -98,7 +134,7 @@ public class RoomTrackerTests
         const string connectionId = "connection";
         AddConnectionToRoom(roomId, userId, connectionId);
 
-        _tracker.GetRoomOfConnection(connectionId, out var resultRoomId).ShouldBeTrue();
+        _tracker.TryGetRoomOfConnection(connectionId, out var resultRoomId).ShouldBeTrue();
         resultRoomId.ShouldBe(roomId);
     }
 
@@ -129,7 +165,7 @@ public class RoomTrackerTests
         var move = _tracker.MoveConnectionToRoom(connectionId, userId, newRoomId);
 
         move.PreviousRoomId.ShouldBe(initialRoomId);
-        _tracker.GetRoomOfConnection(connectionId, out var currentRoomId).ShouldBeTrue();
+        _tracker.TryGetRoomOfConnection(connectionId, out var currentRoomId).ShouldBeTrue();
         currentRoomId.ShouldBe(newRoomId);
     }
 
@@ -147,8 +183,8 @@ public class RoomTrackerTests
         _tracker.SetMemberRole(newRoomId, userId, RoomRole.Viewer);
         _tracker.MoveConnectionToRoom(connectionId, userId, newRoomId);
 
-        _tracker.GetUsersInRoom(initialRoomId, out var users);
-        _tracker.GetRoomOfConnection(connectionId, out var resultRoomId).ShouldBeTrue();
+        _tracker.TryGetUsersInRoom(initialRoomId, out var users);
+        _tracker.TryGetRoomOfConnection(connectionId, out var resultRoomId).ShouldBeTrue();
 
         users.ShouldBe([userId]);
         resultRoomId.ShouldBe(newRoomId);
@@ -157,47 +193,47 @@ public class RoomTrackerTests
     // === GetRoomOfConnection ===
 
     [Fact]
-    public void GetRoomOfConnection_GetFromEmptyTracker_ReturnsFalse()
+    public void TryGetRoomOfConnection_GetFromEmptyTracker_ReturnsFalse()
     {
-        var result = _tracker.GetRoomOfConnection("missing", out _);
+        var result = _tracker.TryGetRoomOfConnection("missing", out _);
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void GetRoomOfConnection_GetNonExistingConnection_ReturnsFalse()
+    public void TryGetRoomOfConnection_GetNonExistingConnection_ReturnsFalse()
     {
         _tracker.AddRoom(Guid.NewGuid());
-        var result = _tracker.GetRoomOfConnection("missing", out _);
+        var result = _tracker.TryGetRoomOfConnection("missing", out _);
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void GetRoomOfConnection_GetDifferentConnectionFromAdded_ReturnsFalse()
+    public void TryGetRoomOfConnection_GetDifferentConnectionFromAdded_ReturnsFalse()
     {
         var roomId = Guid.NewGuid();
 
         AddConnectionToRoom(roomId, Guid.NewGuid(), "existing");
 
-        var result = _tracker.GetRoomOfConnection("missing", out _);
+        var result = _tracker.TryGetRoomOfConnection("missing", out _);
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void GetRoomOfConnection_GetExistingConnection_ReturnsTrueAndCorrectRoomId()
+    public void TryGetRoomOfConnection_GetExistingConnection_ReturnsTrueAndCorrectRoomId()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
         const string connectionId = "connection";
         AddConnectionToRoom(roomId, userId, connectionId);
-        var result = _tracker.GetRoomOfConnection(connectionId, out var resultRoomId);
+        var result = _tracker.TryGetRoomOfConnection(connectionId, out var resultRoomId);
 
         result.ShouldBeTrue();
         resultRoomId.ShouldBe(roomId);
     }
 
     [Fact]
-    public void GetRoomOfConnection_AfterRepeatedJoin_ReturnsCorrectRoomId()
+    public void TryGetRoomOfConnection_AfterRepeatedJoin_ReturnsCorrectRoomId()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -205,7 +241,7 @@ public class RoomTrackerTests
         const string connectionId = "connection";
         AddConnectionToRoom(roomId, userId, connectionId);
         _tracker.MoveConnectionToRoom(connectionId, userId, roomId);
-        var result = _tracker.GetRoomOfConnection(connectionId, out var resultRoomId);
+        var result = _tracker.TryGetRoomOfConnection(connectionId, out var resultRoomId);
 
         result.ShouldBeTrue();
         resultRoomId.ShouldBe(roomId);
@@ -214,27 +250,27 @@ public class RoomTrackerTests
     // === GetTimetablesInRoom ===
 
     [Fact]
-    public void GetTimetablesInRoom_GetNonExistingRoom_ReturnsFalse()
+    public void TryGetTimetablesInRoom_GetNonExistingRoom_ReturnsFalse()
     {
-        var result = _tracker.GetTimetablesInRoom(Guid.NewGuid(), out _);
+        var result = _tracker.TryGetTimetablesInRoom(Guid.NewGuid(), out _);
 
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void GetTimetablesInRoom_GetFromEmptyRoom_ReturnsTrue()
+    public void TryGetTimetablesInRoom_GetFromEmptyRoom_ReturnsTrue()
     {
         var roomId = Guid.NewGuid();
         _tracker.AddRoom(roomId);
 
-        var result = _tracker.GetTimetablesInRoom(roomId, out var timetables);
+        var result = _tracker.TryGetTimetablesInRoom(roomId, out var timetables);
 
         result.ShouldBeTrue();
         timetables.ShouldBe([]);
     }
 
     [Fact]
-    public void GetTimetablesInRoom_GetFromExistingRoom_ReturnsCorrectList()
+    public void TryGetTimetablesInRoom_GetFromExistingRoom_ReturnsCorrectList()
     {
         var roomId = Guid.NewGuid();
         var timetable = MakeTimetable(roomId);
@@ -242,7 +278,7 @@ public class RoomTrackerTests
         _tracker.AddRoom(roomId);
         _tracker.AddOrUpdateTimetable(timetable);
 
-        var result = _tracker.GetTimetablesInRoom(roomId, out var timetables);
+        var result = _tracker.TryGetTimetablesInRoom(roomId, out var timetables);
 
         result.ShouldBeTrue();
         timetables.ShouldBe([timetable]);
@@ -251,27 +287,27 @@ public class RoomTrackerTests
     // === GetUsersInRoom ===
 
     [Fact]
-    public void GetUsersInRoom_GetNonExistingRoom_ReturnsFalse()
+    public void TryGetUsersInRoom_GetNonExistingRoom_ReturnsFalse()
     {
-        var result = _tracker.GetUsersInRoom(Guid.NewGuid(), out _);
+        var result = _tracker.TryGetUsersInRoom(Guid.NewGuid(), out _);
 
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void GetUsersInRoom_GetFromEmptyRoom_ReturnsTrue()
+    public void TryGetUsersInRoom_GetFromEmptyRoom_ReturnsTrue()
     {
         var roomId = Guid.NewGuid();
         _tracker.AddRoom(roomId);
 
-        var result = _tracker.GetUsersInRoom(roomId, out var users);
+        var result = _tracker.TryGetUsersInRoom(roomId, out var users);
 
         result.ShouldBeTrue();
         users.ShouldBe([]);
     }
 
     [Fact]
-    public void GetUsersInRoom_GetFromExistingRoom_ReturnsCorrectList()
+    public void TryGetUsersInRoom_GetFromExistingRoom_ReturnsCorrectList()
     {
         var roomId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -279,7 +315,7 @@ public class RoomTrackerTests
         AddConnectionToRoom(roomId, userId, "connection");
         AddConnectionToRoom(roomId, userId, "other-connection");
 
-        var result = _tracker.GetUsersInRoom(roomId, out var users);
+        var result = _tracker.TryGetUsersInRoom(roomId, out var users);
 
         result.ShouldBeTrue();
         users.ShouldBe([userId]);
@@ -317,7 +353,7 @@ public class RoomTrackerTests
         AddConnectionToRoom(roomId, userId, "other-connection");
 
         var departure = _tracker.LeaveConnectionFromRoom(connectionId, roomId);
-        _tracker.GetUsersInRoom(roomId, out var users);
+        _tracker.TryGetUsersInRoom(roomId, out var users);
 
         users.ShouldBe([userId]);
         departure.ShouldNotBeNull();
@@ -348,8 +384,8 @@ public class RoomTrackerTests
 
         _tracker.SetRoom(roomId, new RoomInit(editors, viewers, []));
 
-        _tracker.GetEditorsInRoom(roomId, out var editorsRes).ShouldBeTrue();
-        _tracker.GetViewersInRoom(roomId, out var viewersRes).ShouldBeTrue();
+        _tracker.TryGetEditorsInRoom(roomId, out var editorsRes).ShouldBeTrue();
+        _tracker.TryGetViewersInRoom(roomId, out var viewersRes).ShouldBeTrue();
 
         editorsRes.ShouldBe(editors, ignoreOrder: true);
         viewersRes.ShouldBe(viewers, ignoreOrder: true);
@@ -379,8 +415,8 @@ public class RoomTrackerTests
         var result = _tracker.SetMemberRole(roomId, userId, RoomRole.Viewer);
 
         result.ShouldBeTrue();
-        _tracker.GetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
-        _tracker.GetViewersInRoom(roomId, out var viewers).ShouldBeTrue();
+        _tracker.TryGetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
+        _tracker.TryGetViewersInRoom(roomId, out var viewers).ShouldBeTrue();
         editors.ShouldNotContain(userId);
         viewers.ShouldContain(userId);
     }
@@ -398,9 +434,9 @@ public class RoomTrackerTests
         var result = _tracker.RemoveMemberRoleAndConnections(roomId, userId);
 
         result.ShouldBe(["connection-1", "connection-2"], ignoreOrder: true);
-        _tracker.GetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
-        _tracker.GetViewersInRoom(roomId, out var viewers).ShouldBeTrue();
-        _tracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
+        _tracker.TryGetEditorsInRoom(roomId, out var editors).ShouldBeTrue();
+        _tracker.TryGetViewersInRoom(roomId, out var viewers).ShouldBeTrue();
+        _tracker.TryGetUsersInRoom(roomId, out var users).ShouldBeTrue();
         editors.ShouldBeEmpty();
         viewers.ShouldBeEmpty();
         users.ShouldBeEmpty();
@@ -419,8 +455,8 @@ public class RoomTrackerTests
 
         _tracker.CloseRoom(roomId);
 
-        _tracker.GetEditorsInRoom(roomId, out _).ShouldBeFalse();
-        _tracker.GetViewersInRoom(roomId, out _).ShouldBeFalse();
+        _tracker.TryGetEditorsInRoom(roomId, out _).ShouldBeFalse();
+        _tracker.TryGetViewersInRoom(roomId, out _).ShouldBeFalse();
     }
 
     // === AddOrUpdateTimetable
@@ -495,7 +531,7 @@ public class RoomTrackerTests
         _tracker.AddRoom(roomId);
         _tracker.AddOrUpdateTimetable(timetable);
 
-        var success = _tracker.GetChangedTimetables(roomId, out var changedTimetables);
+        var success = _tracker.TryGetChangedTimetables(roomId, out var changedTimetables);
 
         success.ShouldBeTrue();
         changedTimetables.Contains(timetable).ShouldBeTrue();
@@ -604,7 +640,7 @@ public class RoomTrackerTests
 
         _tracker.GetDeletedTimetables(roomId).ShouldContain(timetable.Id);
 
-        _tracker.GetChangedTimetables(roomId, out var changed);
+        _tracker.TryGetChangedTimetables(roomId, out var changed);
         changed.ShouldNotContain(timetable);
     }
 
@@ -617,8 +653,8 @@ public class RoomTrackerTests
 
         _tracker.SetRoom(roomId, new RoomInit([], [], []));
 
-        _tracker.GetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
-        _tracker.GetUsersInRoom(roomId, out var users).ShouldBeTrue();
+        _tracker.TryGetTimetablesInRoom(roomId, out var timetables).ShouldBeTrue();
+        _tracker.TryGetUsersInRoom(roomId, out var users).ShouldBeTrue();
 
         timetables.ShouldBeEmpty();
         users.ShouldBeEmpty();
@@ -640,8 +676,8 @@ public class RoomTrackerTests
         foreach (var userId in users)
             AddConnectionToRoom(roomId, userId, userId.ToString());
 
-        _tracker.GetTimetablesInRoom(roomId, out var timetablesRes).ShouldBeTrue();
-        _tracker.GetUsersInRoom(roomId, out var usersRes).ShouldBeTrue();
+        _tracker.TryGetTimetablesInRoom(roomId, out var timetablesRes).ShouldBeTrue();
+        _tracker.TryGetUsersInRoom(roomId, out var usersRes).ShouldBeTrue();
 
         timetablesRes.ShouldBe(timetables, ignoreOrder: true);
         usersRes.ShouldBe(users, ignoreOrder: true);
@@ -710,8 +746,8 @@ public class RoomTrackerTests
         _tracker.SetRoom(roomId, new RoomInit([], [], timetables));
         _tracker.CloseRoom(roomId);
 
-        _tracker.GetTimetablesInRoom(roomId, out _).ShouldBeFalse();
-        _tracker.GetUsersInRoom(roomId, out _).ShouldBeFalse();
+        _tracker.TryGetTimetablesInRoom(roomId, out _).ShouldBeFalse();
+        _tracker.TryGetUsersInRoom(roomId, out _).ShouldBeFalse();
 
     }
 
@@ -730,32 +766,32 @@ public class RoomTrackerTests
 
         _tracker.CloseRoom(roomId);
 
-        _tracker.GetChangedTimetables(roomId, out _).ShouldBeFalse();
+        _tracker.TryGetChangedTimetables(roomId, out _).ShouldBeFalse();
     }
 
     // === GetChangedTimetables ===
 
     [Fact]
-    public void GetChangedTimetables_GetOnNonExistingRoom_ReturnsFalse()
+    public void TryGetChangedTimetables_GetOnNonExistingRoom_ReturnsFalse()
     {
-        var result = _tracker.GetChangedTimetables(Guid.NewGuid(), out _);
+        var result = _tracker.TryGetChangedTimetables(Guid.NewGuid(), out _);
 
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void GetChangedTimetables_GetOnExistingRoom_ReturnsEmpty()
+    public void TryGetChangedTimetables_GetOnExistingRoom_ReturnsEmpty()
     {
         var roomId = Guid.NewGuid();
 
         _tracker.AddRoom(roomId);
-        _tracker.GetChangedTimetables(roomId, out var res).ShouldBeTrue();
+        _tracker.TryGetChangedTimetables(roomId, out var res).ShouldBeTrue();
 
         res.ShouldBeEmpty();
     }
 
     [Fact]
-    public void GetChangedTimetables_GetOnExistingRoom_ReturnsCorrectChanged()
+    public void TryGetChangedTimetables_GetOnExistingRoom_ReturnsCorrectChanged()
     {
         var roomId = Guid.NewGuid();
 
@@ -770,7 +806,7 @@ public class RoomTrackerTests
         changedTimetable.Name = "Changed!";
         _tracker.AddOrUpdateTimetable(changedTimetable);
 
-        _tracker.GetChangedTimetables(roomId, out var res).ShouldBeTrue();
+        _tracker.TryGetChangedTimetables(roomId, out var res).ShouldBeTrue();
         res.ShouldContain(changedTimetable);
     }
 
@@ -838,7 +874,7 @@ public class RoomTrackerTests
         var res = _tracker.RemoveTimetablesFromChanged([changed.Id]);
         res.ShouldBeEmpty();
 
-        _tracker.GetChangedTimetables(roomId, out var changedRes).ShouldBeTrue();
+        _tracker.TryGetChangedTimetables(roomId, out var changedRes).ShouldBeTrue();
         changedRes.ShouldBe([secondChanged]);
     }
 
