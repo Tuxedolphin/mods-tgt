@@ -1,8 +1,7 @@
 import { debounce } from "es-toolkit";
 import { Err, Ok, Result } from "ts-results-es";
 import { check_handle } from "./db_operations";
-import { token_information } from "../shared/shared.svelte";
-import type { StickyNote } from "@lucide/svelte";
+import type { RoomRole } from "$lib/types/db_raw_types";
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -14,6 +13,19 @@ export function json_tryparse<T>(text: string): Result<T, string> {
   } catch {
     return Err(text);
   }
+}
+
+export function format_room_role_to_string(role: RoomRole): string {
+  switch (role) {
+    case "editor":
+      return "Editor";
+    case "owner":
+      return "Owner";
+    case "viewer":
+      return "Viewer";
+  }
+
+  return "Invalid";
 }
 
 export const query_available_handle = debounce(

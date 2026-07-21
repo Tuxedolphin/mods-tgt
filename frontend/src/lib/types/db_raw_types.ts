@@ -1,3 +1,5 @@
+export type RoomRole = "owner" | "editor" | "viewer";
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
@@ -26,7 +28,7 @@ export interface Profile {
 }
 
 export interface RoomProfile extends Profile {
-  role: "owner" | "editor" | "viewer";
+  role: RoomRole;
   isInRoom: boolean;
 }
 

@@ -1,6 +1,8 @@
 <script lang="ts">
+  import UserAvatarComponent from "$lib/components/Profile/UserAvatarComponent.svelte";
   import { currentUserInformation } from "$lib/shared/shared.svelte";
   import type { RoomProfile, TimetableResponse } from "$lib/types/db_raw_types";
+  import { format_room_role_to_string } from "$lib/utils/frontend_utils";
   import GenericDialog from "../../GenericDialog.svelte";
 
   let copy_text = $state("Copy Link!");
@@ -29,9 +31,29 @@
     </p>
   </fieldset>
   <h1 class=" font-bold">People with Access:</h1>
-  {#each profiles as profile}
-    <p>{profile.username}</p>
-  {/each}
+  <ul class="list bg-base-100 rounded-box shadow-md">
+    {#each profiles as profile}
+      <li class="list-row">
+        <div>
+          <UserAvatarComponent user_info={profile}></UserAvatarComponent>
+        </div>
+
+        <div>
+          <div>{profile.username}</div>
+          <div class="text-xs font-semibold opacity-60">
+            @{profile.handle}
+          </div>
+        </div>
+
+        <div>
+          <button class="btn">
+            {format_room_role_to_string(profile.role)}
+          </button>
+        </div>
+      </li>
+    {/each}
+  </ul>
+
   <button
     class="btn w-full btn-primary"
     onclick={async () => {
