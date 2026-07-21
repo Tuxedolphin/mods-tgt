@@ -1,18 +1,20 @@
 using System.Net.Http.Headers;
 using Backend.DTOs;
 using Backend.Exceptions;
-using Backend.Settings;
-using Microsoft.Extensions.Options;
 using Supabase;
 
 namespace Backend.Services.Auth;
 
-public class AuthService(Client supabase, IHttpClientFactory httpClientFactory, IWebHostEnvironment web) : IAuthService
+public class AuthService(
+    Client supabase,
+    IHttpClientFactory httpClientFactory,
+    IWebHostEnvironment web
+) : IAuthService
 {
     private readonly Client _supabase = supabase;
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
-    private IWebHostEnvironment _webHostEnvironment = web;
+    private readonly IWebHostEnvironment _webHostEnvironment = web;
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
@@ -120,12 +122,11 @@ public class AuthService(Client supabase, IHttpClientFactory httpClientFactory, 
         if (!response.IsSuccessStatusCode)
         {
             var error = await response.Content.ReadAsStringAsync();
-            // Same, log exception here but return JSON payload to client:
-            Console.WriteLine($"Recovery email failed, with status {(int)response.StatusCode} {response.StatusCode}. Details: {error} ");
-
-            throw new ExternalServiceException(
-                error
+            Console.WriteLine(
+                $"Recovery email failed, with status {(int)response.StatusCode} {response.StatusCode}. Details: {error} "
             );
+
+            throw new ExternalServiceException(error);
         }
     }
 
@@ -139,11 +140,10 @@ public class AuthService(Client supabase, IHttpClientFactory httpClientFactory, 
         if (!verifyResponse.IsSuccessStatusCode)
         {
             string error = await verifyResponse.Content.ReadAsStringAsync();
-            // Reported error here instead, frontend expects a JSON error response:
-            Console.WriteLine($"Recovery token invalid or expired. Status: {(int)verifyResponse.StatusCode}. Details: {error}");
-            throw new ExternalServiceException(
-               error
+            Console.WriteLine(
+                $"Recovery token invalid or expired. Status: {(int)verifyResponse.StatusCode}. Details: {error}"
             );
+            throw new ExternalServiceException(error);
         }
 
         SupabaseTokenResponse session =
@@ -159,20 +159,18 @@ public class AuthService(Client supabase, IHttpClientFactory httpClientFactory, 
         if (!updateResponse.IsSuccessStatusCode)
         {
             string error = await updateResponse.Content.ReadAsStringAsync();
-            Console.WriteLine($"Password update failed. Status: {(int)updateResponse.StatusCode}. Details: {error}");
-            throw new ExternalServiceException(
-                error
+            Console.WriteLine(
+                $"Password update failed. Status: {(int)updateResponse.StatusCode}. Details: {error}"
             );
+            throw new ExternalServiceException(error);
         }
 
-        // Logs user out of all sessions, according to best practice
         var logoutResponse = await PostGotrueAsync(
             "logout?scope=global",
             null,
             session.AccessToken
         );
 
-        // Logging this only since password has already changed
         if (!logoutResponse.IsSuccessStatusCode)
         {
             string error = await logoutResponse.Content.ReadAsStringAsync();
@@ -180,13 +178,15 @@ public class AuthService(Client supabase, IHttpClientFactory httpClientFactory, 
             // TODO: Add proper logging for this
             Console.WriteLine($"Logout error: {error}");
 
-            throw new ExternalServiceException(
-                error
-            );
+            throw new ExternalServiceException(error);
         }
     }
 
-    public async Task UpdatePasswordAsync(UpdatePasswordRequest request, string accessToken)
+    public async Task UpdatePasswordAsync(
+        UpdatePasswordRequest request,
+        string accessToken,
+        Guid userId
+    )
     {
         var response = await PutGotrueAsync(
             "user",

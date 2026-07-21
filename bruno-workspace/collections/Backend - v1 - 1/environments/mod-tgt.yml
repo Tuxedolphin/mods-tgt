@@ -3,20 +3,15 @@ variables:
   - name: baseUrl
     value: http://localhost:5233
   - name: email
-    value: developer@example.invalid
+    value: zhuzhen.zhuo@gmail.com
   - secret: true
     name: password
-    value: Replace-with-a-secure-password-123!
+  - secret: true
+    name: currentPassword
   - secret: true
     name: newPassword
-    value: Replace-with-another-secure-password-456!
-  - secret: true
-    name: accessToken
-  - secret: true
-    name: refreshToken
   - secret: true
     name: tokenHash
-    value: paste-recovery-token-hash-here
   - name: username
     value: Ada Lovelace
   - name: handle

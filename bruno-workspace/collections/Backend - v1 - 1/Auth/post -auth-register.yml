@@ -27,8 +27,8 @@ runtime:
           data.session?.accessToken &&
           data.session?.refreshToken
         ) {
-          bru.setEnvVar("accessToken", data.session.accessToken, { persist: false });
-          bru.setEnvVar("refreshToken", data.session.refreshToken, { persist: false });
+          bru.setVar("accessToken", data.session.accessToken);
+          bru.setVar("refreshToken", data.session.refreshToken);
         }
 
 settings:

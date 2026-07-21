@@ -42,6 +42,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // ==== Rooms ====
         modelBuilder.Entity<Room>().ToTable("Rooms");
+        modelBuilder.Entity<Room>().Property(r => r.Visibility).HasConversion<string>();
 
         // ==== RoomMembers ====
         modelBuilder.Entity<RoomMember>().ToTable("RoomMembers");

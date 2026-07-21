@@ -58,9 +58,7 @@ public class AuthController(IAuthService authService) : BaseController
     }
 
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPasswordAsync(
-        [FromBody] ForgotPasswordRequest request
-    )
+    public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
     {
         // Exceptions were swallowed here. Returns the exception to client-side to show
         // user.
@@ -79,7 +77,7 @@ public class AuthController(IAuthService authService) : BaseController
     [Authorize]
     public async Task<IActionResult> UpdatePasswordAsync([FromBody] UpdatePasswordRequest request)
     {
-        await _authService.UpdatePasswordAsync(request, GetBearerToken());
+        await _authService.UpdatePasswordAsync(request, GetBearerToken(), GetUserId());
         return NoContent();
     }
 

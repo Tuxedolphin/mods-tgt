@@ -23,8 +23,8 @@ runtime:
       code: |-
         const data = res.getBody();
         if (res.getStatus() === 200 && data.accessToken && data.refreshToken) {
-          bru.setEnvVar("accessToken", data.accessToken, { persist: false });
-          bru.setEnvVar("refreshToken", data.refreshToken, { persist: false });
+          bru.setVar("accessToken", data.accessToken);
+          bru.setVar("refreshToken", data.refreshToken);
         }
 
 settings:

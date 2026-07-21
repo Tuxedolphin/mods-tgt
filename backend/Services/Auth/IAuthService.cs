@@ -13,7 +13,7 @@ public interface IAuthService
 
     Task ResetPasswordAsync(ResetPasswordRequest request);
 
-    Task UpdatePasswordAsync(UpdatePasswordRequest request, string accessToken);
+    Task UpdatePasswordAsync(UpdatePasswordRequest request, string accessToken, Guid userId);
     Task LogoutAsync(string accessToken);
     Task LogoutAllAccountsAsync(string accessToken);
 }
