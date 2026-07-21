@@ -148,4 +148,20 @@ public class ProfileService(
         profile.AvatarUpdatedAt = null;
         await _context.SaveChangesAsync();
     }
+
+    public async Task UpdateUserCustomisation(
+        Guid userId,
+        UpdateProfileCustomisationRequest request
+    )
+    {
+        var profile =
+            await _context.Profiles.FindAsync(userId)
+            ?? throw new NotFoundException("UserId not found");
+
+        profile.Colour = request.Colour;
+        profile.DefaultTheme = request.DefaultTheme;
+
+        _context.Profiles.Update(profile);
+        await _context.SaveChangesAsync();
+    }
 }

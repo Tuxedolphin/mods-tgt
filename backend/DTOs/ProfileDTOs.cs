@@ -3,15 +3,19 @@ using Backend.Services.Profiles;
 
 namespace Backend.DTOs;
 
-public record ProfileResponse(Guid UserId, string? Username, string? Handle, string? AvatarUrl);
+public record ProfileResponse(
+    Guid UserId,
+    string? Username,
+    string? Handle,
+    string? Colour,
+    string? DefaultTheme,
+    string? AvatarUrl
+);
 
 public record HandleAvailabilityResponse(bool Available, HandleUnavailableReason? Reason);
 
 public record UpdateProfileRequest
 {
-    [Required]
-    public required Guid UserId { get; init; }
-
     [Required]
     [MinLength(
         ProfileRules.MinLength,
@@ -29,6 +33,15 @@ public record UpdateProfileRequest
 
     [Required]
     public required string Handle { get; init; }
+}
+
+public record UpdateProfileCustomisationRequest
+{
+    [Required]
+    public required string Colour { get; init; }
+
+    [Required]
+    public required string DefaultTheme { get; init; }
 }
 
 public record UpsertAvatarRequest(IFormFile File);

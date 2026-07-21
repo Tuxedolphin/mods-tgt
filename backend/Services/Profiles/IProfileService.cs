@@ -12,4 +12,5 @@ public interface IProfileService
 
     Task<ProfileResponse> UpsertUserAvatarAsync(Guid userId, Stream stream);
     Task DeleteUserAvatarAsync(Guid userId);
+    Task UpdateUserCustomisation(Guid userId, UpdateProfileCustomisationRequest request);
 }

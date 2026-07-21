@@ -2,7 +2,9 @@ CREATE TABLE IF NOT EXISTS public."Profiles" (
     "Id" uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     "Username" text,
     "Handle" text,
-    "AvatarUpdatedAt" timestamp with time zone
+    "AvatarUpdatedAt" timestamp with time zone,
+    "Colour" text,
+    "DefaultTheme" text
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS "IX_Profiles_Handle"

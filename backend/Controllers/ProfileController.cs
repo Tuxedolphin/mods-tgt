@@ -35,6 +35,16 @@ public class ProfileController(IProfileService profileService) : BaseController
         return NoContent();
     }
 
+    [HttpPut("me/customisation")]
+    public async Task<IActionResult> UpdateUserCustomisation(
+        [FromBody] UpdateProfileCustomisationRequest request
+    )
+    {
+        await _profileService.UpdateUserCustomisation(GetUserId(), request);
+
+        return NoContent();
+    }
+
     [HttpGet("check-handle")]
     [EnableRateLimiting("handle-check")]
     public async Task<ActionResult<HandleAvailabilityResponse>> CheckHandle(

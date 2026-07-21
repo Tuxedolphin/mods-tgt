@@ -16,13 +16,16 @@ public sealed class ProfileResponseMapper(IAvatarUrlProvider avatarUrlProvider)
     private readonly IAvatarUrlProvider _avatarUrlProvider = avatarUrlProvider;
 
     public ProfileResponse ToResponse(Profile profile) =>
-        new(profile.Id, profile.Username, profile.Handle, _avatarUrlProvider.GetAvatarUrl(profile));
+        new(
+            profile.Id,
+            profile.Username,
+            profile.Handle,
+            profile.Colour,
+            profile.DefaultTheme,
+            _avatarUrlProvider.GetAvatarUrl(profile)
+        );
 
-    public RoomMemberResponse ToRoomMemberResponse(
-        Profile profile,
-        RoomRole role,
-        bool isInRoom
-    )
+    public RoomMemberResponse ToRoomMemberResponse(Profile profile, RoomRole role, bool isInRoom)
     {
         var (username, handle) = RequireInitialisedProfile(profile);
 
