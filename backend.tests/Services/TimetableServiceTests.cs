@@ -305,6 +305,74 @@ public class TimetableServiceTests : IAsyncLifetime
         result[0].Id.ShouldBe(mainTimetable.Id);
     }
 
+    // === GetSharedTimetablesAsync ===
+
+    [Fact]
+    public async Task GetSharedTimetablesAsync_UserIsRoomMember_ReturnsMainTimetable()
+    {
+        var ownerId = await _context.SeedProfileAsync();
+        var memberId = await _context.SeedProfileAsync();
+        var mainTimetable = await _context.SeedTimetableAsync(ownerId);
+
+        _context.RoomMembers.Add(
+            new RoomMember
+            {
+                RoomId = mainTimetable.RoomId,
+                UserId = memberId,
+                Role = RoomRole.Viewer,
+            }
+        );
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetSharedTimetablesAsync(memberId);
+
+        var sharedTimetable = result.ShouldHaveSingleItem();
+        sharedTimetable.Id.ShouldBe(mainTimetable.Id);
+        sharedTimetable.Name.ShouldBe(mainTimetable.Name);
+    }
+
+    [Fact]
+    public async Task GetSharedTimetablesAsync_SharedRoomHasAdditionalTimetable_ReturnsOnlyMainTimetable()
+    {
+        var ownerId = await _context.SeedProfileAsync();
+        var memberId = await _context.SeedProfileAsync();
+        var mainTimetable = await _context.SeedTimetableAsync(ownerId);
+        var additionalTimetable = CreateTimetable(
+            roomId: mainTimetable.RoomId,
+            userId: memberId,
+            name: "Member timetable"
+        );
+
+        _context.Timetables.Add(additionalTimetable);
+        _context.RoomMembers.Add(
+            new RoomMember
+            {
+                RoomId = mainTimetable.RoomId,
+                UserId = memberId,
+                Role = RoomRole.Editor,
+            }
+        );
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetSharedTimetablesAsync(memberId);
+
+        var sharedTimetable = result.ShouldHaveSingleItem();
+        sharedTimetable.Id.ShouldBe(mainTimetable.Id);
+        sharedTimetable.Id.ShouldNotBe(additionalTimetable.Id);
+    }
+
+    [Fact]
+    public async Task GetSharedTimetablesAsync_UserIsNotRoomMember_DoesNotReturnTimetable()
+    {
+        var ownerId = await _context.SeedProfileAsync();
+        var userId = await _context.SeedProfileAsync();
+        await _context.SeedTimetableAsync(ownerId);
+
+        var result = await _service.GetSharedTimetablesAsync(userId);
+
+        result.ShouldBeEmpty();
+    }
+
     // === UpdateTimetableAsync ===
 
     [Fact]

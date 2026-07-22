@@ -1,0 +1,42 @@
+info:
+  name: get /timetable/shared
+  type: http
+  seq: 3
+  tags:
+    - Timetable
+
+http:
+  method: GET
+  url: "{{baseUrl}}/timetable/shared"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Shared timetable summaries
+    description: Returns the main timetables shared with the authenticated user.
+    request:
+      url: "{{baseUrl}}/timetable/shared"
+      method: GET
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          [
+            {
+              "id": "2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133",
+              "name": "Shared Semester 1 Plan",
+              "semester": 1,
+              "academicYear": "2026-2027",
+              "createdAt": "2026-07-21T09:30:00Z"
+            }
+          ]

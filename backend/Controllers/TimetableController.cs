@@ -53,4 +53,12 @@ public class TimetableController(ITimetableService service) : BaseController
         await _service.UpdateTimetableAsync(id, request, GetUserId());
         return NoContent();
     }
+
+    [HttpGet("shared")]
+    public async Task<ActionResult<List<TimetableSummaryResponse>>> GetSharedTimetablesAsync()
+    {
+        var timetables = await _service.GetSharedTimetablesAsync(GetUserId());
+
+        return Ok(timetables);
+    }
 }

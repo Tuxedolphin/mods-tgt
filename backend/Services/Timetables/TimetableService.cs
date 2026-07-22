@@ -88,8 +88,6 @@ public class TimetableService(AppDbContext context) : ITimetableService
 
     public async Task<List<TimetableSummaryResponse>> GetTimetablesAsync(Guid userId)
     {
-        // TODO: have some sort of friend system
-
         return await _context
             .Timetables.Where(t => t.UserId == userId && t.Id == t.RoomId) // We only get the "main" timetables
             .Select(t => new TimetableSummaryResponse
@@ -125,5 +123,17 @@ public class TimetableService(AppDbContext context) : ITimetableService
             timetable.ApplyTo(existing);
 
         return true;
+    }
+
+    public async Task<List<TimetableSummaryResponse>> GetSharedTimetablesAsync(Guid userId)
+    {
+        var timetables = await _context
+            .Timetables.Where(t =>
+                t.RoomId == t.Id
+                && _context.RoomMembers.Any(r => r.UserId == userId && r.RoomId == t.RoomId)
+            )
+            .ToListAsync();
+
+        return timetables.ConvertAll(t => t.ToSummaryResponse());
     }
 }
