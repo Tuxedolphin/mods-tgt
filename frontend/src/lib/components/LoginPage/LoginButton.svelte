@@ -33,12 +33,28 @@
       const tt = await get_user_info(result.value.accessToken);
 
       if (tt.isOk()) {
+        const result = tt.value;
+        // if (!tt.value.username) {
+        //
+        // } else {
+        //   $currentUserInformation.username = tt.value.username;
+        //   $currentUserInformation.userId = tt.value.userId;
+        //   $currentUserInformation.handle = tt.value.handle;
+        // }
+
+        // this is for v2.0.1 and before, handles & colour were not added:
+
+        if (result.username && (!result.handle || !result.colour)) {
+          // Welcome user back, and change their stuff
+          await goto(resolve("/welcome?action=back"));
+          return;
+        }
+
+        // this is default: the user does not have any information
         if (!tt.value.username) {
-          await goto(resolve("/newuser"));
-        } else {
-          $currentUserInformation.username = tt.value.username;
-          $currentUserInformation.userId = tt.value.userId;
-          $currentUserInformation.handle = tt.value.handle;
+          console.log("New User");
+          await goto(resolve("/welcome"));
+          return;
         }
       }
 

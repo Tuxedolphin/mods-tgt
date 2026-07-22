@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import { CircleX, TriangleAlert } from "@lucide/svelte";
   import { onDestroy, onMount } from "svelte";
   import type { Unsubscriber } from "svelte/store";
@@ -21,6 +20,7 @@
     Profile,
     RoomInformation,
     RoomProfile,
+    RoomVisibility,
     TimetableDetailedResponse,
     TimetablePostTemplate,
     TimetableResponse,
@@ -58,6 +58,8 @@
   let unsubscribe_from_mods_list: Unsubscriber;
   // svelte-ignore non_reactive_update
   let user_tt: TimetableDetailedResponse | undefined;
+  let room_information: RoomInformation | undefined = $state();
+  let visibility: RoomVisibility = $state("restricted");
   let error = $state("");
   onMount(async () => {
     let first_time_subscribe = true;
@@ -66,18 +68,17 @@
     $currentWorkingTimetable.timetable_id = params.timetable_id;
     await roomHub.connect($token_information.a!);
     try {
-      const info: RoomInformation | undefined = await $roomHub?.invoke(
+      room_information = await $roomHub?.invoke(
         "CreateOrJoinRoom",
         params.timetable_id,
       );
 
-      console.log(info);
+      visibility = room_information!.visibility;
 
       is_timetable_loaded = false;
-
-      timetable_metadata = info!.timetables[0];
-      profiles = info!.members;
-      $currentlySelectedMods = info!.timetables;
+      timetable_metadata = room_information!.timetables[0];
+      profiles = room_information!.members;
+      $currentlySelectedMods = room_information!.timetables;
 
       $roomHub?.on(
         "ReceiveTimetableUpdate",
@@ -96,13 +97,17 @@
           $currentlySelectedMods = msg;
         },
       );
+
+      $roomHub?.on("ReceiveRoomVisibilityUpdate", (msg) => {
+        visibility = msg;
+      });
       $roomHub?.on("ReceiveRoomMembersUpdate", (msg: RoomProfile[]) => {
         console.log(msg);
         profiles = msg;
       });
 
       // Find a timetable that belongs to current user:
-      user_tt = info!.timetables.find(
+      user_tt = room_information!.timetables.find(
         (x) => x.profile.userId === $currentUserInformation.userId,
       );
 
@@ -224,5 +229,12 @@
   </div>
 {/if}
 
-<ShareTimetableDialog {profiles} {timetable_metadata} bind:share_tt_dialog
-></ShareTimetableDialog>
+{#if room_information}
+  <ShareTimetableDialog
+    room_visibility={visibility}
+    base_timetable_id={params.timetable_id}
+    {profiles}
+    {timetable_metadata}
+    bind:share_tt_dialog
+  ></ShareTimetableDialog>
+{/if}

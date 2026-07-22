@@ -1,3 +1,6 @@
+export type RoomRole = "owner" | "editor" | "viewer";
+export type RoomVisibility = "publicView" | "publicEdit" | "restricted";
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
@@ -21,10 +24,12 @@ export interface Profile {
   username: string | null;
   avatarUrl: string | null;
   handle: string | null;
+  colour: string | null;
+  defaultTheme: string | null;
 }
 
 export interface RoomProfile extends Profile {
-  role: "owner" | "editor" | "viewer";
+  role: RoomRole;
   isInRoom: boolean;
 }
 
@@ -71,6 +76,7 @@ export interface RoomInformation {
   roomId: string;
   members: RoomProfile[];
   timetables: TimetableDetailedResponse[];
+  visibility: RoomVisibility;
 }
 
 export interface TimetableDetailedResponse extends TimetableResponse {
