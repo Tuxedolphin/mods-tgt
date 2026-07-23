@@ -125,6 +125,7 @@ public class RoomHub(
 
             await Clients.Caller.ReceiveTimetableUpdate(roomInformation.Timetables);
 
+            Console.WriteLine($"Room information sent to user {userId} for room {roomId}");
             return roomInformation;
         }
         catch (NotFoundException ex)

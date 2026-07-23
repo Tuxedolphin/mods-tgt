@@ -3,7 +3,7 @@ variables:
   - name: baseUrl
     value: http://localhost:5233
   - name: email
-    value: zhuzhen.zhuo@gmail.com
+    value: jordynwinnie@gmail.com
   - secret: true
     name: password
   - secret: true

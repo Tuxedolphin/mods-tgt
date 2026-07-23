@@ -44,6 +44,28 @@ public class ConflictException : Exception
         : base(message, inner) { }
 }
 
+public class SupabaseAuthException : Exception
+{
+    public SupabaseAuthException() { }
+
+    public SupabaseAuthException(string? message)
+        : base(message) { }
+
+    public SupabaseAuthException(string? message, Exception? innerException)
+        : base(message, innerException) { }
+
+    public SupabaseAuthException(int statusCode, string content)
+        : base(content)
+    {
+        StatusCode = statusCode;
+        Content = content;
+    }
+
+    public int StatusCode { get; }
+
+    public string? Content { get; }
+}
+
 public class ExternalServiceException : Exception
 {
     public ExternalServiceException() { }

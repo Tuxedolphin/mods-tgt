@@ -25,27 +25,13 @@ public class AuthService(
     public async Task LogoutAsync(string accessToken)
     {
         var response = await PostGotrueAsync("logout?scope=local", null, accessToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            throw new ExternalServiceException(
-                $"Logout failed. Status: {(int)response.StatusCode} {response.StatusCode}. Details: {errorContent}"
-            );
-        }
+        await EnsureGotrueSuccessAsync(response);
     }
 
     public async Task LogoutAllAccountsAsync(string accessToken)
     {
         var response = await PostGotrueAsync("logout?scope=global", null, accessToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            throw new ExternalServiceException(
-                $"Logout from all devices failed. Status: {(int)response.StatusCode} {response.StatusCode}. Details: {errorContent}"
-            );
-        }
+        await EnsureGotrueSuccessAsync(response);
     }
 
     public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request)
@@ -58,13 +44,7 @@ public class AuthService(
             new { refresh_token = request.RefreshToken }
         );
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            throw new ExternalServiceException(
-                $"Failed to refresh token. Status: {(int)response.StatusCode} {response.StatusCode}. Details: {errorContent}"
-            );
-        }
+        await EnsureGotrueSuccessAsync(response);
 
         var supabaseResponse = await response.Content.ReadFromJsonAsync<SupabaseTokenResponse>();
         return ValidateTokens(
@@ -119,15 +99,7 @@ public class AuthService(
             new { email = request.Email }
         );
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(
-                $"Recovery email failed, with status {(int)response.StatusCode} {response.StatusCode}. Details: {error} "
-            );
-
-            throw new ExternalServiceException(error);
-        }
+        await EnsureGotrueSuccessAsync(response);
     }
 
     public async Task ResetPasswordAsync(ResetPasswordRequest request)
@@ -137,14 +109,7 @@ public class AuthService(
             new { type = "recovery", token_hash = request.TokenHash }
         );
 
-        if (!verifyResponse.IsSuccessStatusCode)
-        {
-            string error = await verifyResponse.Content.ReadAsStringAsync();
-            Console.WriteLine(
-                $"Recovery token invalid or expired. Status: {(int)verifyResponse.StatusCode}. Details: {error}"
-            );
-            throw new ExternalServiceException(error);
-        }
+        await EnsureGotrueSuccessAsync(verifyResponse);
 
         SupabaseTokenResponse session =
             await verifyResponse.Content.ReadFromJsonAsync<SupabaseTokenResponse>()
@@ -156,14 +121,7 @@ public class AuthService(
             session.AccessToken
         );
 
-        if (!updateResponse.IsSuccessStatusCode)
-        {
-            string error = await updateResponse.Content.ReadAsStringAsync();
-            Console.WriteLine(
-                $"Password update failed. Status: {(int)updateResponse.StatusCode}. Details: {error}"
-            );
-            throw new ExternalServiceException(error);
-        }
+        await EnsureGotrueSuccessAsync(updateResponse);
 
         var logoutResponse = await PostGotrueAsync(
             "logout?scope=global",
@@ -171,15 +129,7 @@ public class AuthService(
             session.AccessToken
         );
 
-        if (!logoutResponse.IsSuccessStatusCode)
-        {
-            string error = await logoutResponse.Content.ReadAsStringAsync();
-
-            // TODO: Add proper logging for this
-            Console.WriteLine($"Logout error: {error}");
-
-            throw new ExternalServiceException(error);
-        }
+        await EnsureGotrueSuccessAsync(logoutResponse);
     }
 
     public async Task UpdatePasswordAsync(
@@ -194,13 +144,17 @@ public class AuthService(
             accessToken
         );
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new ExternalServiceException(
-                $"Failed to update password. Status: {(int)response.StatusCode} {response.StatusCode} Error: {error} "
-            );
-        }
+        await EnsureGotrueSuccessAsync(response);
+    }
+
+    // Wraps gotrue exceptions to get better error messages
+    private static async Task EnsureGotrueSuccessAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var content = await response.Content.ReadAsStringAsync();
+        throw new SupabaseAuthException((int)response.StatusCode, content);
     }
 
     private HttpClient CreateGotrueClient(string? accessToken)
