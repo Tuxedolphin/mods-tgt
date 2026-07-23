@@ -22,7 +22,7 @@
 </script>
 
 <button
-  class="btn btn-primary"
+  class="btn btn-primary w-full"
   onclick={async () => {
     const available_timetables_req = await get_timetables($token_information.a);
 
@@ -43,7 +43,7 @@
       timetable_infos = undefined;
     }
     dialog.show();
-  }}>Copy from other timetables</button
+  }}>Copy From Existing Timetable</button
 >
 
 <GenericDialog

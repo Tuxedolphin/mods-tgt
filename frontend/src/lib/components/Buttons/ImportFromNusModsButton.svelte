@@ -50,58 +50,60 @@
     reset();
   }}
 >
-  <h3 class="text-lg font-bold">Import from NUSMods! (Beta)</h3>
+  <div class="text-left">
+    <h3 class="text-lg font-bold">Import from NUSMods! (Beta)</h3>
 
-  <h3 class="text-error">
-    Importing from NUSMods Share Link is currently work in progress, please
-    check any errors after the import is complete!
-  </h3>
+    <h3 class="text-error">
+      Importing from NUSMods Share Link is currently work in progress, please
+      check any errors after the import is complete!
+    </h3>
 
-  <p class="py-4">Paste NUS Mods Share Link:</p>
-  <div class="flex w-full gap-1">
-    <input class="input w-full" bind:value={share_link} />
-    <button
-      class="btn btn-primary"
-      onclick={async () => {
-        const parsed_result = parse_mods_link(share_link);
+    <p class="py-4">Paste NUS Mods Share Link:</p>
+    <div class="flex w-full gap-1">
+      <input class="input w-full" bind:value={share_link} />
+      <button
+        class="btn btn-primary"
+        onclick={async () => {
+          const parsed_result = parse_mods_link(share_link);
 
-        if (second_click && parsed_result.isOk()) {
-          const { mods_info } = parsed_result.value;
-          await $roomHub?.invoke("UpdateTimetable", current_timetable_id, {
-            Name: timetable_name,
-            MetaData: mods_info,
-          });
-          reset();
-        }
+          if (second_click && parsed_result.isOk()) {
+            const { mods_info } = parsed_result.value;
+            await $roomHub?.invoke("UpdateTimetable", current_timetable_id, {
+              Name: timetable_name,
+              MetaData: mods_info,
+            });
+            reset();
+          }
 
-        if (parsed_result.isOk()) {
-          second_click = true;
+          if (parsed_result.isOk()) {
+            second_click = true;
 
-          sucess_text = `Managed to detect ${parsed_result.value.no_mods_detected} mods for ${format_semester_name(parsed_result.value.semester_no)} (${format_AY_name(acad_year)})`;
-        }
+            sucess_text = `Managed to detect ${parsed_result.value.no_mods_detected} mods for ${format_semester_name(parsed_result.value.semester_no)} (${format_AY_name(acad_year)})`;
+          }
 
-        if (parsed_result.isErr()) {
-          error = parsed_result.error;
-        }
-      }}>Import</button
-    >
+          if (parsed_result.isErr()) {
+            error = parsed_result.error;
+          }
+        }}>Import</button
+      >
+    </div>
+
+    {#if sucess_text}
+      <div class="text-success">
+        <p>Share link is valid!</p>
+        <p>{sucess_text}</p>
+        <p>Click on 'Import' again to confirm!</p>
+      </div>
+    {/if}
+    {#if error}
+      <div class="text-error">
+        <p>Error reading share link:</p>
+        <p>Problem: {error}</p>
+        <p>
+          Do also note that this feature is currently work in progress. It may
+          have issues reading certain NUSMods Share links.
+        </p>
+      </div>
+    {/if}
   </div>
-
-  {#if sucess_text}
-    <div class="text-success">
-      <p>Share link is valid!</p>
-      <p>{sucess_text}</p>
-      <p>Click on 'Import' again to confirm!</p>
-    </div>
-  {/if}
-  {#if error}
-    <div class="text-error">
-      <p>Error reading share link:</p>
-      <p>Problem: {error}</p>
-      <p>
-        Do also note that this feature is currently work in progress. It may
-        have issues reading certain NUSMods Share links.
-      </p>
-    </div>
-  {/if}
 </GenericDialog>

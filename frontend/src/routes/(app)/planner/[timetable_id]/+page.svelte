@@ -33,6 +33,7 @@
   import GenericDialog from "../../GenericDialog.svelte";
   import type { PageProps } from "./$types";
   import ShareTimetableDialog from "./ShareTimetableDialog.svelte";
+  import ModsSelectionComponent from "./ModsSelectionComponent.svelte";
 
   let is_timetable_loaded = $state(false);
   let profiles: RoomProfile[] = $state([]);
@@ -58,6 +59,11 @@
   let unsubscribe_from_mods_list: Unsubscriber;
   // svelte-ignore non_reactive_update
   let user_tt: TimetableDetailedResponse | undefined;
+
+  let user_perms: RoomProfile = $derived(
+    profiles.find((x) => x.userId == $currentUserInformation.userId),
+  );
+
   let room_information: RoomInformation | undefined = $state();
   let visibility: RoomVisibility = $state("restricted");
   let error = $state("");
@@ -78,6 +84,7 @@
       is_timetable_loaded = false;
       timetable_metadata = room_information!.timetables[0];
       profiles = room_information!.members;
+      console.log($state.snapshot(room_information));
       $currentlySelectedMods = room_information!.timetables;
 
       $roomHub?.on(
@@ -111,16 +118,6 @@
         (x) => x.profile.userId === $currentUserInformation.userId,
       );
 
-      if (!user_tt) {
-        const info_to_post: TimetablePostTemplate = {
-          academicYear: timetable_metadata.academicYear,
-          metaData: [],
-          name: timetable_metadata.name,
-          semester: timetable_metadata.semester,
-        };
-        await $roomHub?.invoke("CreateTimetable", info_to_post);
-      }
-
       unsubscribe_from_mods_list = currentlySelectedMods.subscribe(
         async (updated_timetable) => {
           if (first_time_subscribe) {
@@ -134,12 +131,10 @@
           }
 
           for (const timetable of updated_timetable) {
-            if (timetable.id === user_tt?.id) {
-              await $roomHub?.invoke("UpdateTimetable", timetable.id, {
-                Name: timetable.name,
-                MetaData: timetable.metaData,
-              });
-            }
+            await $roomHub?.invoke("UpdateTimetable", timetable.id, {
+              Name: timetable.name,
+              MetaData: timetable.metaData,
+            });
           }
         },
       );
@@ -198,28 +193,32 @@
       ></CircleX>
     </div>
   </div>
-  <div class="flex">
-    <Timeline></Timeline>
-    <div class="flex-1 flex-col">
-      <DaysOfWeekHeader
+  <div class="md:flex">
+    <!-- This is the main timetable view -->
+    <div class="flex w-[75%]">
+      <Timeline></Timeline>
+      <div class="flex-1 flex-col">
+        <DaysOfWeekHeader
+          acadYear={timetable_metadata.academicYear}
+          semester={timetable_metadata.semester}
+        ></DaysOfWeekHeader>
+        <TimetableComponent
+          timetables={currentTimetableDisplay}
+          acadYear={timetable_metadata.academicYear}
+          semester={timetable_metadata.semester}
+        ></TimetableComponent>
+      </div>
+    </div>
+
+    <!-- This is the module seleciton view (your own) -->
+    <div class="w-[25%] px-4">
+      <ModsSelectionComponent
         acadYear={timetable_metadata.academicYear}
         semester={timetable_metadata.semester}
-      ></DaysOfWeekHeader>
-      <TimetableComponent
-        timetables={currentTimetableDisplay}
-        acadYear={timetable_metadata.academicYear}
-        semester={timetable_metadata.semester}
-      ></TimetableComponent>
+        timetable_id={user_tt?.id}
+      ></ModsSelectionComponent>
     </div>
   </div>
-
-  <SearchBar
-    timetable_id={user_tt?.id as string}
-    acadYear={timetable_metadata.academicYear}
-    semester={timetable_metadata.semester}
-  ></SearchBar>
-
-  <ModListGroup acadYear={timetable_metadata.academicYear}></ModListGroup>
 {/if}
 
 {#if error}
