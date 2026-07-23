@@ -1,6 +1,14 @@
 <script lang="ts">
-  import { currentlySelectedMods } from "$lib/shared/shared.svelte";
+  import {
+    currentlySelectedMods,
+    currentUserInformation,
+  } from "$lib/shared/shared.svelte";
   import { roomHub } from "$lib/stores/roomHub";
+  import type {
+    RoomProfile,
+    RoomRole,
+    RoomVisibility,
+  } from "$lib/types/db_raw_types";
   import { getFullModInfo } from "$lib/utils/fetch_from_cache";
   import { removeModEntry } from "$lib/utils/format_db_information";
   import { X } from "@lucide/svelte";
@@ -12,6 +20,8 @@
     semester: number;
     timetable_id: string | undefined;
     timetable_name: string;
+    room_profiles: RoomProfile[];
+    visibility: RoomVisibility;
   }
 
   let mods_list = $derived(
@@ -26,7 +36,14 @@
     acadYear,
     semester,
     timetable_name,
+    room_profiles,
+    visibility,
   }: ModsSelectionComponentProps = $props();
+
+  let user_current_perms: "annon" | RoomRole = $derived(
+    room_profiles.find((x) => x.userId === $currentUserInformation.userId)
+      ?.role || "annon",
+  );
 </script>
 
 <!-- Mods List -->
@@ -44,30 +61,32 @@
           </div>
         {/await}
       </div>
-      <button
-        onclick={async () => {
-          currentlySelectedMods.set(
-            removeModEntry(
-              $currentlySelectedMods,
-              acadYear,
-              semester,
-              timetable_id!,
-              mods[0],
-            ),
-          );
+      {#if visibility === "publicEdit" || user_current_perms === "owner" || user_current_perms === "editor"}
+        <button
+          onclick={async () => {
+            currentlySelectedMods.set(
+              removeModEntry(
+                $currentlySelectedMods,
+                acadYear,
+                semester,
+                timetable_id!,
+                mods[0],
+              ),
+            );
 
-          const new_data = get(currentlySelectedMods).find(
-            (x) => x.id === timetable_id,
-          )!.metaData;
+            const new_data = get(currentlySelectedMods).find(
+              (x) => x.id === timetable_id,
+            )!.metaData;
 
-          await $roomHub?.invoke("UpdateTimetable", timetable_id, {
-            Name: timetable_name,
-            MetaData: new_data,
-          });
-        }}
-      >
-        <X></X>
-      </button>
+            await $roomHub?.invoke("UpdateTimetable", timetable_id, {
+              Name: timetable_name,
+              MetaData: new_data,
+            });
+          }}
+        >
+          <X></X>
+        </button>
+      {/if}
     </li>
   {/each}
 </ul>

@@ -19,11 +19,12 @@
     acadYear: string;
     semester: number;
     timetable_id: string | undefined;
-    visibility: RoomVisibility;
+
     timetable_name: string;
     is_friend: boolean;
     user_favourite_color: string;
     room_profiles: RoomProfile[];
+    visibility: RoomVisibility;
   }
 
   let {
@@ -56,7 +57,7 @@
   Your Mod List:
 {/if}
 
-{#if user_current_perms === "owner" || user_current_perms === "editor"}
+{#if visibility === "publicEdit" || user_current_perms === "owner" || user_current_perms === "editor"}
   <SearchBar
     {user_favourite_color}
     {timetable_name}
@@ -64,24 +65,21 @@
     {semester}
     {timetable_id}
   ></SearchBar>
-{:else if user_current_perms === "annon" && visibility === "publicEdit"}
-  <p>{visibility}</p>
-  <SearchBar
-    {user_favourite_color}
-    {timetable_name}
-    {acadYear}
-    {semester}
-    {timetable_id}
-  ></SearchBar>
-{:else}{/if}
+{/if}
 
 {#if selected_user_mods_list.length !== 0}
-  <SelectedModuleList {timetable_name} {acadYear} {semester} {timetable_id}
+  <SelectedModuleList
+    {visibility}
+    {room_profiles}
+    {timetable_name}
+    {acadYear}
+    {semester}
+    {timetable_id}
   ></SelectedModuleList>
 {:else}
   <div class="text-center">List is empty.</div>
   {#if !is_friend}
-    {#if user_current_perms === "owner" || user_current_perms === "editor" || (user_current_perms === "annon" && visibility === "publicEdit")}
+    {#if visibility === "publicEdit" || user_current_perms === "owner" || user_current_perms === "editor"}
       <div class="flex text-center flex-col">
         <ImportFromNusModsButton
           user_favourite_colour={user_favourite_color}

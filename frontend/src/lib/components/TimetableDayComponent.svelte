@@ -55,46 +55,50 @@
   const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
 
   async function changeTimetable() {
-    if (user_current_perms === "annon" && visibility !== "publicEdit") return;
+    if (
+      visibility === "publicEdit" ||
+      user_current_perms === "editor" ||
+      user_current_perms === "owner"
+    ) {
+      if ($chooseModState.lessonType === "") {
+        $chooseModState = {
+          lessonType: timeTableDayInfo.lessonSchedule.lessonType,
+          moduleCode: timeTableDayInfo.moduleCode,
+          classNo: timeTableDayInfo.lessonSchedule.classNo,
+          colour: timetable_colour,
+          selectedTimetableId: timetable_id,
+        };
+      } else {
+        currentlySelectedMods.set(
+          await modifyModEntry(
+            $currentlySelectedMods,
+            acadYear,
+            semester,
+            timetable_id,
+            timeTableDayInfo.moduleCode,
+            timeTableDayInfo.lessonSchedule.lessonType,
+            timeTableDayInfo.lessonSchedule.classNo,
+            $chooseModState,
+          ),
+        );
 
-    if ($chooseModState.lessonType === "") {
-      $chooseModState = {
-        lessonType: timeTableDayInfo.lessonSchedule.lessonType,
-        moduleCode: timeTableDayInfo.moduleCode,
-        classNo: timeTableDayInfo.lessonSchedule.classNo,
-        colour: timetable_colour,
-        selectedTimetableId: timetable_id,
-      };
-    } else {
-      currentlySelectedMods.set(
-        await modifyModEntry(
-          $currentlySelectedMods,
-          acadYear,
-          semester,
-          timetable_id,
-          timeTableDayInfo.moduleCode,
-          timeTableDayInfo.lessonSchedule.lessonType,
-          timeTableDayInfo.lessonSchedule.classNo,
-          $chooseModState,
-        ),
-      );
+        const new_data = get(currentlySelectedMods).find(
+          (x) => x.id === timetable_id,
+        )!.metaData;
 
-      const new_data = get(currentlySelectedMods).find(
-        (x) => x.id === timetable_id,
-      )!.metaData;
+        await $roomHub?.invoke("UpdateTimetable", timetable_id, {
+          Name: timetable_name,
+          MetaData: new_data,
+        });
 
-      await $roomHub?.invoke("UpdateTimetable", timetable_id, {
-        Name: timetable_name,
-        MetaData: new_data,
-      });
-
-      $chooseModState = {
-        classNo: "",
-        colour: "",
-        lessonType: "",
-        moduleCode: "",
-        selectedTimetableId: "",
-      };
+        $chooseModState = {
+          classNo: "",
+          colour: "",
+          lessonType: "",
+          moduleCode: "",
+          selectedTimetableId: "",
+        };
+      }
     }
   }
 
