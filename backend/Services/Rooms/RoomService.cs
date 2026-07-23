@@ -238,9 +238,11 @@ public class RoomService(
         [
             .. timetables
                 .Select(t =>
-                    profilesById.TryGetValue(t.UserId, out var profile)
-                        ? t.ToDetailedResponse(_profileResponseMapper.ToResponse(profile))
-                        : null
+                    t.ToDetailedResponse(
+                        t.UserId is { } uid && profilesById.TryGetValue(uid, out var profile)
+                            ? _profileResponseMapper.ToResponse(profile)
+                            : ProfileResponse.DeletedUser
+                    )
                 )
                 .OfType<TimetableDetailedResponse>(),
         ];

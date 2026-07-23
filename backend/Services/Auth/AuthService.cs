@@ -12,8 +12,8 @@ public class AuthService(
 ) : IAuthService
 {
     private readonly Client _supabase = supabase;
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private readonly IWebHostEnvironment _webHostEnvironment = web;
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)

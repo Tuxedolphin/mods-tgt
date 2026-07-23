@@ -22,12 +22,14 @@ public class Timetable
     public required Guid Id { get; set; }
 
     // No FK constraint since users is handled by supabase auth,
-    // and apparently this is standard practice for supabase auth since they have thier own table
-    public required Guid UserId { get; set; }
+    // and apparently this is standard practice for supabase auth since they have their own table
+
+    // Nullable for the case when users are deleted
+    public Guid? UserId { get; set; }
 
     public required string Name { get; set; } = null!;
 
-    // The following fields are placed here, instead of TimetableModule since all the modules will havae the same semester and academic year
+    // The following fields are placed here, instead of TimetableModule since all the modules will have the same semester and academic year
     public required int Semester { get; set; }
     public required string AcademicYear { get; set; } = null!;
 

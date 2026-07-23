@@ -24,7 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasOne<Profile>()
             .WithMany()
             .HasForeignKey(t => t.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<Timetable>().OwnsMany(t => t.MetaData, builder => builder.ToJson());
         modelBuilder

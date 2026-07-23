@@ -10,7 +10,17 @@ public record ProfileResponse(
     string? Colour,
     string? DefaultTheme,
     string? AvatarUrl
-);
+)
+{
+    public static readonly ProfileResponse DeletedUser = new(
+        Guid.Empty,
+        "[Deleted User]",
+        null,
+        null,
+        null,
+        null
+    );
+}
 
 public record HandleAvailabilityResponse(bool Available, HandleUnavailableReason? Reason);
 
