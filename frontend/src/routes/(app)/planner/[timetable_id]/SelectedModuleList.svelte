@@ -8,7 +8,7 @@
   interface ModsSelectionComponentProps {
     acadYear: string;
     semester: number;
-    timetable_id: string | null;
+    timetable_id: string | undefined;
   }
 
   let mods_list = $derived(

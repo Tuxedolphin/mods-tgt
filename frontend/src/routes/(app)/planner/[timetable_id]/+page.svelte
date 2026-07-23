@@ -34,6 +34,7 @@
   import type { PageProps } from "./$types";
   import ShareTimetableDialog from "./ShareTimetableDialog.svelte";
   import ModsSelectionComponent from "./ModsSelectionComponent.svelte";
+  import FriendsMods from "./FriendsMods.svelte";
 
   let is_timetable_loaded = $state(false);
   let profiles: RoomProfile[] = $state([]);
@@ -58,7 +59,7 @@
   let { params }: PageProps = $props();
   let unsubscribe_from_mods_list: Unsubscriber;
   // svelte-ignore non_reactive_update
-  let user_tt: TimetableDetailedResponse | undefined;
+  let user_tt: TimetableDetailedResponse | undefined = $state();
 
   let user_perms: RoomProfile = $derived(
     profiles.find((x) => x.userId == $currentUserInformation.userId),
@@ -84,20 +85,18 @@
       is_timetable_loaded = false;
       timetable_metadata = room_information!.timetables[0];
       profiles = room_information!.members;
-      console.log($state.snapshot(room_information));
+
       $currentlySelectedMods = room_information!.timetables;
 
       $roomHub?.on(
         "ReceiveTimetableUpdate",
         (msg: TimetableDetailedResponse[]) => {
           update_from_room = true;
-
           // If a new timetable is created: update local userid:
           if (!user_tt) {
             user_tt = msg.find(
               (x) => x.profile.userId === $currentUserInformation.userId,
             );
-            // Force update:
             update_from_room = false;
           }
 
@@ -126,11 +125,13 @@
           }
 
           if (update_from_room) {
+            console.log("Hello");
             update_from_room = false;
             return;
           }
 
           for (const timetable of updated_timetable) {
+            if (timetable.profile.userId !== user_tt?.profile.userId) continue;
             await $roomHub?.invoke("UpdateTimetable", timetable.id, {
               Name: timetable.name,
               MetaData: timetable.metaData,
@@ -193,30 +194,39 @@
       ></CircleX>
     </div>
   </div>
-  <div class="md:flex">
+  <div class="flex-col flex">
     <!-- This is the main timetable view -->
-    <div class="flex w-[75%]">
-      <Timeline></Timeline>
-      <div class="flex-1 flex-col">
-        <DaysOfWeekHeader
+    <div class="flex-col md:flex-row flex">
+      <div class="flex flex-1 md:w-[75%]">
+        <Timeline></Timeline>
+        <div class="flex-1 flex-col">
+          <DaysOfWeekHeader
+            acadYear={timetable_metadata.academicYear}
+            semester={timetable_metadata.semester}
+          ></DaysOfWeekHeader>
+          <TimetableComponent
+            timetables={currentTimetableDisplay}
+            acadYear={timetable_metadata.academicYear}
+            semester={timetable_metadata.semester}
+          ></TimetableComponent>
+        </div>
+      </div>
+
+      <!-- This is the module seleciton view (your own) -->
+      <div class="md:w-[25%] px-4">
+        <ModsSelectionComponent
+          timetable_name={timetable_metadata.name}
+          {visibility}
           acadYear={timetable_metadata.academicYear}
           semester={timetable_metadata.semester}
-        ></DaysOfWeekHeader>
-        <TimetableComponent
-          timetables={currentTimetableDisplay}
-          acadYear={timetable_metadata.academicYear}
-          semester={timetable_metadata.semester}
-        ></TimetableComponent>
+          timetable_id={user_tt?.id}
+        ></ModsSelectionComponent>
       </div>
     </div>
 
-    <!-- This is the module seleciton view (your own) -->
-    <div class="w-[25%] px-4">
-      <ModsSelectionComponent
-        acadYear={timetable_metadata.academicYear}
-        semester={timetable_metadata.semester}
-        timetable_id={user_tt?.id}
-      ></ModsSelectionComponent>
+    <!-- This is your friend's modules: -->
+    <div>
+      <FriendsMods></FriendsMods>
     </div>
   </div>
 {/if}

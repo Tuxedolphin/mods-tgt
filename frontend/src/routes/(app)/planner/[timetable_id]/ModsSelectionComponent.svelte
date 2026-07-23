@@ -9,15 +9,23 @@
   import ImportFromNUSMods from "$lib/components/ImportFromNUSMods.svelte";
   import ImportFromNusModsButton from "$lib/components/Buttons/ImportFromNusModsButton.svelte";
   import AddFromOtherTimetablesButton from "$lib/components/Buttons/AddFromOtherTimetablesButton.svelte";
+  import type { RoomVisibility } from "$lib/types/db_raw_types";
 
   interface ModsSelectionComponentProps {
     acadYear: string;
     semester: number;
-    timetable_id: string | null;
+    timetable_id: string | undefined;
+    visibility: RoomVisibility;
+    timetable_name: string;
   }
 
-  let { acadYear, semester, timetable_id }: ModsSelectionComponentProps =
-    $props();
+  let {
+    acadYear,
+    semester,
+    timetable_id,
+    visibility,
+    timetable_name,
+  }: ModsSelectionComponentProps = $props();
 
   let user_info = $derived(
     $currentlySelectedMods.find((x) => x.id === timetable_id),
@@ -33,7 +41,10 @@
       {user_info.profile.handle}
     {/if}
   </div>
-  <SearchBar {acadYear} {semester} {timetable_id}></SearchBar>
+  <SearchBar {timetable_name} {acadYear} {semester} {timetable_id}></SearchBar>
+{:else}
+  <div class="text-xl">Your Mods:</div>
+  <SearchBar {timetable_name} {acadYear} {semester} {timetable_id}></SearchBar>
 {/if}
 
 {#if selected_user_mods_list.length !== 0}
@@ -53,6 +64,7 @@
     <AddFromOtherTimetablesButton
       acad_year={acadYear}
       current_timetable_id={timetable_id}
+      timetable_name={$currentlySelectedMods[0].name}
       {semester}
     ></AddFromOtherTimetablesButton>
   </div>

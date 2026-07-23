@@ -1,14 +1,18 @@
 <script lang="ts">
   import { token_information } from "$lib/shared/shared.svelte";
   import { roomHub } from "$lib/stores/roomHub";
-  import type { TimetableInfos } from "$lib/types/db_raw_types";
+  import type {
+    TimetableInfos,
+    TimetablePostTemplate,
+  } from "$lib/types/db_raw_types";
   import { get_timetables } from "$lib/utils/db_operations";
   import GenericDialog from "../../../routes/(app)/GenericDialog.svelte";
 
   interface AddFromOtherTimetablesButtonProps {
     acad_year: string;
     semester: number;
-    current_timetable_id: string;
+    current_timetable_id: string | undefined;
+    timetable_name: string;
   }
   // svelte-ignore non_reactive_update
   let dialog: HTMLDialogElement;
@@ -18,6 +22,7 @@
     acad_year,
     semester,
     current_timetable_id,
+    timetable_name,
   }: AddFromOtherTimetablesButtonProps = $props();
 </script>
 
@@ -70,6 +75,17 @@
           class="btn btn-primary"
           onclick={async () => {
             // console.log(current_timetable_id)
+            if (!current_timetable_id) {
+              const info_to_post: TimetablePostTemplate = {
+                academicYear: acad_year,
+                metaData: [],
+                name: timetable_name,
+                semester: semester,
+              };
+              await $roomHub?.invoke("CreateTimetable", info_to_post);
+            }
+
+            console.log(selected_tt_id, current_timetable_id);
             await $roomHub
               ?.invoke("CopyTimetableTo", selected_tt_id, current_timetable_id)
               .catch((e) => console.error(e));
