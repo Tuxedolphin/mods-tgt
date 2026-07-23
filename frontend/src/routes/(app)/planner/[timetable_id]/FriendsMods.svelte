@@ -5,6 +5,7 @@
   } from "$lib/shared/shared.svelte";
   import { onMount } from "svelte";
   import ModsSelectionComponent from "./ModsSelectionComponent.svelte";
+  import type { RoomProfile, RoomVisibility } from "$lib/types/db_raw_types";
 
   let friends_mods = $derived(
     $currentlySelectedMods.filter(
@@ -12,30 +13,22 @@
     ),
   );
 
-  onMount(() => {
-    console.log(friends_mods);
-  });
-
-  interface ModsSelectionComponentProps {
-    acadYear: string;
-    semester: number;
-    timetable_id: string | undefined;
+  interface FriendsModsProps {
+    visibility: RoomVisibility;
+    room_profiles: RoomProfile[];
   }
-
-  onMount(() => {
-    console.log("Friend:");
-    console.log($state.snapshot(friends_mods));
-  });
+  let { room_profiles, visibility }: FriendsModsProps = $props();
 </script>
 
 {#each friends_mods as mods}
   <ModsSelectionComponent
+    {room_profiles}
     user_favourite_color={mods.profile.colour!}
     is_friend={true}
     acadYear={mods.academicYear}
     semester={mods.semester}
     timetable_id={mods.id}
     timetable_name={mods.name}
-    visibility={"publicEdit"}
+    {visibility}
   ></ModsSelectionComponent>
 {/each}

@@ -207,6 +207,7 @@
       <!-- This is the module seleciton view (your own) -->
       <div class="md:w-[25%] px-4">
         <ModsSelectionComponent
+          room_profiles={profiles}
           is_friend={false}
           user_favourite_color={$currentUserInformation.colour!}
           timetable_name={timetable_metadata.name}
@@ -220,7 +221,7 @@
 
     <!-- This is your friend's modules: -->
     <div>
-      <FriendsMods></FriendsMods>
+      <FriendsMods {visibility} room_profiles={profiles}></FriendsMods>
     </div>
   </div>
 {/if}
