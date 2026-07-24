@@ -326,12 +326,13 @@ export async function update_user_profile(
     });
 
     const result = await update_profile_db.put("profile/me");
-    console.log(result);
+
     return Ok("");
   } catch (error) {
     console.log(error);
     try {
       if (error instanceof HTTPError) {
+        console.log(error);
         const errorResponse = error.data as ErrorResponse;
         const errorMessage = json_tryparse<ErrorInformation>(
           errorResponse.title,

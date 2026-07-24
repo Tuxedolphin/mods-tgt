@@ -18,9 +18,7 @@
   import { Check } from "@lucide/svelte";
   import { onMount } from "svelte";
   let welcome_back = $state(false);
-  let nameInput = $state("");
   let loading = $state(false);
-  let nameError = $state(false);
 
   let current_user_info = $state({} as Profile);
 
@@ -49,7 +47,7 @@
   });
 
   async function update_account() {
-    handle_error = "";
+    handle_error = change_error = "";
     loading = true;
     const change = await update_user_profile(
       current_user_info,
@@ -62,13 +60,14 @@
     );
 
     if (!change_preferences.isOk()) {
-      handle_error = change_preferences.error;
+      console.log(change_preferences.error);
+      change_error = change_preferences.error;
       loading = false;
       return;
     }
 
     if (!change.isOk()) {
-      handle_error = change.error;
+      change_error = change.error;
       loading = false;
       return;
     }
@@ -100,6 +99,7 @@
   let handle_error = $state("");
   let handle_success = $state("");
   let check_handle_state = $state("");
+  let change_error = $state("");
 </script>
 
 <ModTogetherHero attempt_redirect={false}>
@@ -117,6 +117,9 @@
   <fieldset class="fieldset">
     <legend class="fieldset-legend">Your name:</legend>
     <input type="text" class="input" bind:value={current_user_info.username} />
+    {#if change_error}
+      <p class="text-error">{change_error}</p>
+    {/if}
   </fieldset>
 
   <fieldset class="fieldset">
@@ -126,7 +129,7 @@
       type="text"
       class="input"
       bind:value={current_user_info.handle}
-      oninput={async (new_text) => {
+      oninput={async () => {
         check_handle_safe();
       }}
     />
