@@ -31,10 +31,14 @@
       );
     }
   }
+
+  let { children } = $props();
 </script>
 
-<CirclePlus size={32} class="cursor-pointer" onclick={() => dialog.show()}
-></CirclePlus>
+<div class="cursor-pointer" onclick={() => dialog.show()}>
+  {@render children()}
+</div>
+
 <!-- Open the modal using ID.showModal() method -->
 
 <GenericDialog
