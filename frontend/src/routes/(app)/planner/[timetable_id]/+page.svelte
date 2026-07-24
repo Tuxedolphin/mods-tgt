@@ -5,8 +5,6 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import DaysOfWeekHeader from "$lib/components/DaysOfWeekHeader.svelte";
-  import ModListGroup from "$lib/components/ModListGroup.svelte";
-  import SearchBar from "$lib/components/SearchBar.svelte";
   import Timeline from "$lib/components/Timeline.svelte";
   import TimetableComponent from "$lib/components/TimetableComponent.svelte";
   import {
@@ -17,12 +15,10 @@
   } from "$lib/shared/shared.svelte";
   import { roomHub } from "$lib/stores/roomHub";
   import type {
-    Profile,
     RoomInformation,
     RoomProfile,
     RoomVisibility,
     TimetableDetailedResponse,
-    TimetablePostTemplate,
     TimetableResponse,
   } from "$lib/types/db_raw_types";
   import { getTimetable } from "$lib/utils/format_db_information";
@@ -30,9 +26,11 @@
     format_AY_name,
     format_semester_name,
   } from "$lib/utils/formatting_utils";
-  import GenericDialog from "../../GenericDialog.svelte";
   import type { PageProps } from "./$types";
   import ShareTimetableDialog from "./ShareTimetableDialog.svelte";
+  import ModsSelectionComponent from "./ModsSelectionComponent.svelte";
+  import FriendsMods from "./FriendsMods.svelte";
+  import CurrentlyViewingDocumentComponent from "./CurrentlyViewingDocumentComponent.svelte";
 
   let is_timetable_loaded = $state(false);
   let profiles: RoomProfile[] = $state([]);
@@ -57,7 +55,8 @@
   let { params }: PageProps = $props();
   let unsubscribe_from_mods_list: Unsubscriber;
   // svelte-ignore non_reactive_update
-  let user_tt: TimetableDetailedResponse | undefined;
+  let user_tt: TimetableDetailedResponse | undefined = $state();
+
   let room_information: RoomInformation | undefined = $state();
   let visibility: RoomVisibility = $state("restricted");
   let error = $state("");
@@ -78,19 +77,18 @@
       is_timetable_loaded = false;
       timetable_metadata = room_information!.timetables[0];
       profiles = room_information!.members;
+
       $currentlySelectedMods = room_information!.timetables;
 
       $roomHub?.on(
         "ReceiveTimetableUpdate",
         (msg: TimetableDetailedResponse[]) => {
           update_from_room = true;
-
           // If a new timetable is created: update local userid:
           if (!user_tt) {
             user_tt = msg.find(
               (x) => x.profile.userId === $currentUserInformation.userId,
             );
-            // Force update:
             update_from_room = false;
           }
 
@@ -111,16 +109,6 @@
         (x) => x.profile.userId === $currentUserInformation.userId,
       );
 
-      if (!user_tt) {
-        const info_to_post: TimetablePostTemplate = {
-          academicYear: timetable_metadata.academicYear,
-          metaData: [],
-          name: timetable_metadata.name,
-          semester: timetable_metadata.semester,
-        };
-        await $roomHub?.invoke("CreateTimetable", info_to_post);
-      }
-
       unsubscribe_from_mods_list = currentlySelectedMods.subscribe(
         async (updated_timetable) => {
           if (first_time_subscribe) {
@@ -129,17 +117,13 @@
           }
 
           if (update_from_room) {
+            console.log("Hello");
             update_from_room = false;
             return;
           }
 
           for (const timetable of updated_timetable) {
-            if (timetable.id === user_tt?.id) {
-              await $roomHub?.invoke("UpdateTimetable", timetable.id, {
-                Name: timetable.name,
-                MetaData: timetable.metaData,
-              });
-            }
+            // if (timetable.profile.userId !== user_tt?.profile.userId) continue;
           }
         },
       );
@@ -174,18 +158,10 @@
         )}
       </h2>
     </div>
+    <!-- Profile View -->
     <div class="flex h-8 items-center gap-1">
-      <div class="flex gap-1">
-        {#each profiles as profile (profile.userId)}
-          {#if profile.userId !== $currentUserInformation.userId}
-            <div class="avatar avatar-placeholder">
-              <div class="w-8 rounded-full bg-neutral text-neutral-content">
-                <span class="text-xs">{profile.username?.charAt(0)}</span>
-              </div>
-            </div>
-          {/if}
-        {/each}
-      </div>
+      <CurrentlyViewingDocumentComponent {profiles}
+      ></CurrentlyViewingDocumentComponent>
       <button class="btn btn-accent" onclick={() => share_tt_dialog.show()}>
         Share Timetable
       </button>
@@ -198,28 +174,50 @@
       ></CircleX>
     </div>
   </div>
-  <div class="flex">
-    <Timeline></Timeline>
-    <div class="flex-1 flex-col">
-      <DaysOfWeekHeader
-        acadYear={timetable_metadata.academicYear}
-        semester={timetable_metadata.semester}
-      ></DaysOfWeekHeader>
-      <TimetableComponent
-        timetables={currentTimetableDisplay}
-        acadYear={timetable_metadata.academicYear}
-        semester={timetable_metadata.semester}
-      ></TimetableComponent>
+  <div class="flex-col flex">
+    <!-- This is the main timetable view -->
+    <div class="flex-col lg:flex-row flex">
+      <div class="flex flex-1 lg:w-[75%]">
+        <Timeline></Timeline>
+        <div class="flex-1 flex-col">
+          <DaysOfWeekHeader
+            acadYear={timetable_metadata.academicYear}
+            semester={timetable_metadata.semester}
+          ></DaysOfWeekHeader>
+          <TimetableComponent
+            room_profiles={profiles}
+            {visibility}
+            timetable_name={timetable_metadata.name}
+            timetables={currentTimetableDisplay}
+            acadYear={timetable_metadata.academicYear}
+            semester={timetable_metadata.semester}
+          ></TimetableComponent>
+        </div>
+      </div>
+
+      <!-- This is the module seleciton view (your own) -->
+      <div class="lg:w-[25%] lg:px-2">
+        <ModsSelectionComponent
+          room_profiles={profiles}
+          is_friend={false}
+          user_favourite_color={$currentUserInformation.colour!}
+          timetable_name={timetable_metadata.name}
+          {visibility}
+          acadYear={timetable_metadata.academicYear}
+          semester={timetable_metadata.semester}
+          timetable_id={user_tt?.id}
+        ></ModsSelectionComponent>
+      </div>
     </div>
+    {#if profiles.length > 1}
+      <!-- This is your friend's modules: -->
+      <div>
+        <FriendsMods {visibility} room_profiles={profiles}></FriendsMods>
+      </div>
+    {/if}
+
+    <div class="divider"></div>
   </div>
-
-  <SearchBar
-    timetable_id={user_tt?.id as string}
-    acadYear={timetable_metadata.academicYear}
-    semester={timetable_metadata.semester}
-  ></SearchBar>
-
-  <ModListGroup acadYear={timetable_metadata.academicYear}></ModListGroup>
 {/if}
 
 {#if error}

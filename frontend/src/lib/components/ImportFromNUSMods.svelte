@@ -2,7 +2,10 @@
   import { Import } from "@lucide/svelte";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
-  import { token_information } from "$lib/shared/shared.svelte";
+  import {
+    currentUserInformation,
+    token_information,
+  } from "$lib/shared/shared.svelte";
   import {
     create_empty_timetable,
     put_timetable_by_id,
@@ -26,7 +29,10 @@
 
   async function create_new_empty_timetable() {
     error = "";
-    const parsed_result = parse_mods_link(share_link);
+    const parsed_result = parse_mods_link(
+      share_link,
+      $currentUserInformation.colour!,
+    );
 
     if (parsed_result.isErr()) {
       error = parsed_result.error;

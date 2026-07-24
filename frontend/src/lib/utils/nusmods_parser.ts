@@ -1,6 +1,5 @@
 import { Err, Ok, type Result } from "ts-results-es";
 import type { TimetableModule } from "$lib/types/db_raw_types";
-import { get_random_colour } from "./formatting_utils";
 
 // Taken from NUS Mods Source Code:
 type lessonTypeAbbrev = { [lessonType: string]: string };
@@ -39,7 +38,10 @@ const ABBREV_TO_LESSON_TYPE: lessonTypeAbbrev = {
   WS: "Workshop",
 };
 
-export function parse_mods_link(link: string): Result<
+export function parse_mods_link(
+  link: string,
+  user_favourite_colour: string,
+): Result<
   {
     semester_no: number;
     no_mods_detected: number;
@@ -71,7 +73,7 @@ export function parse_mods_link(link: string): Result<
 
   // Sample module_classes: LAB:12,LEC:1
   for (const [module_code, module_classes] of url.searchParams) {
-    const colour = get_random_colour();
+    const colour = user_favourite_colour;
     const classes = module_classes.split(",");
 
     for (const curr_class of classes) {

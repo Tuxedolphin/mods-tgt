@@ -1,14 +1,18 @@
 <script lang="ts">
   import { token_information } from "$lib/shared/shared.svelte";
   import { roomHub } from "$lib/stores/roomHub";
-  import type { TimetableInfos } from "$lib/types/db_raw_types";
+  import type {
+    TimetableInfos,
+    TimetablePostTemplate,
+  } from "$lib/types/db_raw_types";
   import { get_timetables } from "$lib/utils/db_operations";
   import GenericDialog from "../../../routes/(app)/GenericDialog.svelte";
 
   interface AddFromOtherTimetablesButtonProps {
     acad_year: string;
     semester: number;
-    current_timetable_id: string;
+    current_timetable_id: string | undefined;
+    timetable_name: string;
   }
   // svelte-ignore non_reactive_update
   let dialog: HTMLDialogElement;
@@ -18,11 +22,12 @@
     acad_year,
     semester,
     current_timetable_id,
+    timetable_name,
   }: AddFromOtherTimetablesButtonProps = $props();
 </script>
 
 <button
-  class="btn btn-primary"
+  class="btn btn-primary w-full"
   onclick={async () => {
     const available_timetables_req = await get_timetables($token_information.a);
 
@@ -43,7 +48,7 @@
       timetable_infos = undefined;
     }
     dialog.show();
-  }}>Copy from other timetables</button
+  }}>Copy From Existing Timetable</button
 >
 
 <GenericDialog
@@ -52,7 +57,12 @@
     /* Intentionally Left Empty */
   }}
 >
-  <h3 class="text-lg font-bold">Copy from your other timetables!</h3>
+  <h3 class="text-lg font-bold">Copy from existing timetables! (Beta)</h3>
+  <p class="text-error">
+    Copying from timetables is a feature that is work in progress. It currently
+    does not work with certain timetable configurations (like empty timetables),
+    and sometimes requires refreshing the page and copying again for it to work.
+  </p>
   {#if timetable_infos}
     {#if timetable_infos.length !== 0}
       <p class="text">Select the timetable:</p>
@@ -69,10 +79,24 @@
         <button
           class="btn btn-primary"
           onclick={async () => {
-            // console.log(current_timetable_id)
-            await $roomHub
-              ?.invoke("CopyTimetableTo", selected_tt_id, current_timetable_id)
-              .catch((e) => console.error(e));
+            if (!current_timetable_id) {
+              const info_to_post: TimetablePostTemplate = {
+                academicYear: acad_year,
+                metaData: [],
+                name: timetable_name,
+                semester: semester,
+              };
+              await $roomHub?.invoke("CreateTimetable", info_to_post);
+            }
+
+            await $roomHub?.invoke(
+              "CopyTimetableTo",
+              selected_tt_id,
+              current_timetable_id,
+            );
+            if (dialog) {
+              dialog.close();
+            }
           }}>Copy!</button
         >
       </div>
