@@ -325,7 +325,7 @@ export async function update_user_profile(
       json: user_update_data,
     });
 
-    const result = await update_profile_db.put("profile/me");
+    const _result = await update_profile_db.put("profile/me");
 
     return Ok("");
   } catch (error) {

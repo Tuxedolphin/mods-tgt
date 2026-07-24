@@ -82,7 +82,11 @@
         </div>
       </div>
     {:else}
-      <TimetableList {availableTimetables}></TimetableList>
+      <TimetableList
+        deletion_allowed={true}
+        editing_allowed={true}
+        {availableTimetables}
+      ></TimetableList>
     {/if}
   {/if}
 {/if}
