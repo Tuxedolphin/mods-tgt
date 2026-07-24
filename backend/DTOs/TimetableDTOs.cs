@@ -3,7 +3,6 @@ using Backend.Models;
 
 namespace Backend.DTOs;
 
-
 public record TimetableSummaryResponse
 {
     public required Guid Id { get; init; }
@@ -11,6 +10,11 @@ public record TimetableSummaryResponse
     public required int Semester { get; init; }
     public required string AcademicYear { get; init; }
     public required DateTime CreatedAt { get; init; }
+}
+
+public record SharedTimetableSummaryResponse : TimetableSummaryResponse
+{
+    public required ProfileResponse Profile { get; init; }
 }
 
 public record TimetableResponse : TimetableSummaryResponse
