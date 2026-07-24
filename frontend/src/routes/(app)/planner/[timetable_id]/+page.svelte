@@ -35,6 +35,7 @@
   import ShareTimetableDialog from "./ShareTimetableDialog.svelte";
   import ModsSelectionComponent from "./ModsSelectionComponent.svelte";
   import FriendsMods from "./FriendsMods.svelte";
+  import CurrentlyViewingDocumentComponent from "./CurrentlyViewingDocumentComponent.svelte";
 
   let is_timetable_loaded = $state(false);
   let profiles: RoomProfile[] = $state([]);
@@ -162,18 +163,10 @@
         )}
       </h2>
     </div>
+    <!-- Profile View -->
     <div class="flex h-8 items-center gap-1">
-      <div class="flex gap-1">
-        {#each profiles as profile (profile.userId)}
-          {#if profile.userId !== $currentUserInformation.userId}
-            <div class="avatar avatar-placeholder">
-              <div class="w-8 rounded-full bg-neutral text-neutral-content">
-                <span class="text-xs">{profile.username?.charAt(0)}</span>
-              </div>
-            </div>
-          {/if}
-        {/each}
-      </div>
+      <CurrentlyViewingDocumentComponent {profiles}
+      ></CurrentlyViewingDocumentComponent>
       <button class="btn btn-accent" onclick={() => share_tt_dialog.show()}>
         Share Timetable
       </button>

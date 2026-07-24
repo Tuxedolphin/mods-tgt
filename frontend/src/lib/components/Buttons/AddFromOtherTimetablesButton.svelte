@@ -57,7 +57,12 @@
     /* Intentionally Left Empty */
   }}
 >
-  <h3 class="text-lg font-bold">Copy from your other timetables!</h3>
+  <h3 class="text-lg font-bold">Copy from existing timetables! (Beta)</h3>
+  <p class="text-error">
+    Copying from timetables is a feature that is work in progress. It currently
+    does not work with certain timetable configurations (like empty timetables),
+    and sometimes requires refreshing the page and copying again for it to work.
+  </p>
   {#if timetable_infos}
     {#if timetable_infos.length !== 0}
       <p class="text">Select the timetable:</p>
@@ -74,7 +79,6 @@
         <button
           class="btn btn-primary"
           onclick={async () => {
-            // console.log(current_timetable_id)
             if (!current_timetable_id) {
               const info_to_post: TimetablePostTemplate = {
                 academicYear: acad_year,
@@ -85,10 +89,14 @@
               await $roomHub?.invoke("CreateTimetable", info_to_post);
             }
 
-            console.log(selected_tt_id, current_timetable_id);
-            await $roomHub
-              ?.invoke("CopyTimetableTo", selected_tt_id, current_timetable_id)
-              .catch((e) => console.error(e));
+            await $roomHub?.invoke(
+              "CopyTimetableTo",
+              selected_tt_id,
+              current_timetable_id,
+            );
+            if (dialog) {
+              dialog.close();
+            }
           }}>Copy!</button
         >
       </div>
