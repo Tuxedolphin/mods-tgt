@@ -1,7 +1,7 @@
 using Backend.DTOs;
 using Backend.DTOs.Mappings;
 using Backend.Models;
-using Backend.Services.Profiles;
+using Backend.Tests.TestDoubles;
 using Shouldly;
 
 namespace Backend.Tests.Unit;
@@ -58,13 +58,4 @@ public class ProfileResponseMapperTests
             Handle = "test-user",
             AvatarUpdatedAt = avatarUpdatedAt,
         };
-
-    private sealed class TestAvatarUrlProvider : IAvatarUrlProvider
-    {
-        public string? GetAvatarUrl(Profile profile) =>
-            profile.AvatarUpdatedAt is null ? null : UrlFor(profile);
-
-        public static string UrlFor(Profile profile) =>
-            $"https://avatars.test/{profile.Id}/avatar.webp?v={profile.AvatarUpdatedAt!.Value.Ticks}";
-    }
 }
