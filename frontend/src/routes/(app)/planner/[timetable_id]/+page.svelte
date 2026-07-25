@@ -100,7 +100,6 @@
         visibility = msg;
       });
       $roomHub?.on("ReceiveRoomMembersUpdate", (msg: RoomProfile[]) => {
-        console.log(msg);
         profiles = msg;
       });
 
@@ -117,7 +116,6 @@
           }
 
           if (update_from_room) {
-            console.log("Hello");
             update_from_room = false;
             return;
           }

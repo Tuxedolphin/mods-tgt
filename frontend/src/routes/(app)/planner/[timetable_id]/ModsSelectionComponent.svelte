@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ToggleVisibilityComponent from "./ToggleVisibilityComponent.svelte";
+
   import SearchBar from "$lib/components/SearchBar.svelte";
   import { onMount } from "svelte";
   import SelectedModuleList from "./SelectedModuleList.svelte";
@@ -62,6 +64,8 @@
     >
       <UserAvatarComponent user_info={user_info?.profile}></UserAvatarComponent>
       <p>@{user_info?.profile.handle}'s Mod List</p>
+      <ToggleVisibilityComponent profile={user_info?.profile!}
+      ></ToggleVisibilityComponent>
     </div>
   </div>
 {:else}

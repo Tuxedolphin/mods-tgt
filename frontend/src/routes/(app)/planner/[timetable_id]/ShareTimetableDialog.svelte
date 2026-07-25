@@ -50,7 +50,6 @@
     on_failure: () => void,
     on_success: (result: Profile[]) => void,
   ) {
-    console.log(timetable_metadata);
     try {
       const result = (await $roomHub?.invoke(
         "SetMemberRole",
@@ -102,7 +101,6 @@
   }
 
   const search_for_member = debounce(async (handle: string) => {
-    console.log(timetable_metadata);
     const result = await $roomHub?.invoke(
       "FindUsersByHandle",
       handle,

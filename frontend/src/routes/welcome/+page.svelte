@@ -70,7 +70,6 @@
     );
 
     if (!change_preferences.isOk()) {
-      console.log(change_preferences.error);
       change_error = change_preferences.error;
       loading = false;
       return;

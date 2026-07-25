@@ -18,6 +18,8 @@ export const is_logging_out = writable(false);
 
 export const timetable_list_should_be_refreshed = writable(false);
 
+export const users_to_hide = writable([] as string[]);
+
 interface AccessTokenInfo {
   a: string; // Access Token
   b: boolean; // Guest Login

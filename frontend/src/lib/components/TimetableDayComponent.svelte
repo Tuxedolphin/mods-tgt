@@ -24,6 +24,8 @@
     timetable_name: string;
     room_profiles: RoomProfile[];
     visibility: RoomVisibility;
+    timetable_index: number;
+    timetable_inner_group_length: number;
   }
   const {
     timeTableDayInfo,
@@ -35,6 +37,8 @@
     timetable_name,
     room_profiles,
     visibility,
+    timetable_index,
+    timetable_inner_group_length,
   }: TimetableDayProps = $props();
 
   let user_current_perms: "annon" | RoomRole = $derived(
@@ -42,11 +46,8 @@
       ?.role || "annon",
   );
 
-  const width = $derived(100.0 / timeTableDayInfo.innerGroupLength);
-
-  const leftMarginPercentage = $derived(
-    timeTableDayInfo.innerGroupIndex * width,
-  );
+  const width = $derived(100.0 / timetable_inner_group_length);
+  const leftMarginPercentage = $derived(timetable_index * width);
   const showModName = $state(false);
 
   async function changeTimetable() {
@@ -122,12 +123,9 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
+  style:width="{width}%"
   style:margin-left="{leftMarginPercentage}%"
-  style:width="{width}%;"
   class="absolute
-
-
-  
 	{calculateHeight()}
 	{styledAsPossibleSelection()}
 	{calculateTopMargin()}  

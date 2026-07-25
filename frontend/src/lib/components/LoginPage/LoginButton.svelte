@@ -52,7 +52,6 @@
 
         // this is default: the user does not have any information
         if (!tt.value.username) {
-          console.log("New User");
           await goto(resolve("/welcome"));
           return;
         }
@@ -61,7 +60,6 @@
       if (urlParams.get("action") === "redirect") {
         currentWorkingTimetable.reset();
         const tt_id = urlParams.get("tt_id")!;
-        console.log("Redirect to: " + tt_id);
         goto(
           resolve("/(app)/planner/[timetable_id]", {
             timetable_id: tt_id,
