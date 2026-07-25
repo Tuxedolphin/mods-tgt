@@ -49,7 +49,7 @@
         <th>Name</th>
         <th>Academic Year</th>
         <th>Semester</th>
-        <th class="hidden md:block">Created</th>
+        <th class="hidden md:flex">Created</th>
         <th>Owner</th>
         <th>Actions</th>
       </tr>
@@ -73,8 +73,8 @@
 
           <td>{format_AY_name(timetable.academicYear)}</td>
           <td>{format_semester_name(timetable.semester)}</td>
-          <td class="hidden md:block"
-            >{date.toDateString()}, {date.toLocaleTimeString()}</td
+          <td class="hidden md:flex h-full">
+            <p class="p-2">{date.toDateString()}</p></td
           >
           <td
             >{#if timetable.profile.handle === $currentUserInformation.handle}
