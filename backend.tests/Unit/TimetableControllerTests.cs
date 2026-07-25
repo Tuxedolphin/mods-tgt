@@ -16,7 +16,7 @@ public class TimetableControllerTests
     {
         var userId = Guid.NewGuid();
         var service = Substitute.For<ITimetableService>();
-        var expected = new List<TimetableSummaryResponse>
+        var expected = new List<SharedTimetableSummaryResponse>
         {
             new()
             {
@@ -25,6 +25,14 @@ public class TimetableControllerTests
                 Semester = 1,
                 AcademicYear = "2026-2027",
                 CreatedAt = DateTime.UtcNow,
+                Profile = new ProfileResponse(
+                    userId,
+                    "Test user",
+                    "test-user",
+                    null,
+                    null,
+                    null
+                ),
             },
         };
         service.GetSharedTimetablesAsync(userId).Returns(expected);

@@ -6,6 +6,7 @@ using Backend.Models;
 using Backend.Services.Profiles;
 using Backend.Services.Rooms;
 using Backend.Services.Timetables;
+using Backend.Tests.TestDoubles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
@@ -39,7 +40,7 @@ public class RoomServiceTests : IAsyncLifetime
             NullLogger<RoomService>.Instance,
             _roomTracker,
             _profileTracker,
-            new TimetableService(_context),
+            new TimetableService(_context, _profileResponseMapper),
             _profileResponseMapper,
             _context
         );
@@ -1029,13 +1030,4 @@ public class RoomServiceTests : IAsyncLifetime
     }
 
     private static DateTime AvatarUpdatedAt() => new(2026, 7, 14, 12, 0, 0, DateTimeKind.Utc);
-
-    private sealed class TestAvatarUrlProvider : IAvatarUrlProvider
-    {
-        public string? GetAvatarUrl(Profile profile) =>
-            profile.AvatarUpdatedAt is { } updatedAt ? UrlFor(profile.Id, updatedAt) : null;
-
-        public static string UrlFor(Guid userId, DateTime updatedAt) =>
-            $"https://avatars.test/{userId}/avatar.webp?v={updatedAt.Ticks}";
-    }
 }
