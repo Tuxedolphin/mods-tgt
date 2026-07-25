@@ -281,7 +281,11 @@ export function findOverlappingTimeInfo(
     ["normalisedStartDuration", "lessonLength"],
     ["asc", "desc"],
   );
-  remove(allTime, (x) => users_to_hide.includes(x.timetableOwner!.userId));
+  remove(allTime, (x) =>
+    users_to_hide.includes(
+      x.timetableOwner?.userId ? x.timetableOwner!.userId : "",
+    ),
+  );
 
   for (let i = 0; i < allTime.length; i++) {
     const element = allTime[i];
