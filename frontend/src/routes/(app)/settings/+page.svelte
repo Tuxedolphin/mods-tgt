@@ -56,7 +56,7 @@
   }
 
   onDestroy(() => {
-    $currentUserInformation.defaultTheme = previous_user_info?.defaultTheme!;
+    $currentUserInformation.defaultTheme = previous_user_info?.defaultTheme;
   });
 </script>
 

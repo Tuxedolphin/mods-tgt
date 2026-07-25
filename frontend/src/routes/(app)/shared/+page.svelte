@@ -9,8 +9,8 @@
 
   import mods_tgt_peek from "$lib/assets/mods_tgt_peek.png?enhanced";
   import TimetableList from "./TimetableList.svelte";
-  import type { TimetableSummaryResponse } from "$lib/types/db_raw_types";
-  let availableTimetables: TimetableSummaryResponse[] = $state([]);
+  import type { SharedTimetableSummaryResponse } from "$lib/types/db_raw_types";
+  let availableTimetables: SharedTimetableSummaryResponse[] = $state([]);
   let loading = $state(false);
   let unsubscribe_from_refresh: Unsubscriber;
   onMount(async () => {

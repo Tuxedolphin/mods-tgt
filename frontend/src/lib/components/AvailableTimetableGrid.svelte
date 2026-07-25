@@ -5,11 +5,12 @@
     timetable_list_should_be_refreshed,
     token_information,
   } from "$lib/shared/shared.svelte";
-  import type { TimetableInfos } from "$lib/types/db_raw_types";
+
   import { get_timetables } from "$lib/utils/db_operations";
   import TimeTableCardComponent from "./TimeTableCardComponent.svelte";
+  import type { TimetableSummaryResponse } from "$lib/types/db_raw_types";
 
-  let availableTimetables: TimetableInfos = $state([]);
+  let availableTimetables: TimetableSummaryResponse[] = $state([]);
   let unsubscribe_from_refresh: Unsubscriber;
   onMount(async () => {
     unsubscribe_from_refresh = timetable_list_should_be_refreshed.subscribe(
@@ -18,7 +19,6 @@
         const timetable_request = await get_timetables($token_information.a);
         if (timetable_request.isOk()) {
           availableTimetables = [...timetable_request.value];
-          console.log("Refresh Tt");
         }
 
         timetable_list_should_be_refreshed.set(false);

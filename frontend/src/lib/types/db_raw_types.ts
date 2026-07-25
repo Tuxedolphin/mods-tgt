@@ -32,7 +32,7 @@ export interface Profile {
   avatarUrl: string | null;
   handle: string | null;
   colour: string | null;
-  defaultTheme: string | null;
+  defaultTheme: string | null | undefined;
 }
 
 export interface RoomProfile extends Profile {

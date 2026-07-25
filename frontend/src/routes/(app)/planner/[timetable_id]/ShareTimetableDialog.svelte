@@ -202,6 +202,9 @@
           >
             {#each ["editor", "viewer"] as role}
               <li>
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <!-- svelte-ignore a11y_missing_attribute -->
                 <a
                   class="flex justify-between"
                   onclick={async () => {
@@ -228,7 +231,11 @@
             {/each}
             <hr class="my-2 h-px border-0 bg-gray-200" />
 
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
             <li>
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <!-- svelte-ignore a11y_missing_attribute -->
               <a
                 class="flex justify-between"
                 onclick={async () => {
@@ -284,6 +291,9 @@
       >
         {#each ["publicView", "publicEdit", "restricted"] as visibility}
           <li>
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <!-- svelte-ignore a11y_missing_attribute -->
             <a
               class="flex justify-between"
               onclick={async () => {

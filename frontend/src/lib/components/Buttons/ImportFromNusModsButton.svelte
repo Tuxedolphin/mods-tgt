@@ -1,14 +1,6 @@
 <script lang="ts">
-  import {
-    currentUserInformation,
-    token_information,
-  } from "$lib/shared/shared.svelte";
   import { roomHub } from "$lib/stores/roomHub";
-  import type {
-    TimetableInfos,
-    TimetablePostTemplate,
-  } from "$lib/types/db_raw_types";
-  import { get_timetables } from "$lib/utils/db_operations";
+  import type { TimetablePostTemplate } from "$lib/types/db_raw_types";
   import {
     format_AY_name,
     format_semester_name,
