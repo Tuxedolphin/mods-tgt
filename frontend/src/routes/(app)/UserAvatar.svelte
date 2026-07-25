@@ -8,6 +8,7 @@
   import {
     currentUserInformation,
     currentWorkingTimetable,
+    is_logging_out,
     token_information,
   } from "$lib/shared/shared.svelte";
   import GenericDialog from "./GenericDialog.svelte";
@@ -66,12 +67,11 @@
       <button
         class="btn btn-error w-1/2"
         onclick={async () => {
-          $token_information.a = "";
-          $token_information.b = false;
-          currentUserInformation.reset();
-          currentWorkingTimetable.reset();
           const message = "Logout Successful";
-          await goto(resolve(`/login?error_description=${message}`));
+          $token_information.a = "";
+          await goto(
+            resolve(`/login?error_description=${message}&action=flush`),
+          );
         }}>Logout</button
       >
     </div>

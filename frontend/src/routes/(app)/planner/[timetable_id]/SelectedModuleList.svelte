@@ -58,7 +58,7 @@
     <li class="flex justify-between items-center p-4">
       <div class="flex gap-2 items-center">
         <div>
-          <button class="btn {mods[1][0].colour} btn-square w-8 h-8"> </button>
+          <!-- <button class="btn {mods[1][0].colour} btn-square w-8 h-8"> </button> -->
         </div>
         <div>
           {#await getFullModInfo(mods[0], acadYear) then mod_info}

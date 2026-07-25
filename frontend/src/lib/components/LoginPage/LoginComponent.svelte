@@ -3,7 +3,11 @@
 
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
-  import { token_information } from "$lib/shared/shared.svelte";
+  import {
+    currentUserInformation,
+    currentWorkingTimetable,
+    token_information,
+  } from "$lib/shared/shared.svelte";
   import LoginButton from "./LoginButton.svelte";
 
   let emailInput = $state("");
@@ -24,6 +28,15 @@
     for (const [key, value] of new URLSearchParams(window.location.search)) {
       if (key.includes("error_description")) {
         errorMessage = value;
+      }
+
+      if (key.includes("action")) {
+        if (value === "flush") {
+          $token_information.a = "";
+          $token_information.b = false;
+          currentUserInformation.reset();
+          currentWorkingTimetable.reset();
+        }
       }
     }
   });

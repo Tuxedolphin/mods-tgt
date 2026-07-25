@@ -31,10 +31,17 @@
       );
     }
   }
+
+  let { children } = $props();
 </script>
 
-<CirclePlus size={32} class="cursor-pointer" onclick={() => dialog.show()}
-></CirclePlus>
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="cursor-pointer" onclick={() => dialog.show()}>
+  {@render children()}
+</div>
+
 <!-- Open the modal using ID.showModal() method -->
 
 <GenericDialog

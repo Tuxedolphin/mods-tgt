@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-	logs: false;
+  themes: all;
 }
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";

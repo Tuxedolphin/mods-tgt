@@ -14,6 +14,8 @@ export const currentlySelectedMods = persisted(
   },
 );
 
+export const is_logging_out = writable(false);
+
 export const timetable_list_should_be_refreshed = writable(false);
 
 interface AccessTokenInfo {
@@ -32,6 +34,7 @@ export const currentUserInformation = persisted("clrsnus", {
   avatarUrl: null,
   handle: null,
   colour: null,
+  defaultTheme: "cupcake",
 } as Profile);
 
 export const currentWorkingTimetable = persisted(

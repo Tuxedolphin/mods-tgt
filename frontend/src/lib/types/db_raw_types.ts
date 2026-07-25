@@ -1,5 +1,12 @@
 export type RoomRole = "owner" | "editor" | "viewer";
 export type RoomVisibility = "publicView" | "publicEdit" | "restricted";
+export type ThemePreference = "system" | "light" | "dark";
+
+export const available_theme_preferences: ThemePreference[] = [
+  "dark",
+  "light",
+  "system",
+];
 
 export interface AuthResponse {
   accessToken: string;
@@ -25,7 +32,7 @@ export interface Profile {
   avatarUrl: string | null;
   handle: string | null;
   colour: string | null;
-  defaultTheme: string | null;
+  defaultTheme: string | null | undefined;
 }
 
 export interface RoomProfile extends Profile {
@@ -58,14 +65,16 @@ export interface ErrorInformation {
   msg: string;
 }
 
-export type TimetableInfos = TimetableSummaryResponse[];
-
 export interface TimetableSummaryResponse {
   id: string;
   name: string;
   semester: number;
   academicYear: string;
   createdAt: string;
+}
+
+export interface SharedTimetableSummaryResponse extends TimetableSummaryResponse {
+  profile: Profile;
 }
 
 export interface TimetableResponse extends TimetableSummaryResponse {

@@ -1,7 +1,49 @@
 import { debounce } from "es-toolkit";
 import { Err, Ok, Result } from "ts-results-es";
 import { check_handle } from "./db_operations";
-import type { RoomRole, RoomVisibility } from "$lib/types/db_raw_types";
+import type {
+  RoomRole,
+  RoomVisibility,
+  ThemePreference,
+} from "$lib/types/db_raw_types";
+
+export const daisy_ui_themes = [
+  "light",
+  "dark",
+  "cupcake",
+  "bumblebee",
+  "emerald",
+  "corporate",
+  "synthwave",
+  "retro",
+  "cyberpunk",
+  "valentine",
+  "halloween",
+  "garden",
+  "forest",
+  "aqua",
+  "lofi",
+  "pastel",
+  "fantasy",
+  "wireframe",
+  "black",
+  "luxury",
+  "dracula",
+  "cmyk",
+  "autumn",
+  "business",
+  "acid",
+  "lemonade",
+  "night",
+  "coffee",
+  "winter",
+  "dim",
+  "nord",
+  "sunset",
+  "caramellatte",
+  "abyss",
+  "silk",
+];
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -13,6 +55,19 @@ export function json_tryparse<T>(text: string): Result<T, string> {
   } catch {
     return Err(text);
   }
+}
+
+export function format_theme_preference_to_string(theme: ThemePreference) {
+  switch (theme) {
+    case "dark":
+      return "Dark Theme";
+    case "light":
+      return "Light Theme";
+    case "system":
+      return "Follow System";
+  }
+
+  return "Invalid";
 }
 
 export function get_room_visibility_description(role: RoomVisibility): string {

@@ -2,8 +2,8 @@
   import { token_information } from "$lib/shared/shared.svelte";
   import { roomHub } from "$lib/stores/roomHub";
   import type {
-    TimetableInfos,
     TimetablePostTemplate,
+    TimetableSummaryResponse,
   } from "$lib/types/db_raw_types";
   import { get_timetables } from "$lib/utils/db_operations";
   import GenericDialog from "../../../routes/(app)/GenericDialog.svelte";
@@ -16,7 +16,7 @@
   }
   // svelte-ignore non_reactive_update
   let dialog: HTMLDialogElement;
-  let timetable_infos: TimetableInfos | undefined = $state();
+  let timetable_infos: TimetableSummaryResponse[] | undefined = $state();
   let selected_tt_id = $state("");
   let {
     acad_year,
@@ -36,7 +36,8 @@
       timetable_infos = available_timetable;
 
       timetable_infos = timetable_infos.filter(
-        (x) => x.academicYear === acad_year && x.semester === semester,
+        (x: TimetableSummaryResponse) =>
+          x.academicYear === acad_year && x.semester === semester,
       );
 
       if (timetable_infos.length !== 0) {

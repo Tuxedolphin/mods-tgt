@@ -14,7 +14,10 @@
     update_user_profile,
   } from "$lib/utils/db_operations";
   import { colours } from "$lib/utils/formatting_utils";
-  import { query_available_handle } from "$lib/utils/frontend_utils";
+  import {
+    daisy_ui_themes,
+    query_available_handle,
+  } from "$lib/utils/frontend_utils";
   import { Check } from "@lucide/svelte";
   import { onMount } from "svelte";
   let welcome_back = $state(false);
@@ -39,7 +42,11 @@
       }
 
       if (!current_user_info.defaultTheme) {
-        current_user_info.defaultTheme = "system";
+        current_user_info.defaultTheme = "cupcake";
+      } else {
+        if (!daisy_ui_themes.includes(current_user_info.defaultTheme)) {
+          current_user_info.defaultTheme = "cupcake";
+        }
       }
     }
 

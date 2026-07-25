@@ -15,7 +15,7 @@ import type {
   HandleAvailabilityResponse,
   Profile,
   ProfileValidationErrorResponse,
-  TimetableInfos,
+  SharedTimetableSummaryResponse,
   TimetablePostTemplate,
   TimetableResponse,
   TimetableSummaryResponse,
@@ -325,7 +325,7 @@ export async function update_user_profile(
       json: user_update_data,
     });
 
-    const result = await update_profile_db.put("profile/me");
+    const _result = await update_profile_db.put("profile/me");
 
     return Ok("");
   } catch (error) {
@@ -545,9 +545,28 @@ export async function get_user_info(
   }
 }
 
+export async function get_shared_timetables(
+  access_token: string,
+): Promise<Result<SharedTimetableSummaryResponse[], string>> {
+  try {
+    const get_timetables_db = create_ky_instance({
+      authorised: true,
+      unauthorizedCheck: true,
+      auth_token: access_token,
+    });
+    const timetables = await get_timetables_db
+      .get("/timetable/shared")
+      .json<SharedTimetableSummaryResponse[]>();
+
+    return Ok(timetables);
+  } catch (error) {
+    return Err("Something went wrong " + error);
+  }
+}
+
 export async function get_timetables(
   access_token: string,
-): Promise<Result<TimetableInfos, string>> {
+): Promise<Result<TimetableSummaryResponse[], string>> {
   try {
     const get_timetables_db = create_ky_instance({
       authorised: true,
@@ -556,7 +575,7 @@ export async function get_timetables(
     });
     const timetables = await get_timetables_db
       .get("/timetable")
-      .json<TimetableInfos>();
+      .json<TimetableSummaryResponse[]>();
     return Ok(timetables);
   } catch (error) {
     return Err("Something went wrong " + error);
@@ -657,6 +676,28 @@ export async function put_timetable_by_id(
       auth_token: access_token,
     }).extend({
       json: timetable_data,
+    });
+    await put_timetable_id_db.put(`/timetable/${timetable_id}`);
+    return Ok("");
+  } catch (error) {
+    return Err("Something went wrong " + error);
+  }
+}
+
+export async function rename_tt_by_id(
+  access_token: string,
+  timetable_id: string,
+  new_name: string,
+): Promise<Result<string, string>> {
+  try {
+    const put_timetable_id_db = create_ky_instance({
+      authorised: true,
+      unauthorizedCheck: true,
+      auth_token: access_token,
+    }).extend({
+      json: {
+        name: new_name,
+      },
     });
     await put_timetable_id_db.put(`/timetable/${timetable_id}`);
     return Ok("");

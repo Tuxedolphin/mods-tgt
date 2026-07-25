@@ -26,7 +26,7 @@
   let second_click = $state(false);
   let academic_year = $state("2026-2027");
   let share_link = $state("");
-
+  let { children } = $props();
   async function create_new_empty_timetable() {
     error = "";
     const parsed_result = parse_mods_link(
@@ -92,8 +92,11 @@
   }
 </script>
 
-<Import size={32} class="cursor-pointer" onclick={() => dialog.show()}></Import>
-<!-- Open the modal using ID.showModal() method -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="cursor-pointer" onclick={() => dialog.show()}>
+  {@render children()}
+</div>
 
 <GenericDialog
   bind:dialog
