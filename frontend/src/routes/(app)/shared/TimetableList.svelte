@@ -4,8 +4,8 @@
   import {
     token_information,
     timetable_list_should_be_refreshed,
+    currentUserInformation,
   } from "$lib/shared/shared.svelte";
-  import type { TimetableInfos } from "$lib/types/db_raw_types";
   import {
     delete_timetable_by_id,
     put_timetable_by_id,
@@ -17,6 +17,10 @@
   } from "$lib/utils/formatting_utils";
   import { Pencil, Trash2, SquareArrowOutUpRight } from "@lucide/svelte";
   import GenericDialog from "../GenericDialog.svelte";
+  import type {
+    TimetableSummaryResponse,
+    SharedTimetableSummaryResponse,
+  } from "$lib/types/db_raw_types";
 
   let selected_timetable_name = $state("");
   let selected_timetable_id = $state("");
@@ -27,7 +31,7 @@
   interface TimetableListProps {
     editing_allowed: boolean;
     deletion_allowed: boolean;
-    availableTimetables: TimetableInfos;
+    availableTimetables: SharedTimetableSummaryResponse[];
   }
 
   let {
@@ -46,6 +50,7 @@
         <th>Academic Year</th>
         <th>Semester</th>
         <th class="hidden md:block">Created</th>
+        <th>Owner</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -70,6 +75,13 @@
           <td>{format_semester_name(timetable.semester)}</td>
           <td class="hidden md:block"
             >{date.toDateString()}, {date.toLocaleTimeString()}</td
+          >
+          <td
+            >{#if timetable.profile.handle === $currentUserInformation.handle}
+              You
+            {:else}
+              @{timetable.profile.handle}
+            {/if}</td
           >
           <td>
             <div class="flex gap-2">

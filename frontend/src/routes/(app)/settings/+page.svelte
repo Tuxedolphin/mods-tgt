@@ -70,7 +70,7 @@
       class="select capitalize"
       bind:value={current_user_info.defaultTheme}
       onchange={() => {
-        setTheme(current_user_info!.defaultTheme);
+        setTheme(current_user_info!.defaultTheme!);
       }}
     >
       {#each daisy_ui_themes as theme_preference}

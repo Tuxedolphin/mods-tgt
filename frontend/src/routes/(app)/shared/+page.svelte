@@ -5,11 +5,12 @@
     timetable_list_should_be_refreshed,
     token_information,
   } from "$lib/shared/shared.svelte";
-  import type { TimetableInfos } from "$lib/types/db_raw_types";
   import { get_shared_timetables } from "$lib/utils/db_operations";
-  import TimetableList from "./TimetableList.svelte";
+
   import mods_tgt_peek from "$lib/assets/mods_tgt_peek.png?enhanced";
-  let availableTimetables: TimetableInfos = $state([]);
+  import TimetableList from "./TimetableList.svelte";
+  import type { TimetableSummaryResponse } from "$lib/types/db_raw_types";
+  let availableTimetables: TimetableSummaryResponse[] = $state([]);
   let loading = $state(false);
   let unsubscribe_from_refresh: Unsubscriber;
   onMount(async () => {
@@ -34,7 +35,9 @@
   });
 
   onDestroy(() => {
-    unsubscribe_from_refresh();
+    if (unsubscribe_from_refresh) {
+      unsubscribe_from_refresh();
+    }
   });
 </script>
 

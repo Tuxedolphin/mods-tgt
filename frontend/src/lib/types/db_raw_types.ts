@@ -65,10 +65,6 @@ export interface ErrorInformation {
   msg: string;
 }
 
-export type TimetableInfos = TimetableSummaryResponse[];
-
-export type SharedTimetableInfos = SharedTimetableSummaryResponse[];
-
 export interface TimetableSummaryResponse {
   id: string;
   name: string;

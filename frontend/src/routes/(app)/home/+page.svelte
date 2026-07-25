@@ -6,18 +6,22 @@
   import GreetingComponent from "$lib/components/GreetingComponent.svelte";
   import ImportFromNUSMods from "$lib/components/ImportFromNUSMods.svelte";
   import {
+    currentUserInformation,
     timetable_list_should_be_refreshed,
     token_information,
   } from "$lib/shared/shared.svelte";
   import CreateNewTimetableButton from "../../../lib/components/CreateNewTimetableButton.svelte";
-  import type { TimetableInfos } from "$lib/types/db_raw_types";
+
   import type { Unsubscriber } from "svelte/store";
   import { get_timetables } from "$lib/utils/db_operations";
   import TimetableList from "../shared/TimetableList.svelte";
   import mods_tgt_thinking from "$lib/assets/mods_tgt_thinking.png?enhanced";
   import { CirclePlus, Import } from "@lucide/svelte";
-  import ImportFromNusModsButton from "$lib/components/Buttons/ImportFromNusModsButton.svelte";
-  let availableTimetables: TimetableInfos = $state([]);
+  import type {
+    SharedTimetableSummaryResponse,
+    TimetableSummaryResponse,
+  } from "$lib/types/db_raw_types";
+  let availableTimetables: SharedTimetableSummaryResponse[] = $state([]);
   let loading = $state(false);
   let unsubscribe_from_refresh: Unsubscriber;
   onMount(async () => {
@@ -25,9 +29,21 @@
       async (should_be_refreshed) => {
         if (!should_be_refreshed) return;
         loading = true;
+        const current_user = $state.snapshot($currentUserInformation);
         const timetable_request = await get_timetables($token_information.a);
         if (timetable_request.isOk()) {
-          availableTimetables = [...timetable_request.value];
+          const new_timetables: SharedTimetableSummaryResponse[] = [];
+          timetable_request.value.forEach((x) => {
+            new_timetables.push({
+              academicYear: x.academicYear,
+              createdAt: x.createdAt,
+              id: x.id,
+              name: x.name,
+              semester: x.semester,
+              profile: current_user,
+            });
+          });
+          availableTimetables = new_timetables;
           loading = false;
         }
 
