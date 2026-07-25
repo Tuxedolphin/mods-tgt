@@ -42,17 +42,12 @@
       ?.role || "annon",
   );
 
-  const spaceAllowedToUse = $derived(100.0 / timeTableDayInfo.outerGroupLength);
-  const startingOuterOffset = $derived(
-    timeTableDayInfo.outerGroupIndex * spaceAllowedToUse,
-  );
+  const width = $derived(100.0 / timeTableDayInfo.innerGroupLength);
+
   const leftMarginPercentage = $derived(
-    timeTableDayInfo.innerGroupIndex *
-      (spaceAllowedToUse / timeTableDayInfo.innerGroupLength) +
-      startingOuterOffset,
+    timeTableDayInfo.innerGroupIndex * width,
   );
   const showModName = $state(false);
-  const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
 
   async function changeTimetable() {
     if (
@@ -136,7 +131,7 @@
 	{calculateHeight()}
 	{styledAsPossibleSelection()}
 	{calculateTopMargin()}  
-	
+  
   p-px
   bgp-circlesAndSquares-white/15
 	text-[10px]
@@ -145,7 +140,11 @@
 	md:text-xs"
   onclick={async () => changeTimetable()}
 >
-  <div class="p-2 border rounded {timetable_colour} w-full h-full">
+  <div
+    class="p-2 border rounded bg-linear-to-r
+    {timetable_colour}
+	 w-full h-full"
+  >
     <div class="font-semibold">
       {timeTableDayInfo.moduleCode}
       {showModName ? timeTableDayInfo.moduleName : ""}
