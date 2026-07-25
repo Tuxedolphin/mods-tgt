@@ -9,6 +9,7 @@ import { orderBy } from "es-toolkit";
 
 import { normaliseDuration } from "./calculations_for_ui";
 import { getFullModInfo } from "./fetch_from_cache";
+import { default_colour_fallback } from "./formatting_utils";
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const startOfDayTime = "0800";
@@ -121,7 +122,9 @@ export async function filterTimetableByDay(
           ),
           moduleCode: lesson.moduleCode,
           moduleName: modInfo.title,
-          timetableColour: lesson.colour,
+          timetableColour: timetable.profile.colour
+            ? timetable.profile.colour
+            : default_colour_fallback,
           timetableId: timetable.id,
           timetableOwner: timetable.profile,
           processed: false,
@@ -276,14 +279,6 @@ export function findOverlappingTimeInfo(
     ["asc", "desc"],
   );
 
-  // allTime.forEach((x) =>
-  //   console.log(
-  //     x.moduleCode,
-  //     x.normalisedStartDuration,
-  //     x.normalisedEndDuration,
-  //   ),
-  // );
-
   const MAX_ITER = 1000;
   let iter_count = 0;
   let not_all_processed = true;
@@ -344,6 +339,8 @@ export function findOverlappingTimeInfo(
       }
     }
   }
+
+  console.log(allTime);
   // console.log(allTime);
   if (iter_count === MAX_ITER) {
     console.error("Unable to find pairings");

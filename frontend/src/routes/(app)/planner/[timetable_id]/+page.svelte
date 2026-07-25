@@ -211,7 +211,7 @@
     </div>
     {#if profiles.length > 1}
       <!-- This is your friend's modules: -->
-      <div>
+      <div class="flex flex-col gap-2">
         <FriendsMods {visibility} room_profiles={profiles}></FriendsMods>
       </div>
     {/if}
