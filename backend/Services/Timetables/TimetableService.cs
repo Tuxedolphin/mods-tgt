@@ -130,24 +130,40 @@ public class TimetableService(AppDbContext context, IProfileResponseMapper profi
     public async Task<List<SharedTimetableSummaryResponse>> GetSharedTimetablesAsync(Guid userId)
     {
         var timetables = await _context
-            .Timetables.Where(t =>
+            .Timetables.AsNoTracking()
+            .Where(t =>
                 t.RoomId == t.Id
                 && _context.RoomMembers.Any(r => r.UserId == userId && r.RoomId == t.RoomId)
             )
             .ToListAsync();
 
-        var profile =
-            await _context.Profiles.FindAsync(userId)
-            ?? throw new NotFoundException("User with provided userId was not found");
+        var userIds = timetables
+            .Where(t => t.UserId is not null)
+            .Select(t => t.UserId!.Value)
+            .Distinct()
+            .ToList();
 
-        return timetables.ConvertAll(t => new SharedTimetableSummaryResponse
+        var profilesById = await _context
+            .Profiles.AsNoTracking()
+            .Where(p => userIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id);
+
+        return timetables.ConvertAll(t =>
         {
-            Id = t.Id,
-            Name = t.Name,
-            Semester = t.Semester,
-            AcademicYear = t.AcademicYear,
-            CreatedAt = t.CreatedAt,
-            Profile = _profileResponseMapper.ToResponse(profile),
+            var profileResponse =
+                t.UserId is { } uid && profilesById.TryGetValue(uid, out var profile)
+                    ? _profileResponseMapper.ToResponse(profile)
+                    : ProfileResponse.DeletedUser;
+
+            return new SharedTimetableSummaryResponse
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Semester = t.Semester,
+                AcademicYear = t.AcademicYear,
+                CreatedAt = t.CreatedAt,
+                Profile = profileResponse,
+            };
         });
     }
 }
