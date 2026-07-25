@@ -4,6 +4,7 @@ using Backend.DTOs.Mappings;
 using Backend.Exceptions;
 using Backend.Models;
 using Backend.Services.Timetables;
+using Backend.Tests.TestDoubles;
 using Shouldly;
 
 namespace Backend.Tests.Services;
@@ -19,7 +20,10 @@ public class TimetableServiceTests : IAsyncLifetime
     {
         _db = db;
         _context = db.CreateContext();
-        _service = new TimetableService(_context);
+        _service = new TimetableService(
+            _context,
+            new ProfileResponseMapper(new TestAvatarUrlProvider())
+        );
     }
 
     public async Task DisposeAsync() => await _context.DisposeAsync();

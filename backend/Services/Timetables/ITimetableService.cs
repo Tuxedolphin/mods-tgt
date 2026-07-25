@@ -15,5 +15,5 @@ public interface ITimetableService
     Task<bool> UpsertTimetableAsync(RoomTimetable timetable);
     Task FlushDeleteTimetableAsync(Guid timetableId);
 
-    Task<List<TimetableSummaryResponse>> GetSharedTimetablesAsync(Guid userId);
+    Task<List<SharedTimetableSummaryResponse>> GetSharedTimetablesAsync(Guid userId);
 }

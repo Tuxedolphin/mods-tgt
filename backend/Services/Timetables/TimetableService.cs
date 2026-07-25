@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services.Timetables;
 
-public class TimetableService(AppDbContext context) : ITimetableService
+public class TimetableService(AppDbContext context, IProfileResponseMapper profileResponseMapper)
+    : ITimetableService
 {
     private readonly AppDbContext _context = context;
+    private readonly IProfileResponseMapper _profileResponseMapper = profileResponseMapper;
 
     public async Task<TimetableResponse> CreateTimetableAsync(
         CreateTimetableRequest request,
@@ -125,7 +127,7 @@ public class TimetableService(AppDbContext context) : ITimetableService
         return true;
     }
 
-    public async Task<List<TimetableSummaryResponse>> GetSharedTimetablesAsync(Guid userId)
+    public async Task<List<SharedTimetableSummaryResponse>> GetSharedTimetablesAsync(Guid userId)
     {
         var timetables = await _context
             .Timetables.Where(t =>
@@ -134,6 +136,18 @@ public class TimetableService(AppDbContext context) : ITimetableService
             )
             .ToListAsync();
 
-        return timetables.ConvertAll(t => t.ToSummaryResponse());
+        var profile =
+            await _context.Profiles.FindAsync(userId)
+            ?? throw new NotFoundException("User with provided userId was not found");
+
+        return timetables.ConvertAll(t => new SharedTimetableSummaryResponse
+        {
+            Id = t.Id,
+            Name = t.Name,
+            Semester = t.Semester,
+            AcademicYear = t.AcademicYear,
+            CreatedAt = t.CreatedAt,
+            Profile = _profileResponseMapper.ToResponse(profile),
+        });
     }
 }
