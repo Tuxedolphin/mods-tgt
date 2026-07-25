@@ -5,6 +5,7 @@ import type {
 } from "$lib/types/db_raw_types";
 import type { TimeTableDayInfo } from "$lib/types/internal";
 import type { RawLesson } from "$lib/types/modules";
+import { orderBy } from "es-toolkit";
 
 import { normaliseDuration } from "./calculations_for_ui";
 import { getFullModInfo } from "./fetch_from_cache";
@@ -44,7 +45,7 @@ export async function queryAvailableLessons(
   if (lessonTypeToMatch) {
     for (const lesson of lessonTypeToMatch!) {
       if (lesson.classNo == userState.classNo) continue;
-      resultingTimetables.push({
+      let lesson_info: TimeTableDayInfo = {
         lessonSchedule: lesson,
         moduleCode: userState.moduleCode,
         moduleName: modInfo.title,
@@ -58,15 +59,19 @@ export async function queryAvailableLessons(
           endOfDayTime,
           lesson.endTime,
         ),
+        lessonLength: 0,
         isAChoiceSelection: true,
         innerGroupIndex: -1,
         innerGroupLength: -1,
-        outerGroupIndex: -1,
-        outerGroupLength: -1,
         timetableColour: userState.colour,
         timetableId: userState.selectedTimetableId,
         timetableOwner: undefined,
-      });
+        processed: false,
+      };
+
+      lesson_info.lessonLength =
+        lesson_info.normalisedEndDuration - lesson_info.normalisedStartDuration;
+      resultingTimetables.push(lesson_info);
     }
   }
 
@@ -98,11 +103,9 @@ export async function filterTimetableByDay(
       );
 
       for (const lessonDayInfo of lessonForDay) {
-        resultingTimetables.push({
+        let lesson_info = {
           innerGroupIndex: -1,
           innerGroupLength: -1,
-          outerGroupIndex: -1,
-          outerGroupLength: -1,
           isAChoiceSelection: false,
           lessonSchedule: lessonDayInfo,
           normalisedEndDuration: normaliseDuration(
@@ -110,6 +113,7 @@ export async function filterTimetableByDay(
             endOfDayTime,
             lessonDayInfo.endTime,
           ),
+          lessonLength: 0,
           normalisedStartDuration: normaliseDuration(
             startOfDayTime,
             endOfDayTime,
@@ -120,7 +124,13 @@ export async function filterTimetableByDay(
           timetableColour: lesson.colour,
           timetableId: timetable.id,
           timetableOwner: timetable.profile,
-        });
+          processed: false,
+        };
+
+        lesson_info.lessonLength =
+          lesson_info.normalisedEndDuration -
+          lesson_info.normalisedStartDuration;
+        resultingTimetables.push(lesson_info);
       }
     }
   }
@@ -260,78 +270,86 @@ export async function createModEntry(
 export function findOverlappingTimeInfo(
   allTime: TimeTableDayInfo[],
 ): TimeTableDayInfo[] {
-  allTime.sort((a, b) => a.normalisedStartDuration - b.normalisedStartDuration);
+  allTime = orderBy(
+    allTime,
+    ["normalisedStartDuration", "lessonLength"],
+    ["asc", "desc"],
+  );
 
-  const groupTimes = Object.groupBy(allTime, (x) => x.normalisedStartDuration);
+  // allTime.forEach((x) =>
+  //   console.log(
+  //     x.moduleCode,
+  //     x.normalisedStartDuration,
+  //     x.normalisedEndDuration,
+  //   ),
+  // );
 
-  const MAX_ITER = 10_000;
-  let iterIdx = 0;
-  const processedTimings: string[] = [];
-  const processedGroups: {
-    [key: number]: TimeTableDayInfo[][];
-  } = {};
-  let lengthOfGroups = 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for (const _len in groupTimes) lengthOfGroups++;
-  let groupId = 0;
-  while (processedTimings.length != lengthOfGroups && iterIdx != MAX_ITER) {
-    iterIdx++;
-    let firstGroup: TimeTableDayInfo[] = [];
-    let firstGroupProcess: string = "";
-    for (const i in groupTimes) {
-      if (processedTimings.includes(i)) continue;
-      firstGroup = groupTimes[i]!;
-      firstGroupProcess = i;
-      firstGroup.sort(
-        (a, b) =>
-          b.normalisedEndDuration -
-          b.normalisedStartDuration -
-          (a.normalisedEndDuration - a.normalisedStartDuration),
-      );
+  const MAX_ITER = 1000;
+  let iter_count = 0;
+  let not_all_processed = true;
+  while (not_all_processed && MAX_ITER != iter_count) {
+    // find first lesson to compare:
+    let time_to_compare: TimeTableDayInfo | undefined = undefined;
+    let groups = [];
 
-      processedTimings.push(i);
-
-      if (!processedGroups[groupId]) processedGroups[groupId] = [];
-      processedGroups[groupId].push(firstGroup);
-      break;
-    }
-    if (firstGroup.length === 0) break;
-
-    let endTime = firstGroup[0].normalisedEndDuration;
-
-    // Find groups:
-    for (const i in groupTimes) {
-      if (i == firstGroupProcess) continue;
-      const group = groupTimes[i]![0];
-      if (group.normalisedStartDuration >= endTime) {
-        endTime = group.normalisedEndDuration;
-        processedTimings.push(i);
-        processedGroups[groupId].push(groupTimes[i]!);
+    for (let i = 0; i < allTime.length; i++) {
+      const element = allTime[i];
+      if (!element.processed) {
+        time_to_compare = element;
+        time_to_compare.processed = true;
+        console.log(time_to_compare.moduleCode);
+        groups.push(time_to_compare);
+        break;
       }
     }
-    groupId++;
-  }
 
-  const outerGroupLength = Object.keys(processedGroups).length;
+    // Find similar timings:
+    let first_hit = true;
+    for (let i = 0; i < allTime.length; i++) {
+      const compared_timing = allTime[i];
 
-  for (const group in processedGroups) {
-    const outerGroupIdx = Number.parseInt(group);
+      if (compared_timing.processed) continue;
 
-    for (const lessonGrouping of processedGroups[group]) {
-      const innerGroupLength = lessonGrouping.length;
-      for (let i = 0; i < lessonGrouping.length; i++) {
-        const lesson = lessonGrouping[i];
-        lesson.outerGroupIndex = outerGroupIdx;
-        lesson.outerGroupLength = outerGroupLength;
-        lesson.innerGroupLength = innerGroupLength;
-        lesson.innerGroupIndex = i;
+      if (
+        compared_timing.normalisedStartDuration >=
+          time_to_compare!.normalisedStartDuration &&
+        compared_timing.normalisedEndDuration <=
+          time_to_compare!.normalisedEndDuration
+      ) {
+        compared_timing.processed = true;
+        if (first_hit) {
+          time_to_compare!.processed = false;
+          first_hit = false;
+          time_to_compare = compared_timing;
+        }
+
+        groups.push(compared_timing);
+      }
+    }
+    iter_count++;
+    for (let i = 0; i < groups.length; i++) {
+      const element = groups[i];
+      element.innerGroupIndex = i;
+      if (element.innerGroupLength === -1) {
+        element.innerGroupLength = groups.length;
+      }
+    }
+
+    not_all_processed = false;
+    for (let i = 0; i < allTime.length; i++) {
+      const element = allTime[i];
+      if (!element.processed) {
+        not_all_processed = true;
+        break;
       }
     }
   }
-
-  if (iterIdx == MAX_ITER) {
-    console.log("Unable to find pairings");
+  // console.log(allTime);
+  if (iter_count === MAX_ITER) {
+    console.error("Unable to find pairings");
   }
+
+  console.log(allTime);
 
   return allTime;
 }

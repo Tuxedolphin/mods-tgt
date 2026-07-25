@@ -54,6 +54,7 @@
 		"wrangler": "^4.114.0"
 	},
 	"dependencies": {
+		"@danielfgray/tw-heropatterns": "^0.2.0",
 		"@lucide/svelte": "^1.26.0",
 		"@microsoft/signalr": "^10.0.0",
 		"es-toolkit": "^1.49.0",

@@ -16,6 +16,9 @@ importers:
 
   .:
     dependencies:
+      '@danielfgray/tw-heropatterns':
+        specifier: ^0.2.0
+        version: 0.2.0(tailwindcss@4.3.3)
       '@lucide/svelte':
         specifier: ^1.26.0
         version: 1.26.0(svelte@5.56.7(@typescript-eslint/types@8.65.0))
@@ -195,6 +198,11 @@ packages:
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
+
+  '@danielfgray/tw-heropatterns@0.2.0':
+    resolution: {integrity: sha512-vgiF702GJT4iBctlqqfnW0Oa4Y6dSHhtdpBg7CJBmT0QswMdp5vuaaso9mSRpcBHZb2FlQBRt76z2mQYsMObdQ==}
+    peerDependencies:
+      tailwindcss: '>=4.0.0'
 
   '@emnapi/core@1.11.1':
     resolution: {integrity: sha512-RSvbQmHzdKzNsLYa/wHrbc3KN4sYLKAdPZxqiM2HATqv/SBk2/ENSHpvXGaLOMcsAyz0poEGqkmmKYG3OWiJEQ==}
@@ -2493,6 +2501,10 @@ snapshots:
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
+
+  '@danielfgray/tw-heropatterns@0.2.0(tailwindcss@4.3.3)':
+    dependencies:
+      tailwindcss: 4.3.3
 
   '@emnapi/core@1.11.1':
     dependencies:

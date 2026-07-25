@@ -42,17 +42,12 @@
       ?.role || "annon",
   );
 
-  const spaceAllowedToUse = $derived(100.0 / timeTableDayInfo.outerGroupLength);
-  const startingOuterOffset = $derived(
-    timeTableDayInfo.outerGroupIndex * spaceAllowedToUse,
-  );
+  const width = $derived(100.0 / timeTableDayInfo.innerGroupLength);
+
   const leftMarginPercentage = $derived(
-    timeTableDayInfo.innerGroupIndex *
-      (spaceAllowedToUse / timeTableDayInfo.innerGroupLength) +
-      startingOuterOffset,
+    timeTableDayInfo.innerGroupIndex * width,
   );
   const showModName = $state(false);
-  const width = $derived(spaceAllowedToUse / timeTableDayInfo.innerGroupLength);
 
   async function changeTimetable() {
     if (
@@ -130,37 +125,46 @@
   style:margin-left="{leftMarginPercentage}%"
   style:width="{width}%;"
   class="absolute
-	rounded
-	p-1
+
+
+  
 	{calculateHeight()}
 	{styledAsPossibleSelection()}
 	{calculateTopMargin()}  
-	{timetable_colour} 
+  
+  p-px
+  bgp-circlesAndSquares-white/15
 	text-[10px]
 	wrap-break-word
 	text-black
 	md:text-xs"
   onclick={async () => changeTimetable()}
 >
-  <div class="font-semibold">
-    {timeTableDayInfo.moduleCode}
-    {showModName ? timeTableDayInfo.moduleName : ""}
-  </div>
-
-  <div class="flex gap-1">
-    <div class="truncate">
-      {timeTableDayInfo.lessonSchedule.lessonType}
+  <div
+    class="p-2 border rounded bg-linear-to-r
+    {timetable_colour}
+	 w-full h-full"
+  >
+    <div class="font-semibold">
+      {timeTableDayInfo.moduleCode}
+      {showModName ? timeTableDayInfo.moduleName : ""}
     </div>
-    <div class="opacity-50">
-      [{timeTableDayInfo.lessonSchedule.classNo}]
-    </div>
-  </div>
 
-  <div class="text-[10px] italic">
-    {#if timeTableDayInfo.timetableOwner?.userId === $currentUserInformation.userId}
-      {timeTableDayInfo.timetableOwner?.username} (You)
-    {:else}
-      {timeTableDayInfo.timetableOwner?.username}
-    {/if}
+    <div class="flex gap-1">
+      <div class="truncate">
+        {timeTableDayInfo.lessonSchedule.lessonType}
+      </div>
+      <div class="opacity-50">
+        [{timeTableDayInfo.lessonSchedule.classNo}]
+      </div>
+    </div>
+
+    <div class="text-[10px] italic">
+      {#if timeTableDayInfo.timetableOwner?.userId === $currentUserInformation.userId}
+        {timeTableDayInfo.timetableOwner?.username} (You)
+      {:else}
+        {timeTableDayInfo.timetableOwner?.username}
+      {/if}
+    </div>
   </div>
 </div>
