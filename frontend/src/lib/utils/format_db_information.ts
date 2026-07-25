@@ -1,14 +1,17 @@
 import type { LessonInfo } from "$lib/shared/shared.svelte";
 import type {
+  Profile,
   TimetableDetailedResponse,
   TimetableModule,
 } from "$lib/types/db_raw_types";
 import type { TimeTableDayInfo } from "$lib/types/internal";
 import type { RawLesson } from "$lib/types/modules";
-import { orderBy } from "es-toolkit";
+import { orderBy, pick, remove } from "es-toolkit";
 
 import { normaliseDuration } from "./calculations_for_ui";
 import { getFullModInfo } from "./fetch_from_cache";
+import { default_colour_fallback } from "./formatting_utils";
+import { users_to_hide } from "../shared/shared.svelte";
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const startOfDayTime = "0800";
@@ -121,7 +124,9 @@ export async function filterTimetableByDay(
           ),
           moduleCode: lesson.moduleCode,
           moduleName: modInfo.title,
-          timetableColour: lesson.colour,
+          timetableColour: timetable.profile.colour
+            ? timetable.profile.colour
+            : default_colour_fallback,
           timetableId: timetable.id,
           timetableOwner: timetable.profile,
           processed: false,
@@ -269,20 +274,25 @@ export async function createModEntry(
 
 export function findOverlappingTimeInfo(
   allTime: TimeTableDayInfo[],
+  users_to_hide: string[],
 ): TimeTableDayInfo[] {
   allTime = orderBy(
     allTime,
     ["normalisedStartDuration", "lessonLength"],
     ["asc", "desc"],
   );
+  remove(allTime, (x) =>
+    users_to_hide.includes(
+      x.timetableOwner?.userId ? x.timetableOwner!.userId : "",
+    ),
+  );
 
-  // allTime.forEach((x) =>
-  //   console.log(
-  //     x.moduleCode,
-  //     x.normalisedStartDuration,
-  //     x.normalisedEndDuration,
-  //   ),
-  // );
+  for (let i = 0; i < allTime.length; i++) {
+    const element = allTime[i];
+    element.processed = false;
+    element.innerGroupLength = -1;
+    element.innerGroupIndex = -1;
+  }
 
   const MAX_ITER = 1000;
   let iter_count = 0;
@@ -297,7 +307,6 @@ export function findOverlappingTimeInfo(
       if (!element.processed) {
         time_to_compare = element;
         time_to_compare.processed = true;
-        console.log(time_to_compare.moduleCode);
         groups.push(time_to_compare);
         break;
       }
@@ -344,12 +353,9 @@ export function findOverlappingTimeInfo(
       }
     }
   }
-  // console.log(allTime);
+
   if (iter_count === MAX_ITER) {
     console.error("Unable to find pairings");
   }
-
-  console.log(allTime);
-
   return allTime;
 }

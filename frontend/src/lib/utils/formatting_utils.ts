@@ -1,5 +1,7 @@
 import type { TimetableResponse } from "$lib/types/db_raw_types";
 
+export const default_colour_fallback = "bg-emerald-400";
+
 export const colours = new Set([
   "bg-red-400",
   "bg-orange-400",

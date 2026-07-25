@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import type { Unsubscriber } from "svelte/store";
-  import { chooseModState } from "$lib/shared/shared.svelte";
+  import { chooseModState, users_to_hide } from "$lib/shared/shared.svelte";
   import type {
     RoomProfile,
     RoomVisibility,

@@ -13,7 +13,10 @@
     update_user_preferences,
     update_user_profile,
   } from "$lib/utils/db_operations";
-  import { colours } from "$lib/utils/formatting_utils";
+  import {
+    colours,
+    default_colour_fallback,
+  } from "$lib/utils/formatting_utils";
   import {
     daisy_ui_themes,
     query_available_handle,
@@ -38,7 +41,7 @@
       current_user_info = user_info.value;
 
       if (!current_user_info.colour) {
-        current_user_info.colour = "bg-emerald-400";
+        current_user_info.colour = default_colour_fallback;
       }
 
       if (!current_user_info.defaultTheme) {
@@ -67,7 +70,6 @@
     );
 
     if (!change_preferences.isOk()) {
-      console.log(change_preferences.error);
       change_error = change_preferences.error;
       loading = false;
       return;

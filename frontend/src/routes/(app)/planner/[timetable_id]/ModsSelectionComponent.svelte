@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ToggleVisibilityComponent from "./ToggleVisibilityComponent.svelte";
+
   import SearchBar from "$lib/components/SearchBar.svelte";
   import { onMount } from "svelte";
   import SelectedModuleList from "./SelectedModuleList.svelte";
@@ -15,6 +17,7 @@
     RoomVisibility,
   } from "$lib/types/db_raw_types";
   import UserAvatarComponent from "$lib/components/Profile/UserAvatarComponent.svelte";
+  import { default_colour_fallback } from "$lib/utils/formatting_utils";
 
   interface ModsSelectionComponentProps {
     acadYear: string;
@@ -54,16 +57,24 @@
 <!-- First Layer: Check for tt metadata-->
 {#if is_friend}
   <div class="divider">
-    <div class="flex items-center gap-2">
+    <div
+      class="flex items-center gap-2 {user_info?.profile.colour
+        ? user_info?.profile.colour
+        : default_colour_fallback} p-1 pr-3 rounded-full"
+    >
       <UserAvatarComponent user_info={user_info?.profile}></UserAvatarComponent>
       <p>@{user_info?.profile.handle}'s Mod List</p>
+      <ToggleVisibilityComponent profile={user_info?.profile!}
+      ></ToggleVisibilityComponent>
     </div>
   </div>
 {:else}
   <div class="divider">
-    <div class="flex items-center gap-2">
+    <div
+      class="flex items-center gap-2 {$currentUserInformation.colour} p-1 pr-3 rounded-full"
+    >
       <UserAvatarComponent></UserAvatarComponent>
-      <p>Your Mod List</p>
+      <div>Your Mod List</div>
     </div>
   </div>
 {/if}
@@ -112,4 +123,10 @@
       </div>
     {/if}
   {/if}
+{/if}
+
+{#if !is_friend}
+  <div class="text-xs text-center py-2 italic">
+    Your mods are coloured by your favourite colour!
+  </div>
 {/if}

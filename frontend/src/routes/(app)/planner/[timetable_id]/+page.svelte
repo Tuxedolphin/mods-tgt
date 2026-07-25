@@ -100,7 +100,6 @@
         visibility = msg;
       });
       $roomHub?.on("ReceiveRoomMembersUpdate", (msg: RoomProfile[]) => {
-        console.log(msg);
         profiles = msg;
       });
 
@@ -117,7 +116,6 @@
           }
 
           if (update_from_room) {
-            console.log("Hello");
             update_from_room = false;
             return;
           }
@@ -211,7 +209,7 @@
     </div>
     {#if profiles.length > 1}
       <!-- This is your friend's modules: -->
-      <div>
+      <div class="flex flex-col gap-2">
         <FriendsMods {visibility} room_profiles={profiles}></FriendsMods>
       </div>
     {/if}

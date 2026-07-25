@@ -22,7 +22,6 @@
           $token_information.a,
         );
         if (timetable_request.isOk()) {
-          console.log(timetable_request.value);
           availableTimetables = [...timetable_request.value];
           loading = false;
         }
