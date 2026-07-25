@@ -4,5 +4,9 @@
 	},
 	"editor.codeActionsOnSave": {
 		"source.fixAll.oxc": "always"
+	},
+	"tailwindCSS.includeLanguages": {
+		"typescript": "javascript",
+		"typescriptreact": "typescript"
 	}
 }
