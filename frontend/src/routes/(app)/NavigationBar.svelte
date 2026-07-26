@@ -1,13 +1,8 @@
 <script lang="ts">
   import {
     Calendar1,
-    Home,
     House,
-    type LucideIcon,
-    Menu,
-    Settings,
     Settings2,
-    Share,
     Share2,
     UserRound,
   } from "@lucide/svelte";
@@ -23,6 +18,10 @@
   import { resolve } from "$app/paths";
   import { currentUserInformation } from "$lib/shared/shared.svelte";
   import type { NavigationItemProp } from "$lib/types/internal";
+  import {
+    PUBLIC_VERSION_NUMBER,
+    PUBLIC_GITHUB_SHA_VALUE,
+  } from "$env/static/public";
 
   const navigation_items: NavigationItemProp[] = [
     { icon: House, title: "Home", path: "/home" },
@@ -140,7 +139,16 @@
         >
       </div>
 
-      <div>Copyright © 2026, Zhun</div>
+      <div>
+        Copyright © 2026, Zhun • ModsTogether v{PUBLIC_VERSION_NUMBER}
+        (<a
+          class="link link-primary link-hover"
+          target="_blank"
+          href="https://github.com/Tuxedolphin/mods-tgt/commit/{PUBLIC_GITHUB_SHA_VALUE}"
+        >
+          {PUBLIC_GITHUB_SHA_VALUE.slice(0, 7)}
+        </a>)
+      </div>
     </footer>
   </div>
 </div>

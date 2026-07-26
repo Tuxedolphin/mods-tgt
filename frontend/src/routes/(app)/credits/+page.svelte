@@ -3,6 +3,7 @@
   import zhu_zhen from "$lib/assets/zhuzhen.jpg?enhanced";
   import xin_jie from "$lib/assets/xinjie.jpg?enhanced";
   import jordan from "$lib/assets/jordan.jpg?enhanced";
+  import nus_mods_logo from "$lib/assets/nusmods_logo.png?enhanced";
   import { HandHeart } from "@lucide/svelte";
   let { data }: PageProps = $props();
 </script>
@@ -15,9 +16,9 @@
 
 <div class="flex flex-col gap-2">
   <p class="text-justify">
-    ModsTogether is a project created by Zhu Zhen and Jordan, under the team
-    name Zhun, for NUS Orbital 2026. It allows you to plan mods live with
-    friends, and supports live syncing of timetable data across devices.
+    ModsTogether is a project created by Zhuzhen and Jordan, under the team name
+    Zhun, for NUS Orbital 2026. It allows you to plan mods live with friends,
+    and supports live syncing of timetable data across devices.
   </p>
 
   <p class="text-justify">
@@ -29,7 +30,7 @@
   </p>
 </div>
 
-<p class="mt-2 font-semibold">The Team!</p>
+<p class="mt-2 font-semibold">Core Team</p>
 <hr class="my-2 h-px border-0 bg-gray-200" />
 <div class="flex p-4">
   <div>
@@ -48,7 +49,7 @@
       Responsible for the creation and storage of your ModsTogether data, as
       well as the live communication features!
     </div>
-    <div></div>
+    <div>Hello there 🙂</div>
   </div>
 </div>
 
@@ -90,6 +91,7 @@
 
 <p class="mt-2 font-semibold">Special Thanks!</p>
 <hr class="my-2 h-px border-0 bg-gray-200" />
+
 <div class="flex p-4">
   <div>
     <enhanced:img
@@ -107,6 +109,34 @@
     </div>
   </div>
 </div>
+
+<div class="flex p-4">
+  <div>
+    <enhanced:img
+      class="object-contain min-w-36 max-w-36 rounded-full"
+      src={nus_mods_logo}
+    />
+  </div>
+
+  <div class="flex flex-col px-6">
+    <div class=" text-2xl font-semibold">Team @nusmodifications</div>
+    <div class="uppercase font-semibold opacity-60 text-sm">
+      Creators of NUSMods & NUSMods API
+    </div>
+    <div class="italic">The team that started it all</div>
+    <div>
+      ModsTogether uses data that is painstakingly maintained and gathered by
+      the core team <a
+        class="link link-hover link-primary"
+        href="https://github.com/nusmodifications"
+        target="_blank">@nusmodifications</a
+      > and this project would not be possible without the countless hours they have
+      spent to create such a good product in the first place! Be sure to show them
+      lots of love!
+    </div>
+  </div>
+</div>
+
 <div class="flex p-4">
   <div
     class="bg-base-300 rounded-full min-w-36 min-h-36 max-h-36 flex items-center justify-center"
