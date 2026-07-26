@@ -1,0 +1,193 @@
+info:
+  name: post /optimiser/room/:roomId/solve
+  type: http
+  seq: 4
+  tags:
+    - Optimiser
+
+http:
+  method: POST
+  url: "{{baseUrl}}/optimiser/room/:roomId/solve"
+  params:
+    - name: roomId
+      value: "{{roomId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "participants": null,
+        "lockedLessons": [
+          { "moduleCode": "CS2103T", "lessonType": "Lecture" }
+        ],
+        "includeFreeSlots": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        if (res.getStatus() === 200 && data.solveId) {
+          bru.setEnvVar("solveId", data.solveId, { persist: false });
+        }
+
+examples:
+  - name: 200 Group suggestions
+    description: >-
+      Solves for everyone with a timetable in the room. Rate limited to 3
+      requests per minute per user. A null participants list means everyone,
+      lockedLessons apply to the caller only. The result is stored for the room
+      and broadcast over the hub as ReceiveOptimiserResult.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/solve"
+      method: POST
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "includeFreeSlots": true
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": "optimal",
+            "solveId": "6f2a1c40-8f0b-4f4a-9b6e-2a3d5c7e9f11",
+            "solutions": [
+              {
+                "rank": 1,
+                "score": {
+                  "sharedClassCount": 1,
+                  "sharedClasses": [
+                    {
+                      "moduleCode": "CS2100",
+                      "lessonType": "Tutorial",
+                      "classNo": "T01",
+                      "userIds": [
+                        "8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f",
+                        "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                      ]
+                    }
+                  ],
+                  "perUser": [
+                    {
+                      "userId": "8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f",
+                      "satisfiedCount": 2,
+                      "violatedCount": 0,
+                      "satisfied": [
+                        { "pref": "earliestStart", "day": null, "detail": null }
+                      ],
+                      "violated": []
+                    },
+                    {
+                      "userId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                      "satisfiedCount": 1,
+                      "violatedCount": 1,
+                      "satisfied": null,
+                      "violated": null
+                    }
+                  ]
+                },
+                "suggestions": [
+                  {
+                    "userId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "timetableId": "9e8d7c6b-5a4f-3e2d-1c0b-9a8f7e6d5c4b",
+                    "changes": [
+                      {
+                        "moduleCode": "CS2100",
+                        "lessonType": "Tutorial",
+                        "from": "T02",
+                        "to": "T01"
+                      }
+                    ]
+                  }
+                ],
+                "freeSlots": [
+                  { "day": "Monday", "start": "0800", "end": "1000" }
+                ]
+              }
+            ],
+            "warnings": [
+              {
+                "code": "moduleNotFound",
+                "userId": "8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f",
+                "moduleCode": "NEW9999",
+                "lessonType": null,
+                "detail": null
+              }
+            ],
+            "usedDefaults": ["1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"],
+            "frozen": [],
+            "infeasibleReasons": null
+          }
+  - name: 200 Infeasible
+    description: >-
+      No arrangement satisfies every hard constraint. Solutions is empty and
+      infeasibleReasons names the blocked day that caused it.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/solve"
+      method: POST
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+      body:
+        type: json
+        data: |-
+          {}
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": "infeasible",
+            "solveId": "6f2a1c40-8f0b-4f4a-9b6e-2a3d5c7e9f11",
+            "solutions": [],
+            "warnings": [],
+            "usedDefaults": [],
+            "frozen": [],
+            "infeasibleReasons": [
+              {
+                "reason": "blockedDayConflict",
+                "userId": "8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f",
+                "day": "Monday",
+                "moduleCode": "CS2100",
+                "lessonType": "Tutorial"
+              }
+            ]
+          }
+  - name: 429 Rate limited
+    description: More than 3 solves in one minute for the same user.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/solve"
+      method: POST
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+    response:
+      status: 429
+      statusText: Too Many Requests

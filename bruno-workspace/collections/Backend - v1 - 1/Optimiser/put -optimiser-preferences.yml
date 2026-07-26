@@ -1,0 +1,48 @@
+info:
+  name: put /optimiser/preferences
+  type: http
+  seq: 2
+  tags:
+    - Optimiser
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/optimiser/preferences"
+  body:
+    type: json
+    data: |-
+      {
+        "blockedDays": ["Friday"],
+        "earliestStart": "1000",
+        "lunchBreak": "important",
+        "compactDays": "niceToHave",
+        "fewerCampusDays": "off",
+        "maxConsecutiveHours": 4
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 204 Preferences saved
+    description: >-
+      Upserts the caller's global preferences. Every field is optional, an
+      omitted field stays unset and is inherited or falls back to the baseline.
+    request:
+      url: "{{baseUrl}}/optimiser/preferences"
+      method: PUT
+      body:
+        type: json
+        data: |-
+          {
+            "blockedDays": ["Friday"],
+            "earliestStart": "1000",
+            "lunchBreak": "important"
+          }
+    response:
+      status: 204
+      statusText: No Content
