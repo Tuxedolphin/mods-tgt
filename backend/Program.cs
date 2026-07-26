@@ -7,6 +7,7 @@ using Backend.Exceptions;
 using Backend.Hubs;
 using Backend.Services.Auth;
 using Backend.Services.NusMods;
+using Backend.Services.Optimiser;
 using Backend.Services.Profiles;
 using Backend.Services.Rooms;
 using Backend.Services.Storage;
@@ -68,6 +69,27 @@ builder.Services.AddRateLimiter(options =>
         }
     );
 
+    options.AddPolicy(
+        "optimiser-solve",
+        httpContext =>
+        {
+            var key =
+                httpContext.User.FindFirst("sub")?.Value
+                ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                ?? "anonymous";
+
+            return RateLimitPartition.GetFixedWindowLimiter(
+                key,
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 3,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                }
+            );
+        }
+    );
+
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
@@ -116,7 +138,7 @@ builder.Services.AddHttpClient(
     }
 );
 
-builder.Services.AddMemoryCache();
+builder.Services.AddMemoryCache(options => options.SizeLimit = 4096);
 builder.Services.AddHttpClient<INusModsClient, NusModsClient>(client =>
 {
     client.BaseAddress = new Uri("https://api.nusmods.com/v2/");
@@ -156,6 +178,13 @@ builder.Services.AddScoped<ITimetableService, TimetableService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IRoomMembershipChecker, RoomMembershipChecker>();
+builder.Services.AddScoped<IOptimiserPreferenceService, OptimiserPreferenceService>();
+builder.Services.AddScoped<LessonCatalogueBuilder>();
+builder.Services.AddSingleton<SolverModelBuilder>();
+builder.Services.AddScoped<IOptimiserService, OptimiserService>();
+builder.Services.AddSingleton<IOptimiserSolveQueue, OptimiserSolveQueue>();
+builder.Services.AddHostedService<OptimiserSolveWorker>();
 builder.Services.AddSingleton<IAvatarUrlProvider, AvatarUrlProvider>();
 builder.Services.AddSingleton<IProfileResponseMapper, ProfileResponseMapper>();
 builder.Services.AddSingleton<IRoomTracker, RoomTracker>();
