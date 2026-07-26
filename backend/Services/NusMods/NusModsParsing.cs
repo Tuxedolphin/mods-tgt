@@ -11,8 +11,7 @@ public static class NusModsParsing
     public static int ParseTimeToMinutes(string hhmm) =>
         int.Parse(hhmm[..2]) * 60 + int.Parse(hhmm[2..]);
 
-    // NUSMods "weeks" is either a plain array of week numbers or a range object
-    // ({start, end, weekInterval?, weeks?}) used by modules on irregular schedules.
+    // Weeks come as either a plain array or a {start, end, weeks?} range object
     public static IReadOnlySet<int> ParseWeeks(JsonElement weeks)
     {
         if (weeks.ValueKind == JsonValueKind.Array)

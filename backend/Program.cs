@@ -6,6 +6,7 @@ using Backend.DTOs.Mappings;
 using Backend.Exceptions;
 using Backend.Hubs;
 using Backend.Services.Auth;
+using Backend.Services.NusMods;
 using Backend.Services.Profiles;
 using Backend.Services.Rooms;
 using Backend.Services.Storage;
@@ -114,6 +115,12 @@ builder.Services.AddHttpClient(
         client.DefaultRequestHeaders.Add("apikey", supabaseSettings.PublishableKey);
     }
 );
+
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<INusModsClient, NusModsClient>(client =>
+{
+    client.BaseAddress = new Uri("https://api.nusmods.com/v2/");
+});
 
 // Supabase JWT Configuration
 builder
