@@ -123,7 +123,7 @@
         Built with much ❤️ by <a
           href="https://github.com/Tuxedolphin"
           class="link link-primary link-hover"
-          target="_blank">Zhu Zhen</a
+          target="_blank">Zhuzhen</a
         >
         and
         <a
