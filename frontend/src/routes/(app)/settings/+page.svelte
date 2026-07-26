@@ -26,6 +26,7 @@
   let current_user_info: Profile | undefined = $state();
   let previous_user_info: Profile | undefined = $state();
   let loading = $state(false);
+  let current_themes = $derived(daisy_ui_themes.toSorted());
   onMount(async () => {
     const user_info = await get_user_info($token_information.a, false);
 
@@ -73,7 +74,7 @@
         setTheme(current_user_info!.defaultTheme!);
       }}
     >
-      {#each daisy_ui_themes as theme_preference}
+      {#each current_themes as theme_preference}
         <option value={theme_preference}
           ><p class="capitalize">{theme_preference}</p></option
         >
