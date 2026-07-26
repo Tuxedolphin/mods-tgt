@@ -145,12 +145,12 @@
 </script>
 
 {#if is_timetable_loaded}
-  <div class="flex items-center justify-between gap-2">
+  <div class="flex items-center justify-between gap-2 pt-2">
     <div class="flex min-w-0 flex-col">
       <h1 class="min-w-0 truncate text-lg font-semibold">
         {timetable_metadata.name}
       </h1>
-      <h2 class="min-w-0 truncate text-xs">
+      <h2 class="min-w-0 truncate text-xs uppercase opacity-60">
         {format_AY_name(timetable_metadata.academicYear)} - {format_semester_name(
           timetable_metadata.semester,
         )}
@@ -172,7 +172,7 @@
       ></CircleX>
     </div>
   </div>
-  <div class="flex-col flex">
+  <div class="flex-col flex py-1">
     <!-- This is the main timetable view -->
     <div class="flex-col lg:flex-row flex">
       <div class="flex flex-1 lg:w-[75%]">
