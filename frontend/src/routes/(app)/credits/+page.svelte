@@ -106,8 +106,17 @@
       <div class=" text-2xl font-semibold">Xin Jie</div>
       <div class="uppercase font-semibold opacity-60 text-sm">Artist</div>
       <div class="italic">
-        The brilliant mind behind all the cute characters you see in
-        ModsTogether, as well as the logo too!
+        The mighty mind behind all the cute characters you see in ModsTogether,
+        as well as the logo too!
+      </div>
+      <div>
+        digital art is my favourite hobby and it's been a pleasure to draw all
+        the cute and chubby characters around the website! you can find more of
+        my art at <a
+          class="link link-hover link-primary"
+          href="https://www.instagram.com/footlongburger"
+          target="_blank">@footlongburger</a
+        > on instagram!
       </div>
     </div>
   </div>
