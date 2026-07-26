@@ -1,17 +1,15 @@
 import type { LessonInfo } from "$lib/shared/shared.svelte";
 import type {
-  Profile,
   TimetableDetailedResponse,
   TimetableModule,
 } from "$lib/types/db_raw_types";
 import type { TimeTableDayInfo } from "$lib/types/internal";
 import type { RawLesson } from "$lib/types/modules";
-import { orderBy, pick, remove } from "es-toolkit";
+import { orderBy, remove } from "es-toolkit";
 
 import { normaliseDuration } from "./calculations_for_ui";
 import { getFullModInfo } from "./fetch_from_cache";
 import { default_colour_fallback } from "./formatting_utils";
-import { users_to_hide } from "../shared/shared.svelte";
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const startOfDayTime = "0800";
