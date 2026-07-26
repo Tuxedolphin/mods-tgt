@@ -240,7 +240,7 @@
     bind:value={confirm_delete}
   />
   <p class="text-error">{delete_error}</p>
-  <p class="label">
+  <p class="label text-wrap">
     We're sorry to see you go. To delete your account, type your handle ({$currentUserInformation.handle})
     and press the delete button
   </p>
