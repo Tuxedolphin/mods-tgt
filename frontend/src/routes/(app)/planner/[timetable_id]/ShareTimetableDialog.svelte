@@ -277,7 +277,7 @@
       </li>
     {/each}
   </ul>
-  <h1 class=" font-bold">General Access Settings:</h1>
+  <h1 class=" font-bold">General Access Settings (Beta):</h1>
   <ul class="list bg-base-100 rounded-box shadow-md overflow-auto max-h-28">
     <li class="list-row">
       <ul
