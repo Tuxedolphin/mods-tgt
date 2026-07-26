@@ -207,9 +207,7 @@
         ></ModsSelectionComponent>
       </div>
     </div>
-    {visibility}
-    {profiles.length}
-    {#if (visibility === "publicEdit" && profiles.length > 0) || (visibility === "restricted" && profiles.length > 1)}
+    {#if ((visibility === "publicEdit" || visibility === "publicView") && profiles.length > 0) || (visibility === "restricted" && profiles.length > 1)}
       <!-- This is your friend's modules: -->
       <div class="flex flex-col gap-2">
         <FriendsMods {visibility} room_profiles={profiles}></FriendsMods>
