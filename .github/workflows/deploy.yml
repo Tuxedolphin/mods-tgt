@@ -6,7 +6,8 @@ on:
 
 env:
   PUBLIC_DB_LINK: ${{ vars.PUBLIC_DB_LINK }}
-  BUILD_SHA: ${{ github.sha }}
+  PUBLIC_VERSION_NUMBER: ${{ vars.PUBLIC_VERSION_NUMBER }}
+  PUBLIC_GITHUB_SHA_VALUE: ${{ github.sha }}
 
 jobs:
   backend-checks:
