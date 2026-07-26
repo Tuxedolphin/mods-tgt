@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Backend.Models;
 
 namespace Backend.Services.NusMods;
 
@@ -10,6 +11,8 @@ public static class NusModsParsing
 
     public static int ParseTimeToMinutes(string hhmm) =>
         int.Parse(hhmm[..2]) * 60 + int.Parse(hhmm[2..]);
+
+    public static string ToHhmm(int minutes) => $"{minutes / 60:00}{minutes % 60:00}";
 
     // Weeks come as either a plain array or a {start, end, weeks?} range object
     public static IReadOnlySet<int> ParseWeeks(JsonElement weeks)

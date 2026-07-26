@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Backend.Models;
 using Backend.Services.NusMods;
 using Shouldly;
 

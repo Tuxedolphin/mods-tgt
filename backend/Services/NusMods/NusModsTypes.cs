@@ -1,15 +1,6 @@
-namespace Backend.Services.NusMods;
+using Backend.Models;
 
-public enum WeekDay
-{
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday,
-}
+namespace Backend.Services.NusMods;
 
 public record NusModsSession(
     string ClassNo,

@@ -37,7 +37,7 @@ public class NusModsClientTests
     private static NusModsClient CreateClient(StubHandler handler) =>
         new(
             new HttpClient(handler) { BaseAddress = new Uri("https://api.nusmods.com/v2/") },
-            new MemoryCache(new MemoryCacheOptions())
+            new MemoryCache(new MemoryCacheOptions { SizeLimit = 128 })
         );
 
     [Fact]
