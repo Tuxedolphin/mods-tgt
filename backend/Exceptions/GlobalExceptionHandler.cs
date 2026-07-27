@@ -32,6 +32,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             UnauthorizedAccessException ex => (401, ex.Message, null),
             NotFoundException ex => (404, ex.Message, null),
             ForbiddenException ex => (403, ex.Message, null),
+            ConflictException ex => (409, ex.Message, null),
             ExternalServiceException ex => (502, ex.Message, null),
             _ => (500, "An unexpected error occurred.", null),
         };

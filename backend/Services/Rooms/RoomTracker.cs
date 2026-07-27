@@ -56,7 +56,7 @@ public class RoomTracker : IRoomTracker
             {
                 if (currentConnection.UserId != userId)
                 {
-                    throw new UnauthorizedAccessException(
+                    throw new ForbiddenException(
                         $"Connection {connectionId} does not belong to user {userId}."
                     );
                 }
