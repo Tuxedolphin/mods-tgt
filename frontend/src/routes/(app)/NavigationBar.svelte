@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     Calendar1,
+    Heart,
     House,
     Settings2,
     Share2,
@@ -29,6 +30,7 @@
     { icon: Share2, title: "Shared with me", path: "/shared" },
     { icon: UserRound, title: "Profile", path: "/me" },
     { icon: Settings2, title: "Settings", path: "/settings" },
+    { icon: Heart, title: "Support", path: "/support" },
   ];
 </script>
 
@@ -39,7 +41,6 @@
         <enhanced:img
           class="aspect-5/2 h-14 w-auto align-middle"
           src={mods_tgt_header}
-          alt="Mods Together Logo"
         />
       </div>
 
@@ -123,7 +124,7 @@
         Built with much ❤️ by <a
           href="https://github.com/Tuxedolphin"
           class="link link-primary link-hover"
-          target="_blank">Zhu Zhen</a
+          target="_blank">Zhuzhen</a
         >
         and
         <a

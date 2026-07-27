@@ -254,9 +254,9 @@
               </a>
             </li>
           </ul>
-          <div class="join btn-secondary">
+          <div class="join">
             <button
-              class="btn join-item {profile.role === 'owner'
+              class="btn btn-secondary join-item {profile.role === 'owner'
                 ? 'rounded-full'
                 : 'rounded-l-full'}"
             >
@@ -265,7 +265,7 @@
 
             {#if profile.role !== "owner"}
               <button
-                class="btn join-item rounded-r-full"
+                class="btn btn-secondary join-item rounded-r-full"
                 popovertarget="popover-{profile.handle}"
                 style="anchor-name:--anchor-{profile.handle}"
               >
@@ -277,7 +277,7 @@
       </li>
     {/each}
   </ul>
-  <h1 class=" font-bold">General Access Settings:</h1>
+  <h1 class=" font-bold">General Access Settings (Beta):</h1>
   <ul class="list bg-base-100 rounded-box shadow-md overflow-auto max-h-28">
     <li class="list-row">
       <ul

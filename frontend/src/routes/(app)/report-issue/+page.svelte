@@ -26,7 +26,19 @@
       class="link link-hover link-primary">Google Forms</a
     >
   </li>
+  <li>
+    Send us an email: <a
+      href="mailto:help@mods-tgt.com"
+      class="link link-hover link-primary">help@mods-tgt.com</a
+    >
+  </li>
 </ul>
+
+<p class="">
+  In the reports, please include as much information as possible, like the steps
+  you took to get to the error, what you expected should happen, and also any
+  error messages that appear, it will help alot!
+</p>
 
 <p class="">
   Mods Together is under active development, thank you for helping us make this

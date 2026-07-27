@@ -34,5 +34,5 @@
   <link rel="apple-touch-icon" sizes="180x180" href={favicon_apple} />
   <meta name="apple-mobile-web-app-title" content="Mods Together!" />
 </svelte:head>
-<ModeWatcher defaultTheme="cupcake"></ModeWatcher>
+<ModeWatcher defaultTheme="winter"></ModeWatcher>
 {@render children()}

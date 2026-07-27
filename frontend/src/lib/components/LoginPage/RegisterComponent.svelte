@@ -11,6 +11,12 @@
   let success = $state("");
 </script>
 
+<div class="alert alert-error alert-soft text-center">
+  <span>⚠️ </span>
+  Please use your personal email (instead of school or company ones) and check your
+  spam mail for our registration code!
+</div>
+
 {#if success}
   <p class="text-success text-wrap break-after-all">{success}</p>
 {:else}
@@ -72,7 +78,7 @@
           error = result.error;
         } else {
           success =
-            "Registration successful. A confirmation will be sent if email has not been used before. Check spam if necessary.";
+            "Registration successful. Thank you! A confirmation will be sent if email has not been used before. Check spam if necessary. Our emails may have trouble reaching school or company email addresses, please try a personal email if that happens.";
         }
         loading = false;
       }}

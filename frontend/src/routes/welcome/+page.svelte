@@ -45,10 +45,10 @@
       }
 
       if (!current_user_info.defaultTheme) {
-        current_user_info.defaultTheme = "cupcake";
+        current_user_info.defaultTheme = "winter";
       } else {
         if (!daisy_ui_themes.includes(current_user_info.defaultTheme)) {
-          current_user_info.defaultTheme = "cupcake";
+          current_user_info.defaultTheme = "winter";
         }
       }
     }

@@ -36,7 +36,7 @@ export const currentUserInformation = persisted("clrsnus", {
   avatarUrl: null,
   handle: null,
   colour: null,
-  defaultTheme: "cupcake",
+  defaultTheme: "winter",
 } as Profile);
 
 export const currentWorkingTimetable = persisted(
