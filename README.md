@@ -32,6 +32,8 @@ cd backend
 dotnet ef database update
 ```
 
+Do note that the `Profile` table has been excluded from migrations. Hence, you'll need to manually run the initial script under `backend/Database/initial_setup.sql`. Since we use Supabase, you'll need to initialise the buckets as well, the code can be found at `backend/Database/initialise_buckets.sql`.
+
 **3. Run**
 
 ```shell
