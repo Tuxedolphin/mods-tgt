@@ -1,4 +1,4 @@
-import { debounce } from "es-toolkit";
+import { debounce, retry } from "es-toolkit";
 import { Err, Ok, Result } from "ts-results-es";
 import { check_handle } from "./db_operations";
 import type {
@@ -47,6 +47,32 @@ export const daisy_ui_themes = [
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Start time in a hours in int i.e., 8, end time too.
+//
+// Returns all string (start and end inclusive) with one hour intervals
+export function generate_display_times(
+  start_time: number,
+  end_time: number,
+  interval: number,
+): string[] {
+  return [];
+}
+
+const timeFormatter = new Intl.DateTimeFormat(undefined, {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+// eslint-disable-next-line svelte/prefer-svelte-reactivity
+const formatter_time_to_set = new Date("25 Jan 2026");
+
+function formatShortTime(hour: number): string {
+  formatter_time_to_set.setHours(0, 0, 0, 0);
+
+  return timeFormatter.format();
 }
 
 export function json_tryparse<T>(text: string): Result<T, string> {

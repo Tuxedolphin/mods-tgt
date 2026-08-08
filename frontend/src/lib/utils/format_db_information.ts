@@ -11,9 +11,11 @@ import { normaliseDuration } from "./calculations_for_ui";
 import { getFullModInfo } from "./fetch_from_cache";
 import { default_colour_fallback } from "./formatting_utils";
 
-const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const startOfDayTime = "0800";
-const endOfDayTime = "2000";
+export const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+export const startOfDayTime = "0800";
+export const endOfDayTime = "2100";
+
+
 export function getTimetable(
   acadYear: string,
   semesterNo: number,

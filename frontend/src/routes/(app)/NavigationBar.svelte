@@ -61,7 +61,7 @@
 
   <div class="container mx-auto px-2 md:px-0 grow">
     <div class="flex flex-col w-full">
-      <div class="flex grow">
+      <div class="flex">
         <div
           class="md:flex flex-col gap-1 hidden md:min-w-16 xl:min-w-48 w-4 mt-4"
         >
@@ -69,7 +69,7 @@
             <NavItemLargeScreen information={item}></NavItemLargeScreen>
           {/each}
         </div>
-        <div class="w-full">
+        <div class="flex-1 overflow-auto">
           {@render children()}
         </div>
       </div>

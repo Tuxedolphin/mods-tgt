@@ -57,6 +57,7 @@
 		"@danielfgray/tw-heropatterns": "^0.2.0",
 		"@lucide/svelte": "^1.26.0",
 		"@microsoft/signalr": "^10.0.0",
+		"date-fns": "^4.4.0",
 		"es-toolkit": "^1.50.0",
 		"js-search": "^2.0.1",
 		"ky": "^2.0.2",

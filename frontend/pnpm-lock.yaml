@@ -25,6 +25,9 @@ importers:
       '@microsoft/signalr':
         specifier: ^10.0.0
         version: 10.0.0
+      date-fns:
+        specifier: ^4.4.0
+        version: 4.4.0
       es-toolkit:
         specifier: ^1.50.0
         version: 1.50.0
@@ -1406,6 +1409,9 @@ packages:
 
   daisyui@5.7.0:
     resolution: {integrity: sha512-2/kYbxaKtv349lPrTyxMKC9SHsyA7fBULMSabJljDE82D079cjqz+UyAzsogWgy4sTs5NDvD000acfcFqbO1XA==}
+
+  date-fns@4.4.0:
+    resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -3431,6 +3437,8 @@ snapshots:
   cssesc@3.0.0: {}
 
   daisyui@5.7.0: {}
+
+  date-fns@4.4.0: {}
 
   debug@4.4.3:
     dependencies:
