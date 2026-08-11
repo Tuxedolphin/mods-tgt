@@ -1,0 +1,64 @@
+info:
+  name: get /optimiser/preferences
+  type: http
+  seq: 1
+  tags:
+    - Optimiser
+
+http:
+  method: GET
+  url: "{{baseUrl}}/optimiser/preferences"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Global preferences
+    description: Returns the authenticated user's global optimiser preferences.
+    request:
+      url: "{{baseUrl}}/optimiser/preferences"
+      method: GET
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "blockedDays": ["Friday"],
+            "earliestStart": "1000",
+            "latestEnd": "1800",
+            "preferredWindow": { "start": "1000", "end": "1800" },
+            "lunchBreak": "important",
+            "compactDays": "niceToHave",
+            "fewerCampusDays": "off",
+            "maxConsecutiveHours": 4,
+            "freeDay": "Friday",
+            "lockedLessons": null
+          }
+  - name: 404 No preferences set
+    description: The user has never saved global preferences.
+    request:
+      url: "{{baseUrl}}/optimiser/preferences"
+      method: GET
+    response:
+      status: 404
+      statusText: Not Found
+      headers:
+        - name: Content-Type
+          value: application/problem+json
+      body:
+        type: json
+        data: |-
+          {
+            "title": "Not Found",
+            "status": 404,
+            "detail": "No preferences set"
+          }

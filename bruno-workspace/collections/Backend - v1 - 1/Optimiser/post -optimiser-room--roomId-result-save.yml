@@ -1,0 +1,95 @@
+info:
+  name: post /optimiser/room/:roomId/result/save
+  type: http
+  seq: 7
+  tags:
+    - Optimiser
+
+http:
+  method: POST
+  url: "{{baseUrl}}/optimiser/room/:roomId/result/save"
+  params:
+    - name: roomId
+      value: "{{roomId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "solveId": "{{solveId}}",
+        "rank": 1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 201 Suggestion saved as a new timetable
+    description: >-
+      Applies the caller's changes from the chosen solution and saves them as a
+      new timetable in the room, keeping the original untouched. Module colours
+      carry over from the source timetable.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/result/save"
+      method: POST
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "solveId": "6f2a1c40-8f0b-4f4a-9b6e-2a3d5c7e9f11",
+            "rank": 1
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+        - name: Location
+          value: /timetable/4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f90
+      body:
+        type: json
+        data: |-
+          {
+            "id": "4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f90"
+          }
+  - name: 409 Result superseded
+    description: >-
+      Someone ran a newer group solve for this room, so the solveId no longer
+      matches the stored result. Re-read the result and try again.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/result/save"
+      method: POST
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "solveId": "00000000-0000-0000-0000-000000000000",
+            "rank": 1
+          }
+    response:
+      status: 409
+      statusText: Conflict
+      headers:
+        - name: Content-Type
+          value: application/problem+json
+      body:
+        type: json
+        data: |-
+          {
+            "title": "Conflict",
+            "status": 409,
+            "detail": "Result superseded"
+          }

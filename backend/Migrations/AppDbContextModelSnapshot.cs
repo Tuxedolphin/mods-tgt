@@ -22,6 +22,67 @@ namespace Backend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Backend.Models.OptimiserPreference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RoomId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId", "RoomId")
+                        .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("UserId", "RoomId"), false);
+
+                    b.ToTable("OptimiserPreferences", (string)null);
+                });
+
+            modelBuilder.Entity("Backend.Models.OptimiserResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("RequestedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SolveId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId", "UserId")
+                        .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("RoomId", "UserId"), false);
+
+                    b.ToTable("OptimiserResults", (string)null);
+                });
+
             modelBuilder.Entity("Backend.Models.Profile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -128,6 +189,111 @@ namespace Backend.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TimeTables", (string)null);
+                });
+
+            modelBuilder.Entity("Backend.Models.OptimiserPreference", b =>
+                {
+                    b.HasOne("Backend.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Backend.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Backend.Models.PreferencePayload", "Payload", b1 =>
+                        {
+                            b1.Property<Guid>("OptimiserPreferenceId");
+
+                            b1.PrimitiveCollection<string>("BlockedDays");
+
+                            b1.Property<string>("CompactDays");
+
+                            b1.Property<string>("EarliestStart");
+
+                            b1.Property<string>("FewerCampusDays");
+
+                            b1.Property<string>("FreeDay");
+
+                            b1.Property<string>("LatestEnd");
+
+                            b1.Property<string>("LunchBreak");
+
+                            b1.Property<int?>("MaxConsecutiveHours");
+
+                            b1.HasKey("OptimiserPreferenceId");
+
+                            b1.ToTable("OptimiserPreferences");
+
+                            b1
+                                .ToJson("Payload")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OptimiserPreferenceId");
+
+                            b1.OwnsMany("Backend.Models.LockedLesson", "LockedLessons", b2 =>
+                                {
+                                    b2.Property<Guid>("PreferencePayloadOptimiserPreferenceId");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAdd();
+
+                                    b2.Property<string>("LessonType")
+                                        .IsRequired();
+
+                                    b2.Property<string>("ModuleCode")
+                                        .IsRequired();
+
+                                    b2.HasKey("PreferencePayloadOptimiserPreferenceId", "__synthesizedOrdinal");
+
+                                    b2.ToTable("OptimiserPreferences");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PreferencePayloadOptimiserPreferenceId");
+                                });
+
+                            b1.OwnsOne("Backend.Models.TimeWindow", "PreferredWindow", b2 =>
+                                {
+                                    b2.Property<Guid>("PreferencePayloadOptimiserPreferenceId");
+
+                                    b2.Property<string>("End")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Start")
+                                        .IsRequired();
+
+                                    b2.HasKey("PreferencePayloadOptimiserPreferenceId");
+
+                                    b2.ToTable("OptimiserPreferences");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PreferencePayloadOptimiserPreferenceId");
+                                });
+
+                            b1.Navigation("LockedLessons");
+
+                            b1.Navigation("PreferredWindow");
+                        });
+
+                    b.Navigation("Payload")
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("Backend.Models.OptimiserResult", b =>
+                {
+                    b.HasOne("Backend.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Backend.Models.RoomMember", b =>

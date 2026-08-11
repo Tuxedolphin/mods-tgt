@@ -1,0 +1,79 @@
+info:
+  name: put /optimiser/room/:roomId/preferences
+  type: http
+  seq: 3
+  tags:
+    - Optimiser
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/optimiser/room/:roomId/preferences"
+  params:
+    - name: roomId
+      value: "{{roomId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "lunchBreak": "off",
+        "freeDay": "Wednesday",
+        "lockedLessons": [
+          { "moduleCode": "CS2103T", "lessonType": "Lecture" }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 204 Room preferences saved
+    description: >-
+      Per-room overrides. Set fields win over the global row, including an
+      explicit "off". Locked lessons are only read from the room row.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/preferences"
+      method: PUT
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "lunchBreak": "off",
+            "lockedLessons": [
+              { "moduleCode": "CS2103T", "lessonType": "Lecture" }
+            ]
+          }
+    response:
+      status: 204
+      statusText: No Content
+  - name: 403 Not a room member
+    description: The caller is neither a member nor the room owner.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/preferences"
+      method: PUT
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/problem+json
+      body:
+        type: json
+        data: |-
+          {
+            "title": "Forbidden",
+            "status": 403,
+            "detail": "User is not a member of this room"
+          }

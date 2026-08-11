@@ -10,4 +10,8 @@ public interface IRoomHubClient
     Task ReceiveTimetableUpdate(IReadOnlyCollection<TimetableDetailedResponse> timetables);
     Task ReceiveRoomMembersUpdate(IReadOnlyCollection<RoomMemberResponse> members);
     Task ReceiveRoomVisibilityUpdate(Visibility visibility);
+
+    Task ReceiveOptimiserStarted(Guid roomId, Guid requestedBy);
+    Task ReceiveOptimiserResult(Guid roomId, SolveResponse result);
+    Task ReceiveOptimiserError(string message);
 }

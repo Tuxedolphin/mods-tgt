@@ -1,0 +1,106 @@
+info:
+  name: get /optimiser/room/:roomId/result
+  type: http
+  seq: 6
+  tags:
+    - Optimiser
+
+http:
+  method: GET
+  url: "{{baseUrl}}/optimiser/room/:roomId/result"
+  params:
+    - name: roomId
+      value: "{{roomId}}"
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Latest group result
+    description: >-
+      Returns the room's most recent group solve, filtered for the reader, so
+      satisfied and violated detail is only populated for the caller's own row.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/result"
+      method: GET
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": "optimal",
+            "solveId": "6f2a1c40-8f0b-4f4a-9b6e-2a3d5c7e9f11",
+            "solutions": [
+              {
+                "rank": 1,
+                "score": {
+                  "sharedClassCount": 1,
+                  "sharedClasses": [
+                    {
+                      "moduleCode": "CS2100",
+                      "lessonType": "Tutorial",
+                      "classNo": "T01",
+                      "userIds": [
+                        "8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f",
+                        "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                      ]
+                    }
+                  ],
+                  "perUser": [
+                    {
+                      "userId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                      "satisfiedCount": 1,
+                      "violatedCount": 0,
+                      "satisfied": [
+                        { "pref": "lunchBreak", "day": "Monday", "detail": null }
+                      ],
+                      "violated": []
+                    }
+                  ]
+                },
+                "suggestions": [],
+                "freeSlots": null
+              }
+            ],
+            "warnings": [],
+            "usedDefaults": [],
+            "frozen": [],
+            "infeasibleReasons": null
+          }
+  - name: 404 Never solved
+    description: No group solve has been run for this room yet.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/result"
+      method: GET
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+    response:
+      status: 404
+      statusText: Not Found
+      headers:
+        - name: Content-Type
+          value: application/problem+json
+      body:
+        type: json
+        data: |-
+          {
+            "title": "Not Found",
+            "status": 404,
+            "detail": "No optimiser result for this room"
+          }

@@ -1,0 +1,120 @@
+info:
+  name: post /optimiser/room/:roomId/solve/me
+  type: http
+  seq: 5
+  tags:
+    - Optimiser
+
+http:
+  method: POST
+  url: "{{baseUrl}}/optimiser/room/:roomId/solve/me"
+  params:
+    - name: roomId
+      value: "{{roomId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "lockedLessons": [],
+        "preferences": {
+          "lunchBreak": "important",
+          "earliestStart": "1000"
+        },
+        "includeFreeSlots": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Solo suggestions
+    description: >-
+      Only the caller's lessons may move, everyone else is frozen at their
+      current slots and listed under frozen. Inline preferences override the
+      caller's stored room row for this request only. Nothing is persisted and
+      no hub broadcast is sent, so the returned solveId cannot be saved.
+    request:
+      url: "{{baseUrl}}/optimiser/room/:roomId/solve/me"
+      method: POST
+      params:
+        - name: roomId
+          value: 2c1f2f7e-fcb6-4a8d-8465-cf6d924b6133
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "preferences": { "lunchBreak": "important" }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": "optimal",
+            "solveId": "b7c8d9e0-1f2a-3b4c-5d6e-7f8a9b0c1d2e",
+            "solutions": [
+              {
+                "rank": 1,
+                "score": {
+                  "sharedClassCount": 1,
+                  "sharedClasses": [
+                    {
+                      "moduleCode": "CS2100",
+                      "lessonType": "Tutorial",
+                      "classNo": "T01",
+                      "userIds": [
+                        "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                        "8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f"
+                      ]
+                    }
+                  ],
+                  "perUser": [
+                    {
+                      "userId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                      "satisfiedCount": 1,
+                      "violatedCount": 0,
+                      "satisfied": [
+                        { "pref": "lunchBreak", "day": "Monday", "detail": null }
+                      ],
+                      "violated": []
+                    }
+                  ]
+                },
+                "suggestions": [
+                  {
+                    "userId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "timetableId": "9e8d7c6b-5a4f-3e2d-1c0b-9a8f7e6d5c4b",
+                    "changes": [
+                      {
+                        "moduleCode": "CS2100",
+                        "lessonType": "Tutorial",
+                        "from": "T02",
+                        "to": "T01"
+                      }
+                    ]
+                  }
+                ],
+                "freeSlots": null
+              }
+            ],
+            "warnings": [],
+            "usedDefaults": [],
+            "frozen": [
+              {
+                "userId": "8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f",
+                "lessonCount": 1
+              }
+            ],
+            "infeasibleReasons": null
+          }

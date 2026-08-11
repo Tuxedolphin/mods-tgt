@@ -134,7 +134,7 @@ public class RoomService(
 
         if (!IsOwner(roomId, callerId))
         {
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "Only the owner of a room can change the room visibility"
             );
         }
@@ -422,7 +422,7 @@ public class RoomService(
 
         if (userId == callerId && role == RoomRole.Editor)
         {
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "Caller should not be able to make themself an editor"
             );
         }
@@ -473,7 +473,7 @@ public class RoomService(
 
         if (userId == callerId)
         {
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "Use the leave-room flow to remove your own access."
             );
         }
@@ -538,7 +538,7 @@ public class RoomService(
 
         if (!hasAccess)
         {
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "User does not have permission to change other's roles."
             );
         }
@@ -557,7 +557,7 @@ public class RoomService(
 
         if (!hasAccess)
         {
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "User does not have permission to edit the room."
             );
         }
@@ -577,7 +577,7 @@ public class RoomService(
 
         if (!hasAccess)
         {
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "User does not have permission to view the room."
             );
         }
